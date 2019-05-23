@@ -125,9 +125,9 @@ class Software(QMainWindow, Ui_MainWindow):
         '''
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
-        fileName, _ = QFileDialog.getOpenFileName(self,"Select Target File", "","All Files (*);;Text Files (*.txt)", options=options)
-        if fileName:
-            self.output_text.setText(fileName)
+        folderName = str(QFileDialog.getExistingDirectory(self, "Select Directory"))
+        if folderName:
+            self.output_text.setText(folderName)
 
     @pyqtSlot()
     def on_click_OK(self):
@@ -140,10 +140,12 @@ class Software(QMainWindow, Ui_MainWindow):
         gdal.PushErrorHandler('CPLQuietErrorHandler')
 
         filename = self.input_text.toPlainText()
+        foldername = self.output_text.toPlainText()
         selectedComponents = self.components.toPlainText()
 
         self.dataExists = self.validateInputFile(filename)
-        if self.dataExists:
+        self.outputFolderExists = self.validateOutputFolder(foldername)
+        if self.dataExists and self.outputFolderExists:
         	self.validateComponents(selectedComponents)
 
     @pyqtSlot()
@@ -171,10 +173,17 @@ class Software(QMainWindow, Ui_MainWindow):
     		self.logs.addItem("Please provide path to dataset")
     		return False
 
+    def validateOutputFolder(self, foldername):
+    	if foldername:
+    		if os.path.isdir(foldername):
+    			return True
+    	self.logs.addItem("Please provide a valid directory to save output file")
+    	return False
+
     def validateComponents(self, selectedComponents):
     	totalComponents = self.dataset.RasterCount
     	if selectedComponents.isdigit():
-    		if (int)(selectedComponents) > 0 and (int)(selectedComponents) < totalComponents:
+    		if (int)(selectedComponents) > 0 and (int)(selectedComponents) <= totalComponents:
     			return True
     	self.logs.addItem(f'Incorrect number of bands... Max possible number of bands are {totalComponents}')
     	return False

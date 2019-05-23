@@ -6,6 +6,9 @@ from PyQt5.QtCore import pyqtSlot
 
 from PyQt5.QtWidgets import QMainWindow, QApplication, QFileDialog, QPushButton, QTextEdit, QListWidget, QProgressBar, QLabel
 
+from osgeo import gdal
+
+
 path = os.path.dirname(__file__)
 qtCreatorFile = "MainWindow.ui" 
 
@@ -131,7 +134,8 @@ class Software(QMainWindow, Ui_MainWindow):
         '''
         On click listener for OK button
         '''
-        pass
+        filename = self.input_text.toPlainText()
+        self.validateInputFile(filename)
 
     @pyqtSlot()
     def on_click_cancel(self):
@@ -144,6 +148,17 @@ class Software(QMainWindow, Ui_MainWindow):
         self.jobs.setText("")
         self.progress.setValue(0)
         self.logs.clear()
+
+    def validateInputFile(self, filename):
+    	if filename:
+    		# Suppressing printing of errors using GDAL lib
+    		gdal.UseExceptions()
+    		gdal.PushErrorHandler('CPLQuietErrorHandler')
+    		try:
+    			dataset = gdal.Open(filename, gdal.GA_ReadOnly)
+    			self.logs.addItem("Dataset imported successfully")
+    		except:
+    			self.logs.addItem(gdal.GetLastErrorMsg())
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

@@ -134,8 +134,17 @@ class Software(QMainWindow, Ui_MainWindow):
         '''
         On click listener for OK button
         '''
+
+        # Suppressing printing of errors using GDAL lib
+        gdal.UseExceptions()
+        gdal.PushErrorHandler('CPLQuietErrorHandler')
+
         filename = self.input_text.toPlainText()
-        self.validateInputFile(filename)
+        selectedComponents = self.components.toPlainText()
+
+        self.dataExists = self.validateInputFile(filename)
+        if self.dataExists:
+        	self.validateComponents(selectedComponents)
 
     @pyqtSlot()
     def on_click_cancel(self):
@@ -151,14 +160,25 @@ class Software(QMainWindow, Ui_MainWindow):
 
     def validateInputFile(self, filename):
     	if filename:
-    		# Suppressing printing of errors using GDAL lib
-    		gdal.UseExceptions()
-    		gdal.PushErrorHandler('CPLQuietErrorHandler')
     		try:
-    			dataset = gdal.Open(filename, gdal.GA_ReadOnly)
+    			self.dataset = gdal.Open(filename, gdal.GA_ReadOnly)
     			self.logs.addItem("Dataset imported successfully")
+    			return True
     		except:
     			self.logs.addItem(gdal.GetLastErrorMsg())
+    			return False
+    	else:
+    		self.logs.addItem("Please provide path to dataset")
+    		return False
+
+    def validateComponents(self, selectedComponents):
+    	totalComponents = self.dataset.RasterCount
+    	if selectedComponents.isdigit():
+    		if (int)(selectedComponents) > 0 and (int)(selectedComponents) < totalComponents:
+    			return True
+    	self.logs.addItem(f'Incorrect number of bands... Max possible number of bands are {totalComponents}')
+    	return False
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

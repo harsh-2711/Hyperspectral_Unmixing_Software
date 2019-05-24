@@ -169,6 +169,10 @@ class Software(QMainWindow, Ui_MainWindow):
     		self.progress.setRange(0,1)
 
     def validate(self):
+    	'''
+		Parent function for validating all the input fields
+    	'''
+
     	# Suppressing printing of errors using GDAL lib
         gdal.UseExceptions()
         gdal.PushErrorHandler('CPLQuietErrorHandler')
@@ -196,6 +200,10 @@ class Software(QMainWindow, Ui_MainWindow):
         	pca = PCA(self.datasetAsArray)
 
     def validateInputFile(self, filename):
+    	'''
+		Validates the dataset path and loads the dataset if path exists
+    	'''
+
     	if filename:
     		try:
     			self.dataset = gdal.Open(filename, gdal.GA_ReadOnly)
@@ -210,6 +218,11 @@ class Software(QMainWindow, Ui_MainWindow):
     		return False
 
     def validateOutputFolder(self, foldername):
+    	'''
+		Validates the existence of output folder where outfile file will be 
+		created after analysis
+    	'''
+
     	if foldername:
     		if os.path.isdir(foldername):
     			return True
@@ -217,6 +230,10 @@ class Software(QMainWindow, Ui_MainWindow):
     	return False
 
     def validateComponents(self, selectedComponents):
+    	'''
+		Validates the number of components w.r.t. the input dataset
+    	'''
+
     	totalComponents = self.dataset.RasterCount
     	if selectedComponents.isdigit():
     		if (int)(selectedComponents) > 0 and (int)(selectedComponents) <= totalComponents:

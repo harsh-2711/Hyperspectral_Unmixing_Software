@@ -38,3 +38,25 @@ class PCA():
 		principalComponents = pca.fit_transform(X = standardizedData)
 
 		return pca.explained_variance_ratio_.sum()
+
+	def getPrincipalComponents_fraction(self, fraction):
+		'''
+		Returns the principal components based on the given fraction of information
+		to be reatined
+		'''
+
+		pca = PCA(fraction)
+		principalComponents = pca.fit_transform(X = self.standardizedData)
+
+		return principalComponents
+
+	def getPrincipalComponents_noOfComponents(self, noOfComponents):
+		'''
+		Returns the principal components based on the given nnumber of components
+		to be retained
+		'''
+
+		pca = PCA(n_components=noOfComponents)
+		principalComponents = pca.fit_transform(X = standardizedData)
+
+		return principalComponents		

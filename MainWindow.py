@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import QMainWindow, QApplication, QFileDialog, QPushButton,
 
 from osgeo import gdal
 
-from PCA import PCA
+from PCA import PrincipalComponentAnalysis
 from Threads import ValidationThread
 
 
@@ -174,30 +174,30 @@ class Software(QMainWindow, Ui_MainWindow):
     	'''
 
     	# Suppressing printing of errors using GDAL lib
-        gdal.UseExceptions()
-        gdal.PushErrorHandler('CPLQuietErrorHandler')
+    	gdal.UseExceptions()
+    	gdal.PushErrorHandler('CPLQuietErrorHandler')
 
-        filename = self.input_text.toPlainText()
-        foldername = self.output_text.toPlainText()
-        selectedComponents = self.components.toPlainText()
+    	filename = self.input_text.toPlainText()
+    	foldername = self.output_text.toPlainText()
+    	selectedComponents = self.components.toPlainText()
 
-        # Validating dataset path
-        self.dataExists = self.validateInputFile(filename)
+    	# Validating dataset path
+    	self.dataExists = self.validateInputFile(filename)
 
-        # Validating output folder path
-        if self.dataExists:
-        	self.outputFolderExists = self.validateOutputFolder(foldername)
+    	# Validating output folder path
+    	if self.dataExists:
+    		self.outputFolderExists = self.validateOutputFolder(foldername)
 
         # Validating number of components
-        if self.dataExists and self.outputFolderExists:
-        	self.trueComponents = self.validateComponents(selectedComponents)
+    	if self.dataExists and self.outputFolderExists:
+    		self.trueComponents = self.validateComponents(selectedComponents)
 
-        self.setProgressBar(False)
+    	self.setProgressBar(False)
 
-        # Doing PCA
-        if self.dataExists and self.outputFolderExists and self.trueComponents:
-        	self.datasetAsArray = self.dataset.ReadAsArray()
-        	pca = PCA(self.datasetAsArray)
+        # Start PCA if everything's good
+    	if self.dataExists and self.outputFolderExists and self.trueComponents:
+    		self.startPCA()
+        
 
     def validateInputFile(self, filename):
     	'''
@@ -240,6 +240,15 @@ class Software(QMainWindow, Ui_MainWindow):
     			return True
     	self.logs.addItem(f'Incorrect number of bands... Max possible number of bands are {totalComponents}')
     	return False
+
+    def startPCA():
+    	'''
+		Main function for PCA
+    	'''
+    	
+    	self.datasetAsArray = self.dataset.ReadAsArray()
+    	pca = PrincipalComponentAnalysis(self.datasetAsArray)
+    	pca_data = pca.getPrincipalComponents_noOfComponents((int)(self.components.toPlainText()))
 
 
 if __name__ == "__main__":

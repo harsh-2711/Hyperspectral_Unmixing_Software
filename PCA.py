@@ -1,7 +1,7 @@
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 
-class PCA():
+class PrincipalComponentAnalysis():
 
 	def __init__(self, dataset):
 		'''
@@ -9,10 +9,21 @@ class PCA():
 		'''
 		self.dataset = dataset
 
+	def reshapeData(self):
+		'''
+		Reshaping the vector from 3D to 2D
+		'''
+		
+		h,x,y = self.dataset.shape
+		self.dataset = self.dataset.reshape(x*y,h)
+		
+
 	def scaleData(self):
 		'''
 		Scaling the data so that all different ranges of data gets equal weight
 		'''
+
+		self.reshapeData()
 		self.standardizedData = StandardScaler().fit_transform(self.dataset)
 
 	def getMinimumComponents(self, fraction):
@@ -22,6 +33,8 @@ class PCA():
 		This method finds the least number of components needed to retain the given
 		fraction of information
 		'''
+
+		self.scaleData()
 		pca = PCA(fraction)
 		principalComponents = pca.fit_transform(X = self.standardizedData)
 
@@ -34,8 +47,10 @@ class PCA():
 		This method finds the variance of information retained after using the given
 		number of bands
 		'''
+
+		self.scaleData()
 		pca = PCA(n_components=noOfComponents)
-		principalComponents = pca.fit_transform(X = standardizedData)
+		principalComponents = pca.fit_transform(X = self.standardizedData)
 
 		return pca.explained_variance_ratio_.sum()
 
@@ -45,6 +60,7 @@ class PCA():
 		to be reatined
 		'''
 
+		self.scaleData()
 		pca = PCA(fraction)
 		principalComponents = pca.fit_transform(X = self.standardizedData)
 
@@ -56,7 +72,8 @@ class PCA():
 		to be retained
 		'''
 
+		self.scaleData()
 		pca = PCA(n_components=noOfComponents)
-		principalComponents = pca.fit_transform(X = standardizedData)
+		principalComponents = pca.fit_transform(X = self.standardizedData)
 
 		return principalComponents		

@@ -27,6 +27,7 @@ class Software(QMainWindow, Ui_MainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.title = "Hyperspectral Unmixing Toolbox"
+        self.OUTPUT_FILENAME = "PCA_Data"
 
         self.initUI()
 
@@ -192,13 +193,11 @@ class Software(QMainWindow, Ui_MainWindow):
     	if self.dataExists and self.outputFolderExists:
     		self.trueComponents = self.validateComponents(selectedComponents)
 
-    	self.setProgressBar(False)
-
         # Start PCA if everything's good
     	if self.dataExists and self.outputFolderExists and self.trueComponents:
+    		self.logs.addItem(f'Starting Principal Component Analysis for getting top {self.components.toPlainText()} bands')
     		self.startPCA()
         
-
     def validateInputFile(self, filename):
     	'''
 		Validates the dataset path and loads the dataset if path exists
@@ -241,14 +240,19 @@ class Software(QMainWindow, Ui_MainWindow):
     	self.logs.addItem(f'Incorrect number of bands... Max possible number of bands are {totalComponents}')
     	return False
 
-    def startPCA():
+    def startPCA(self):
     	'''
 		Main function for PCA
     	'''
-    	
+
     	self.datasetAsArray = self.dataset.ReadAsArray()
     	pca = PrincipalComponentAnalysis(self.datasetAsArray)
     	pca_data = pca.getPrincipalComponents_noOfComponents((int)(self.components.toPlainText()))
+    	self.logs.addItem("Analysis completed")
+    	self.logs.addItem("Generating Output file")
+    	pca_data.tofile(self.OUTPUT_FILENAME, ",")
+    	self.logs.addItem("Output file generated")
+    	self.setProgressBar(False)
 
 
 if __name__ == "__main__":

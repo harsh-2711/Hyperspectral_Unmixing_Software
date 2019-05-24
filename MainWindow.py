@@ -2,11 +2,13 @@ import sys
 import os
 
 from PyQt5 import uic
-from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtCore import pyqtSlot, QThread
 
 from PyQt5.QtWidgets import QMainWindow, QApplication, QFileDialog, QPushButton, QTextEdit, QListWidget, QProgressBar, QLabel
 
 from osgeo import gdal
+
+from PCA import PCA
 
 
 path = os.path.dirname(__file__)
@@ -92,6 +94,7 @@ class Software(QMainWindow, Ui_MainWindow):
         # Progress Bar
         self.progress = QProgressBar(self)
         self.progress.setGeometry(10, 450, 640, 20)
+        self.progress.setRange(0,0)
 
         self.show()
 
@@ -125,7 +128,7 @@ class Software(QMainWindow, Ui_MainWindow):
         '''
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
-        folderName = str(QFileDialog.getExistingDirectory(self, "Select Directory"))
+        folderName = str(QFileDialog.getExistingDirectory(self, "Select Directory", options=options))
         if folderName:
             self.output_text.setText(folderName)
 
@@ -143,10 +146,22 @@ class Software(QMainWindow, Ui_MainWindow):
         foldername = self.output_text.toPlainText()
         selectedComponents = self.components.toPlainText()
 
+        # Validating dataset path
         self.dataExists = self.validateInputFile(filename)
-        self.outputFolderExists = self.validateOutputFolder(foldername)
+
+        # Validating output folder path
+        if self.dataExists:
+        	self.outputFolderExists = self.validateOutputFolder(foldername)
+
+        # Validating number of components
         if self.dataExists and self.outputFolderExists:
-        	self.validateComponents(selectedComponents)
+        	self.trueComponents = self.validateComponents(selectedComponents)
+
+        # Doing PCA
+        if self.dataExists and self.outputFolderExists and self.trueComponents:
+        	self.datasetAsArray = self.dataset.ReadAsArray()
+        	pca = PCA(self.datasetAsArray)
+
 
     @pyqtSlot()
     def on_click_cancel(self):
@@ -168,6 +183,7 @@ class Software(QMainWindow, Ui_MainWindow):
     			return True
     		except:
     			self.logs.addItem(gdal.GetLastErrorMsg())
+    			self.logs.addItem('Use command line argument gdalinfo --formats to get more insights')
     			return False
     	else:
     		self.logs.addItem("Please provide path to dataset")
@@ -188,6 +204,17 @@ class Software(QMainWindow, Ui_MainWindow):
     	self.logs.addItem(f'Incorrect number of bands... Max possible number of bands are {totalComponents}')
     	return False
 
+'''
+class TaskThread(QThread):
+
+	def __init__(self):
+		QThread.__init__(self)
+
+	def __del__(self):
+		self.wait()
+
+	def run(self):
+'''
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

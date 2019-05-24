@@ -2,13 +2,14 @@ import sys
 import os
 
 from PyQt5 import uic
-from PyQt5.QtCore import pyqtSlot, QThread
+from PyQt5.QtCore import pyqtSlot
 
 from PyQt5.QtWidgets import QMainWindow, QApplication, QFileDialog, QPushButton, QTextEdit, QListWidget, QProgressBar, QLabel
 
 from osgeo import gdal
 
 from PCA import PCA
+from Threads import ValidationThread
 
 
 path = os.path.dirname(__file__)
@@ -94,7 +95,6 @@ class Software(QMainWindow, Ui_MainWindow):
         # Progress Bar
         self.progress = QProgressBar(self)
         self.progress.setGeometry(10, 450, 640, 20)
-        self.progress.setRange(0,0)
 
         self.show()
 
@@ -138,7 +138,38 @@ class Software(QMainWindow, Ui_MainWindow):
         On click listener for OK button
         '''
 
-        # Suppressing printing of errors using GDAL lib
+        self.validation = ValidationThread()
+        self.validation.startThread.connect(self.validate)
+        self.validation.startProgress.connect(self.setProgressBar)
+        self.validation.start()
+
+    @pyqtSlot()
+    def on_click_cancel(self):
+        '''
+        On click listener for Cancel button
+        '''
+
+        self.input_text.setText("")
+        self.output_text.setText("")
+        self.components.setText("")
+        self.jobs.setText("")
+        self.progress.setValue(0)
+        self.logs.clear()
+
+    def setProgressBar(self, switch):
+    	'''
+    	switch - Boolean 
+
+		Switches the progress bar from busy to stop and vice versa based on the
+		value of switch
+    	'''
+    	if switch:
+    		self.progress.setRange(0,0)
+    	else:
+    		self.progress.setRange(0,1)
+
+    def validate(self):
+    	# Suppressing printing of errors using GDAL lib
         gdal.UseExceptions()
         gdal.PushErrorHandler('CPLQuietErrorHandler')
 
@@ -157,23 +188,12 @@ class Software(QMainWindow, Ui_MainWindow):
         if self.dataExists and self.outputFolderExists:
         	self.trueComponents = self.validateComponents(selectedComponents)
 
+        self.setProgressBar(False)
+
         # Doing PCA
         if self.dataExists and self.outputFolderExists and self.trueComponents:
         	self.datasetAsArray = self.dataset.ReadAsArray()
         	pca = PCA(self.datasetAsArray)
-
-
-    @pyqtSlot()
-    def on_click_cancel(self):
-        '''
-        On click listener for Cancel button
-        '''
-        self.input_text.setText("")
-        self.output_text.setText("")
-        self.components.setText("")
-        self.jobs.setText("")
-        self.progress.setValue(0)
-        self.logs.clear()
 
     def validateInputFile(self, filename):
     	if filename:
@@ -204,17 +224,6 @@ class Software(QMainWindow, Ui_MainWindow):
     	self.logs.addItem(f'Incorrect number of bands... Max possible number of bands are {totalComponents}')
     	return False
 
-'''
-class TaskThread(QThread):
-
-	def __init__(self):
-		QThread.__init__(self)
-
-	def __del__(self):
-		self.wait()
-
-	def run(self):
-'''
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

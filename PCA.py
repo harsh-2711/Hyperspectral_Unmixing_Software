@@ -34,7 +34,6 @@ class PrincipalComponentAnalysis():
 		fraction of information
 		'''
 
-		self.scaleData()
 		pca = PCA(fraction)
 		principalComponents = pca.fit_transform(X = self.standardizedData)
 
@@ -48,7 +47,6 @@ class PrincipalComponentAnalysis():
 		number of bands
 		'''
 
-		self.scaleData()
 		pca = PCA(n_components=noOfComponents)
 		principalComponents = pca.fit_transform(X = self.standardizedData)
 
@@ -60,7 +58,6 @@ class PrincipalComponentAnalysis():
 		to be reatined
 		'''
 
-		self.scaleData()
 		pca = PCA(fraction)
 		principalComponents = pca.fit_transform(X = self.standardizedData)
 
@@ -72,7 +69,6 @@ class PrincipalComponentAnalysis():
 		to be retained
 		'''
 
-		self.scaleData()
 		pca = PCA(n_components=noOfComponents)
 		principalComponents = pca.fit_transform(X = self.standardizedData)
 

@@ -10,6 +10,7 @@ from osgeo import gdal
 
 from PCA import PrincipalComponentAnalysis
 from Threads import ValidationThread
+from ErrorHandler import StdErrHandler
 
 
 path = os.path.dirname(__file__)
@@ -247,16 +248,33 @@ class Software(QMainWindow, Ui_MainWindow):
 
     	self.datasetAsArray = self.dataset.ReadAsArray()
     	pca = PrincipalComponentAnalysis(self.datasetAsArray)
+    	pca.scaleData()
     	pca_data = pca.getPrincipalComponents_noOfComponents((int)(self.components.toPlainText()))
+    	retainedVariance = pca.getRetainedVariance((int)(self.components.toPlainText()))
     	self.logs.addItem("Analysis completed")
+    	self.logs.addItem(f'Retained Variance: {retainedVariance}')
     	self.logs.addItem("Generating Output file")
     	pca_data.tofile(self.OUTPUT_FILENAME, ",")
     	self.logs.addItem("Output file generated")
     	self.setProgressBar(False)
+
+    def writeError(self, err_msg):
+    	'''
+		This method receives input from stderr as PyQtSlot and prints it in the 
+		logs section
+    	'''
+
+    	self.logs.addItem(err_msg)
 
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = Software()
     window.show()
+
+    # Adding error handler
+    std_err_handler = StdErrHandler()
+    sys.stderr = std_err_handler
+    std_err_handler.err_msg.connect(window.writeError)
+
     sys.exit(app.exec_())

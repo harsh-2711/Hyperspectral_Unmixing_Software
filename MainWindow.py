@@ -3,16 +3,22 @@ import os
 
 from PyQt5 import uic
 from PyQt5.QtCore import pyqtSlot
+import numpy as np
+
+from mpl_toolkits.mplot3d import Axes3D
 
 from PyQt5.QtWidgets import QMainWindow, QApplication, QFileDialog, QPushButton, QTextEdit, QListWidget, QProgressBar, QLabel
 
 from osgeo import gdal
+from numpy import genfromtxt
 
 from PCA import PrincipalComponentAnalysis
 from Threads import ValidationThread
 from ErrorHandler import StdErrHandler
 
 import multiprocessing as mp
+
+import matplotlib.pyplot as plt
 
 
 path = os.path.dirname(__file__)
@@ -26,12 +32,11 @@ class Software(QMainWindow, Ui_MainWindow):
 		'''
 		Initializing software
 		'''
-
 		super(Software, self).__init__()
 		self.ui = Ui_MainWindow()
 		self.ui.setupUi(self)
 		self.title = "Hyperspectral Unmixing Toolbox"
-		self.OUTPUT_FILENAME = "PCA_Data.csv"
+		self.OUTPUT_FILENAME = "PCA_Data.mat"
 
 		self.initUI()
 
@@ -39,7 +44,6 @@ class Software(QMainWindow, Ui_MainWindow):
 		'''
 		Initializing UI components and their respective listeners
 		'''
-
 		self.setWindowTitle(self.title)
 
 		# Input Label
@@ -109,14 +113,12 @@ class Software(QMainWindow, Ui_MainWindow):
 		'''
 		On click listener for input_browse button
 		'''
-
 		self.InputBrowse()
 
 	def InputBrowse(self):
 		'''
 		Opens Browse Files dialog box for selecting input dataset
 		'''
-
 		options = QFileDialog.Options()
 		options |= QFileDialog.DontUseNativeDialog
 		fileName, _ = QFileDialog.getOpenFileName(self,"Select Dataset", "","All Files (*);;Matlab Files (*.mat)", options=options)
@@ -128,14 +130,12 @@ class Software(QMainWindow, Ui_MainWindow):
 		'''
 		On click listener for output_browse button
 		'''
-
 		self.OutputBrowse()
 
 	def OutputBrowse(self):
 		'''
 		Opens Browse Files dialog box for selecting target file for writing output
 		'''
-
 		options = QFileDialog.Options()
 		options |= QFileDialog.DontUseNativeDialog
 		folderName = str(QFileDialog.getExistingDirectory(self, "Select Directory", options=options))
@@ -173,7 +173,6 @@ class Software(QMainWindow, Ui_MainWindow):
 		Switches the progress bar from busy to stop and vice versa based on the
 		value of switch
 		'''
-
 		if switch:
 			self.progress.setRange(0,0)
 		else:
@@ -211,7 +210,7 @@ class Software(QMainWindow, Ui_MainWindow):
 		# Start PCA if everything's good
 		if self.dataExists and self.outputFolderExists and self.trueComponents and self.enoughProcs:
 			self.logs.addItem(f'Starting Principal Component Analysis for getting top {self.components.toPlainText()} bands')
-			self.startPCA()
+			self.startPCA(selectedComponents)
 		
 	def validateInputFile(self, filename):
 		'''
@@ -259,7 +258,6 @@ class Software(QMainWindow, Ui_MainWindow):
 		'''
 		Validates the number of jobs desired as per processors available
 		'''
-
 		n_processors = mp.cpu_count()
 		if n_jobs.isdigit():
 			if (int)(n_jobs) > 0 and (int)(n_jobs) <= n_processors:
@@ -267,7 +265,8 @@ class Software(QMainWindow, Ui_MainWindow):
 		self.logs.addItem(f'Number of jobs must be greater than 0 and less than {n_processors}')
 		return False
 	
-	def startPCA(self):
+	
+	def startPCA(self,selectedComponents):
 		'''
 		Main function for PCA
 		'''
@@ -283,6 +282,77 @@ class Software(QMainWindow, Ui_MainWindow):
 		pca_data.tofile(self.OUTPUT_FILENAME, ",")
 		self.logs.addItem("Output file generated")
 		self.setProgressBar(False)
+		
+		''' To plot the points after PCA '''
+		if (int)(selectedComponents) == 1:
+			self.plot1DGraph(pca_data)
+
+		elif (int)(selectedComponents) == 2:
+			self.plot2DGraph(pca_data)
+
+		elif (int)(selectedComponents) == 3:
+			self.plot3DGraph(pca_data)
+
+		else:
+			self.logs.addItem('Due to high dimentionality, graph could not be plotted')
+
+	def plot1DGraph(self,pca_data):
+		x = pca_data[:,0]
+		y = np.zeros((len(x),), dtype=np.int)
+		plt.close('all')
+		fig1 = plt.figure()
+		pltData = [x,y]
+		plt.scatter(pltData[0],pltData[1])
+		
+		xAxisLine = ((min(pltData[0]), max(pltData[0])), (0, 0))
+		plt.plot(xAxisLine[0], xAxisLine[1], 'r')
+		# yAxisLine = ((0, 0), (min(pltData[1]), max(pltData[1])))
+		# plt.plot(yAxisLine[0], yAxisLine[1], 'r')
+
+		plt.xlabel("PC1") 
+		plt.title("PCA plot")
+		plt.show()
+
+	def plot2DGraph(self,pca_data):
+		x = pca_data[:,0]
+		y = pca_data[:,1]
+		plt.close('all')
+		fig1 = plt.figure()
+		pltData = [x,y]
+		plt.scatter(pltData[0],pltData[1])
+		
+		xAxisLine = ((min(pltData[0]), max(pltData[0])), (0, 0))
+		plt.plot(xAxisLine[0], xAxisLine[1], 'r')
+		yAxisLine = ((0, 0), (min(pltData[1]), max(pltData[1])))
+		plt.plot(yAxisLine[0], yAxisLine[1], 'r')
+
+		plt.xlabel("PC1") 
+		plt.ylabel("PC2")
+		plt.title("PCA plot")
+		plt.show()	
+
+	def plot3DGraph(self,pca_data):
+		x = pca_data[:,0]
+		y = pca_data[:,1]
+		z = pca_data[:,2]
+		plt.close('all')
+		fig1 = plt.figure()
+		ax = Axes3D(fig1)
+		pltData = [x,y,z]
+		ax.scatter(pltData[0],pltData[1],pltData[2])
+		
+		xAxisLine = ((min(pltData[0]), max(pltData[0])), (0, 0), (0,0))
+		ax.plot(xAxisLine[0], xAxisLine[1], xAxisLine[2], 'r')
+		yAxisLine = ((0, 0), (min(pltData[1]), max(pltData[1])), (0,0))
+		ax.plot(yAxisLine[0], yAxisLine[1], yAxisLine[2], 'r')
+		zAxisLine = ((0, 0), (0,0), (min(pltData[2]), max(pltData[2])))
+		ax.plot(zAxisLine[0], zAxisLine[1], zAxisLine[2], 'r')
+
+		ax.set_xlabel("PC1") 
+		ax.set_ylabel("PC2")
+		ax.set_zlabel("PC3")
+		ax.set_title("PCA plot")
+		plt.show()
 
 	def writeError(self, err_msg):
 		'''

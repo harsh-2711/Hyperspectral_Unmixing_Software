@@ -257,6 +257,7 @@ class Software(QMainWindow, Ui_MainWindow):
     	pca_data.tofile(self.OUTPUT_FILENAME, ",")
     	self.logs.addItem("Output file generated")
     	self.setProgressBar(False)
+    	print(5)
 
     def writeError(self, err_msg):
     	'''
@@ -264,7 +265,7 @@ class Software(QMainWindow, Ui_MainWindow):
 		logs section
     	'''
 
-    	self.logs.addItem(err_msg)
+    	self.logs.addItem(f'stderr: {err_msg}')
 
 
 if __name__ == "__main__":

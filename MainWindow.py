@@ -26,6 +26,7 @@ class Software(QMainWindow, Ui_MainWindow):
 		'''
 		Initializing software
 		'''
+
 		super(Software, self).__init__()
 		self.ui = Ui_MainWindow()
 		self.ui.setupUi(self)
@@ -38,6 +39,7 @@ class Software(QMainWindow, Ui_MainWindow):
 		'''
 		Initializing UI components and their respective listeners
 		'''
+
 		self.setWindowTitle(self.title)
 
 		# Input Label
@@ -107,12 +109,14 @@ class Software(QMainWindow, Ui_MainWindow):
 		'''
 		On click listener for input_browse button
 		'''
+
 		self.InputBrowse()
 
 	def InputBrowse(self):
 		'''
 		Opens Browse Files dialog box for selecting input dataset
 		'''
+
 		options = QFileDialog.Options()
 		options |= QFileDialog.DontUseNativeDialog
 		fileName, _ = QFileDialog.getOpenFileName(self,"Select Dataset", "","All Files (*);;Matlab Files (*.mat)", options=options)
@@ -124,12 +128,14 @@ class Software(QMainWindow, Ui_MainWindow):
 		'''
 		On click listener for output_browse button
 		'''
+
 		self.OutputBrowse()
 
 	def OutputBrowse(self):
 		'''
 		Opens Browse Files dialog box for selecting target file for writing output
 		'''
+
 		options = QFileDialog.Options()
 		options |= QFileDialog.DontUseNativeDialog
 		folderName = str(QFileDialog.getExistingDirectory(self, "Select Directory", options=options))
@@ -167,6 +173,7 @@ class Software(QMainWindow, Ui_MainWindow):
 		Switches the progress bar from busy to stop and vice versa based on the
 		value of switch
 		'''
+
 		if switch:
 			self.progress.setRange(0,0)
 		else:
@@ -252,13 +259,13 @@ class Software(QMainWindow, Ui_MainWindow):
 		'''
 		Validates the number of jobs desired as per processors available
 		'''
+
 		n_processors = mp.cpu_count()
 		if n_jobs.isdigit():
 			if (int)(n_jobs) > 0 and (int)(n_jobs) <= n_processors:
 				return True
 		self.logs.addItem(f'Number of jobs must be greater than 0 and less than {n_processors}')
 		return False
-	
 	
 	def startPCA(self):
 		'''

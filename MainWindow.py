@@ -297,6 +297,10 @@ class Software(QMainWindow, Ui_MainWindow):
 			self.logs.addItem('Due to high dimentionality, graph could not be plotted')
 
 	def plot1DGraph(self,pca_data):
+		'''
+		Plots graph for a single component after PCA analysis
+		'''
+
 		x = pca_data[:,0]
 		y = np.zeros((len(x),), dtype=np.int)
 		plt.close('all')
@@ -314,6 +318,10 @@ class Software(QMainWindow, Ui_MainWindow):
 		plt.show()
 
 	def plot2DGraph(self,pca_data):
+		'''
+		Plots graph for two components i.e. two selected bands after PCA analysis
+		'''
+
 		x = pca_data[:,0]
 		y = pca_data[:,1]
 		plt.close('all')
@@ -332,6 +340,10 @@ class Software(QMainWindow, Ui_MainWindow):
 		plt.show()	
 
 	def plot3DGraph(self,pca_data):
+		'''
+		Plots graph for three components after PCA analysis
+		'''
+
 		x = pca_data[:,0]
 		y = pca_data[:,1]
 		z = pca_data[:,2]

@@ -12,7 +12,7 @@ from PCA import PrincipalComponentAnalysis
 from Threads import ValidationThread
 from ErrorHandler import StdErrHandler
 
-import multiprogramming as mp
+import multiprocessing as mp
 
 
 path = os.path.dirname(__file__)
@@ -184,7 +184,7 @@ class Software(QMainWindow, Ui_MainWindow):
     	filename = self.input_text.toPlainText()
     	foldername = self.output_text.toPlainText()
     	selectedComponents = self.components.toPlainText()
-        n_jobs = self.jobs.toPlainText()
+    	n_jobs = self.jobs.toPlainText()
 
     	# Validating dataset path
     	self.dataExists = self.validateInputFile(filename)
@@ -197,8 +197,9 @@ class Software(QMainWindow, Ui_MainWindow):
     	if self.dataExists and self.outputFolderExists:
     		self.trueComponents = self.validateComponents(selectedComponents)
 
-        if self.dataExists and self.outputFolderExists and self.trueComponents:
-            self.enoughProcs = self.validateJobs(n_jobs)
+    	# Validates number of jobs with local machine's number of cores
+    	if self.dataExists and self.outputFolderExists and self.trueComponents:
+    		self.enoughProcs = self.validateJobs(n_jobs)
 
         # Start PCA if everything's good
     	if self.dataExists and self.outputFolderExists and self.trueComponents and self.enoughProcs:
@@ -245,17 +246,18 @@ class Software(QMainWindow, Ui_MainWindow):
     		if (int)(selectedComponents) > 0 and (int)(selectedComponents) <= totalComponents:
     			return True
     	self.logs.addItem(f'Incorrect number of bands... Max possible number of bands are {totalComponents}')
-        return False
+    	return False
 
-    def validateJobs(self, n_jobs)
+    def validateJobs(self, n_jobs):
         '''
         Validates the number of jobs desired as per processors available
         '''
+
         n_processors = mp.cpu_count()
         if n_jobs.isdigit():
             if (int)(n_jobs) > 0 and (int)(n_jobs) <= n_processors:
                 return True
-        self.logs.addItem("Number of jobs must be greater than 0 and less than {n_processors}")
+        self.logs.addItem(f'Number of jobs must be greater than 0 and less than {n_processors}')
         return False
 
 

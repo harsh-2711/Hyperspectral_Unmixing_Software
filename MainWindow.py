@@ -13,6 +13,7 @@ from osgeo import gdal
 from numpy import genfromtxt
 
 from PCA import PrincipalComponentAnalysis
+from NMF import NonNegativeMatrixFactorisation
 from Threads import ValidationThread
 from ErrorHandler import StdErrHandler
 
@@ -36,7 +37,7 @@ class Software(QMainWindow, Ui_MainWindow):
 		self.ui = Ui_MainWindow()
 		self.ui.setupUi(self)
 		self.title = "Hyperspectral Unmixing Toolbox"
-		self.OUTPUT_FILENAME = "PCA_Data.mat"
+		self.OUTPUT_FILENAME = "Data.mat"
 
 		self.initUI()
 
@@ -210,7 +211,8 @@ class Software(QMainWindow, Ui_MainWindow):
 		# Start PCA if everything's good
 		if self.dataExists and self.outputFolderExists and self.trueComponents and self.enoughProcs:
 			self.logs.addItem(f'Starting Principal Component Analysis for getting top {self.components.toPlainText()} bands')
-			self.startPCA(selectedComponents)
+			# self.startPCA(selectedComponents)
+			self.startNMF(selectedComponents)
 		
 	def validateInputFile(self, filename):
 		'''
@@ -296,12 +298,41 @@ class Software(QMainWindow, Ui_MainWindow):
 		else:
 			self.logs.addItem('Due to high dimentionality, graph could not be plotted')
 
-	def plot1DGraph(self,pca_data):
+
+	def startNMF(self,selectedComponents):
 		'''
-		Plots graph for a single component after PCA analysis
+		Main function for PCA
 		'''
 
-		x = pca_data[:,0]
+		self.datasetAsArray = self.dataset.ReadAsArray()
+		nmf = NonNegativeMatrixFactorisation(self.datasetAsArray)
+		nmf.scaleData()
+		nmf_data = nmf.getReducedComponents_noOfComponents((int)(self.components.toPlainText()))
+		# retainedVariance = nmf.getRetainedVariance((int)(self.components.toPlainText()))
+		self.logs.addItem("Analysis completed")
+		# self.logs.addItem(f'Retained Variance: {retainedVariance}')
+		self.logs.addItem("Generating Output file")
+		nmf_data = nmf.denormalizeData(nmf_data)
+		nmf_data.tofile(self.OUTPUT_FILENAME, ",")
+		self.logs.addItem("Output file generated")
+		self.setProgressBar(False)
+		
+		''' To plot the points after PCA '''
+		if (int)(selectedComponents) == 1:
+			self.plot1DGraph(nmf_data)
+
+		elif (int)(selectedComponents) == 2:
+			self.plot2DGraph(nmf_data)
+
+		elif (int)(selectedComponents) == 3:
+			self.plot3DGraph(nmf_data)
+
+		else:
+			self.logs.addItem('Due to high dimentionality, graph could not be plotted')
+
+
+	def plot1DGraph(self,data):
+		x = data[:,0]
 		y = np.zeros((len(x),), dtype=np.int)
 		plt.close('all')
 		fig1 = plt.figure()
@@ -313,17 +344,13 @@ class Software(QMainWindow, Ui_MainWindow):
 		# yAxisLine = ((0, 0), (min(pltData[1]), max(pltData[1])))
 		# plt.plot(yAxisLine[0], yAxisLine[1], 'r')
 
-		plt.xlabel("PC1") 
-		plt.title("PCA plot")
+		plt.xlabel("comp 1") 
+		plt.title("1D plot")
 		plt.show()
 
-	def plot2DGraph(self,pca_data):
-		'''
-		Plots graph for two components i.e. two selected bands after PCA analysis
-		'''
-
-		x = pca_data[:,0]
-		y = pca_data[:,1]
+	def plot2DGraph(self,data):
+		x = data[:,0]
+		y = data[:,1]
 		plt.close('all')
 		fig1 = plt.figure()
 		pltData = [x,y]
@@ -334,19 +361,15 @@ class Software(QMainWindow, Ui_MainWindow):
 		yAxisLine = ((0, 0), (min(pltData[1]), max(pltData[1])))
 		plt.plot(yAxisLine[0], yAxisLine[1], 'r')
 
-		plt.xlabel("PC1") 
-		plt.ylabel("PC2")
-		plt.title("PCA plot")
+		plt.xlabel("comp 1") 
+		plt.ylabel("comp 2")
+		plt.title("2D plot")
 		plt.show()	
 
-	def plot3DGraph(self,pca_data):
-		'''
-		Plots graph for three components after PCA analysis
-		'''
-
-		x = pca_data[:,0]
-		y = pca_data[:,1]
-		z = pca_data[:,2]
+	def plot3DGraph(self,data):
+		x = data[:,0]
+		y = data[:,1]
+		z = data[:,2]
 		plt.close('all')
 		fig1 = plt.figure()
 		ax = Axes3D(fig1)
@@ -360,10 +383,10 @@ class Software(QMainWindow, Ui_MainWindow):
 		zAxisLine = ((0, 0), (0,0), (min(pltData[2]), max(pltData[2])))
 		ax.plot(zAxisLine[0], zAxisLine[1], zAxisLine[2], 'r')
 
-		ax.set_xlabel("PC1") 
-		ax.set_ylabel("PC2")
-		ax.set_zlabel("PC3")
-		ax.set_title("PCA plot")
+		ax.set_xlabel("comp 1") 
+		ax.set_ylabel("comp 2")
+		ax.set_zlabel("comp 3")
+		ax.set_title("3D plot")
 		plt.show()
 
 	def writeError(self, err_msg):

@@ -301,7 +301,7 @@ class Software(QMainWindow, Ui_MainWindow):
 
 	def startNMF(self,selectedComponents):
 		'''
-		Main function for PCA
+		Main function for NMF
 		'''
 
 		self.datasetAsArray = self.dataset.ReadAsArray()
@@ -317,7 +317,7 @@ class Software(QMainWindow, Ui_MainWindow):
 		self.logs.addItem("Output file generated")
 		self.setProgressBar(False)
 		
-		''' To plot the points after PCA '''
+		''' To plot the points after NMF '''
 		if (int)(selectedComponents) == 1:
 			self.plot1DGraph(nmf_data)
 

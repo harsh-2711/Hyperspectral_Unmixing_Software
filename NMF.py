@@ -73,9 +73,23 @@ class NonNegativeMatrixFactorisation():
 		'''
 
 		nmf = NMF(n_components=noOfComponents)
-		reducedComponents = nmf.fit_transform(X = self.normalizedData)
+		self.reducedComponents = nmf.fit_transform(X = self.normalizedData)
 
 		return nmf.explained_variance_ratio_.sum()
+
+	def errorFactor(self, noOfComponents):
+		'''
+		Calculates the difference between the input values and the reduced values
+		'''
+		nmf = NMF(n_components=noOfComponents)
+		W = nmf.fit_transform(X = self.normalizedData)
+		H = nmf.components_
+		error = ((self.normalizedData - np.matmul(W,H))**2).sum()
+		error = error**0.5
+
+		return error
+
+
 
 	def getReducedComponents_fraction(self, fraction):
 		'''
@@ -84,9 +98,9 @@ class NonNegativeMatrixFactorisation():
 		'''
 
 		nmf = NMF(fraction)
-		reducedComponents = nmf.fit_transform(X = self.normalizedData)
+		self.reducedComponents = nmf.fit_transform(X = self.normalizedData)
 
-		return reducedComponents
+		return self.reducedComponents
 
 	def getReducedComponents_noOfComponents(self, noOfComponents):
 		'''
@@ -95,6 +109,6 @@ class NonNegativeMatrixFactorisation():
 		'''
 
 		nmf = NMF(n_components=noOfComponents)
-		reducedComponents = nmf.fit_transform(X = self.normalizedData)
+		self.reducedComponents = nmf.fit_transform(X = self.normalizedData)
 		
-		return reducedComponents				
+		return self.reducedComponents				

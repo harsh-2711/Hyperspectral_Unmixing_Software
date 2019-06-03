@@ -411,7 +411,7 @@ class Software(QMainWindow, Ui_MainWindow):
 		self.logs.addItem(f'Retained Variance: {retainedVariance}')
 		self.logs.addItem("Generating Output file")
 		pca_data.tofile("PCA_" + self.OUTPUT_FILENAME, ",")
-		self.logs.addItem("Output file generated")
+		self.logs.addItem(f'Output file PCA_{self.OUTPUT_FILENAME} generated')
 		self.setProgressBar(False)
 		
 		''' To plot the points after PCA '''
@@ -443,7 +443,7 @@ class Software(QMainWindow, Ui_MainWindow):
 		self.logs.addItem("Generating Output file")
 		nmf_data = nmf.denormalizeData(nmf_data)
 		nmf_data.tofile("NMF_" + self.OUTPUT_FILENAME, ",")
-		self.logs.addItem("Output file generated")
+		self.logs.addItem(f'Output file NMF_{self.OUTPUT_FILENAME} generated')
 		self.setProgressBar(False)
 		
 		''' To plot the points after NMF '''
@@ -462,6 +462,9 @@ class Software(QMainWindow, Ui_MainWindow):
 		return nmf_data
 
 	def startNFINDR(self, nmf_data, selectedComponents):
+		'''
+		Main function for N-Finder
+		'''
 
 		self.datasetAsArray = self.dataset.ReadAsArray()
 		nfindr = NFindrModule()
@@ -470,7 +473,7 @@ class Software(QMainWindow, Ui_MainWindow):
 		self.logs.addItem(f'Number of iterations: {n_iterations}')
 		self.logs.addItem("Generating Output file")
 		nfindr_data.tofile("NFinder_" + self.OUTPUT_FILENAME, ",")
-		self.logs.addItem("Output file generated")
+		self.logs.addItem(f'Output file NFinder_{self.OUTPUT_FILENAME} generated')
 		self.setProgressBar(False)
 		
 

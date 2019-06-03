@@ -7,7 +7,7 @@ import numpy as np
 
 from mpl_toolkits.mplot3d import Axes3D
 
-from PyQt5.QtWidgets import QMainWindow, QApplication, QFileDialog, QPushButton, QTextEdit, QListWidget, QProgressBar, QLabel, QAction
+from PyQt5.QtWidgets import QMainWindow, QApplication, QFileDialog, QPushButton, QTextEdit, QListWidget, QProgressBar, QLabel
 
 from osgeo import gdal
 from numpy import genfromtxt
@@ -35,134 +35,18 @@ class Software(QMainWindow, Ui_MainWindow):
 		'''
 		Initializing software
 		'''
-
 		super(Software, self).__init__()
 		self.ui = Ui_MainWindow()
 		self.ui.setupUi(self)
 		self.title = "Hyperspectral Unmixing Toolbox"
-		self.OUTPUT_FILENAME = "Data.csv"
-		self.file = ""
+		self.OUTPUT_FILENAME = "Data.mat"
 
-		# Initialising Menu Bar
-		self.initMenu()
-
-		# Initialising UI Components
 		self.initUI()
-
-	def processtrigger(self,q):
-		print(q.text()+" is triggered")
-
-	def initMenu(self):
-		'''
-		Initialises the menu bar in the software for easy navigation
-		'''
-
-		menubar = self.menuBar()
-		file = menubar.addMenu("File")
-
-		new = QAction("New", self)
-		new.setShortcut("Ctrl+N")
-		file.addAction(new)
-
-		save = QAction("Save", self)
-		save.setShortcut("Ctrl+S")
-		file.addAction(save)
-
-		'''
-		edit = file.addMenu("Edit")
-		edit.addAction("copy")
-		edit.addAction("paste")
-
-		quit = QAction("Quit",self) 
-		file.addAction(quit)
-		file.triggered[QAction].connect(self.processtrigger)
-		'''
-
-		''' Algorithm Section '''
-
-		# Dimensionality Reduction
-		dimReduction = menubar.addMenu("Dimensionality Reduction")
-
-		pcaMenu = QAction("PCA", self)
-		dimReduction.addAction(pcaMenu) 
-
-		mnf = QAction("MNF", self)
-		dimReduction.addAction(mnf)
-
-		kerPCA = QAction("Kernel PCA", self)
-		dimReduction.addAction(kerPCA)
-
-		fda = QAction("FDA", self)
-		dimReduction.addAction(fda) 
-
-		lle = QAction("LLE", self)
-		dimReduction.addAction(lle)
-
-		# End Member Extraction
-		eme = menubar.addMenu("End Member Extraction")
-
-		nFinder = QAction("N-Finder", self)
-		eme.addAction(nFinder)
-
-		atgp = QAction("ATGP", self)
-		eme.addAction(atgp)
-
-		ppi = QAction("PPI", self)
-		eme.addAction(ppi)
-
-		sisal = QAction("SISAL", self)
-		eme.addAction(sisal)
-
-		vca = QAction("VCA", self)
-		eme.addAction(vca)
-
-		# Material Count
-		mc = menubar.addMenu("Material Count")
-
-		virDim = QAction("Virtual Dimension", self)
-		mc.addAction(virDim)
-
-		hysime = QAction("Hysime", self)
-		mc.addAction(hysime)
-
-		# Linear Unmixing
-		lu = menubar.addMenu("Linear Unmixing")
-
-		sunsal = QAction("SUNSAL", self)
-		lu.addAction(sunsal)
-
-		nnls = QAction("NNLS", self)
-		lu.addAction(nnls)
-
-		ucls = QAction("UCLS", self)
-		lu.addAction(ucls)
-
-		fcls = QAction("FCLS", self)
-		lu.addAction(fcls)
-
-		# Non-linear Unmixing
-		nlu = menubar.addMenu("Non Linear Unmixing")
-
-		gbmNMF = QAction("GBM using semi-NMF", self)
-		nlu.addAction(gbmNMF)
-
-		gbmGrad = QAction("GBM using gradient", self)
-		nlu.addAction(gbmGrad)
-
-		mulLin = QAction("Multi-Linear", self)
-		nlu.addAction(mulLin)
-
-		kerBase = QAction("Kernel Base", self)
-		nlu.addAction(kerBase)
-
-		graphLapBase = QAction("Graph Laplacian Base", self)
-		nlu.addAction(graphLapBase)
 
 	def initUI(self):
 		'''
 		Initializing UI components and their respective listeners
 		'''
-
 		self.setWindowTitle(self.title)
 
 		# Input Label
@@ -190,7 +74,6 @@ class Software(QMainWindow, Ui_MainWindow):
 		# Output text field
 		self.output_text = QTextEdit(self)
 		self.output_text.setGeometry(142,95,402,21)
-		self.output_text.setText(os.getcwd())
 
 		# No of components Label
 		self.components_label = QLabel("Components", self)
@@ -233,34 +116,29 @@ class Software(QMainWindow, Ui_MainWindow):
 		'''
 		On click listener for input_browse button
 		'''
-
 		self.InputBrowse()
 
 	def InputBrowse(self):
 		'''
 		Opens Browse Files dialog box for selecting input dataset
 		'''
-
 		options = QFileDialog.Options()
 		options |= QFileDialog.DontUseNativeDialog
 		fileName, _ = QFileDialog.getOpenFileName(self,"Select Dataset", "","All Files (*);;Matlab Files (*.mat)", options=options)
-		self.file = fileName
 		if fileName:
-			self.input_text.setText(fileName.split('/')[-1])
+			self.input_text.setText(fileName)
 
 	@pyqtSlot()
 	def on_click_output(self):
 		'''
 		On click listener for output_browse button
 		'''
-
 		self.OutputBrowse()
 
 	def OutputBrowse(self):
 		'''
 		Opens Browse Files dialog box for selecting target file for writing output
 		'''
-
 		options = QFileDialog.Options()
 		options |= QFileDialog.DontUseNativeDialog
 		folderName = str(QFileDialog.getExistingDirectory(self, "Select Directory", options=options))
@@ -298,7 +176,6 @@ class Software(QMainWindow, Ui_MainWindow):
 		Switches the progress bar from busy to stop and vice versa based on the
 		value of switch
 		'''
-
 		if switch:
 			self.progress.setRange(0,0)
 		else:
@@ -319,7 +196,7 @@ class Software(QMainWindow, Ui_MainWindow):
 		n_jobs = self.jobs.toPlainText()
 
 		# Validating dataset path
-		self.dataExists = self.validateInputFile(self.file)
+		self.dataExists = self.validateInputFile(filename)
 
 		# Validating output folder path
 		if self.dataExists:
@@ -336,11 +213,10 @@ class Software(QMainWindow, Ui_MainWindow):
 		# Start PCA if everything's good
 		if self.dataExists and self.outputFolderExists and self.trueComponents and self.enoughProcs:
 			self.logs.addItem(f'Starting Principal Component Analysis for getting top {self.components.toPlainText()} bands')
-			#self.startPCA(selectedComponents)
-			nmf_data = self.startNMF(selectedComponents)
-			self.startNFINDR(nmf_data, selectedComponents)
+			# self.startPCA(selectedComponents)
+			self.startNMF(selectedComponents)
+			# self.startNFINDR(self.nmf_data, selectedComponents)
 
-		self.progress.setRange(0,1)
 		
 	def validateInputFile(self, filename):
 		'''
@@ -388,7 +264,6 @@ class Software(QMainWindow, Ui_MainWindow):
 		'''
 		Validates the number of jobs desired as per processors available
 		'''
-
 		n_processors = mp.cpu_count()
 		if n_jobs.isdigit():
 			if (int)(n_jobs) > 0 and (int)(n_jobs) <= n_processors:
@@ -405,24 +280,30 @@ class Software(QMainWindow, Ui_MainWindow):
 		self.datasetAsArray = self.dataset.ReadAsArray()
 		pca = PrincipalComponentAnalysis(self.datasetAsArray)
 		pca.scaleData()
-		pca_data = pca.getPrincipalComponents_noOfComponents((int)(self.components.toPlainText()))
+		self.pca_data = pca.getPrincipalComponents_noOfComponents((int)(self.components.toPlainText()))
 		retainedVariance = pca.getRetainedVariance((int)(self.components.toPlainText()))
 		self.logs.addItem("Analysis completed")
 		self.logs.addItem(f'Retained Variance: {retainedVariance}')
 		self.logs.addItem("Generating Output file")
-		pca_data.tofile("PCA_" + self.OUTPUT_FILENAME, ",")
-		self.logs.addItem(f'Output file PCA_{self.OUTPUT_FILENAME} generated')
+		self.pca_data.tofile(self.OUTPUT_FILENAME, ",")
+		self.logs.addItem("Output file generated")
 		self.setProgressBar(False)
 		
 		''' To plot the points after PCA '''
 		if (int)(selectedComponents) == 1:
-			self.plot1DGraph(pca_data)
+			newpid = os.fork()
+			if newpid == 0:
+				self.plot1DGraph(self.pca_data)
 
 		elif (int)(selectedComponents) == 2:
-			self.plot2DGraph(pca_data)
+			newpid = os.fork()
+			if newpid == 0:
+				self.plot2DGraph(self.pca_data)
 
 		elif (int)(selectedComponents) == 3:
-			self.plot3DGraph(pca_data)
+			newpid = os.fork()
+			if newpid == 0:
+				self.plot3DGraph(self.pca_data)
 
 		else:
 			self.logs.addItem('Due to high dimentionality, graph could not be plotted')
@@ -436,35 +317,38 @@ class Software(QMainWindow, Ui_MainWindow):
 		self.datasetAsArray = self.dataset.ReadAsArray()
 		nmf = NonNegativeMatrixFactorisation(self.datasetAsArray)
 		nmf.scaleData()
-		nmf_data = nmf.getReducedComponents_noOfComponents((int)(self.components.toPlainText()))
+		self.nmf_data = nmf.getReducedComponents_noOfComponents((int)(self.components.toPlainText()))
 		error = nmf.errorFactor((int)(self.components.toPlainText()))
 		self.logs.addItem("Analysis completed")
 		self.logs.addItem(f'RMS Error: {error}')
 		self.logs.addItem("Generating Output file")
-		nmf_data = nmf.denormalizeData(nmf_data)
-		nmf_data.tofile("NMF_" + self.OUTPUT_FILENAME, ",")
-		self.logs.addItem(f'Output file NMF_{self.OUTPUT_FILENAME} generated')
+		self.nmf_data = nmf.denormalizeData(self.nmf_data)
+		self.nmf_data.tofile(self.OUTPUT_FILENAME, ",")
+		self.logs.addItem("Output file generated")
 		self.setProgressBar(False)
 		
 		''' To plot the points after NMF '''
 		if (int)(selectedComponents) == 1:
-			self.plot1DGraph(nmf_data)
+			newpid = os.fork()
+			if newpid == 0:
+				self.plot1DGraph(self.nmf_data)
 
 		elif (int)(selectedComponents) == 2:
-			self.plot2DGraph(nmf_data)
+			newpid = os.fork()
+			if newpid == 0:
+				self.plot2DGraph(self.nmf_data)
 
 		elif (int)(selectedComponents) == 3:
-			self.plot3DGraph(nmf_data)
+			newpid = os.fork()
+			if newpid == 0:
+				self.plot3DGraph(self.nmf_data)
 
 		else:
 			self.logs.addItem('Due to high dimentionality, graph could not be plotted')
 
-		return nmf_data
+
 
 	def startNFINDR(self, nmf_data, selectedComponents):
-		'''
-		Main function for N-Finder
-		'''
 
 		self.datasetAsArray = self.dataset.ReadAsArray()
 		nfindr = NFindrModule()
@@ -472,16 +356,12 @@ class Software(QMainWindow, Ui_MainWindow):
 		self.logs.addItem("Analysis completed")
 		self.logs.addItem(f'Number of iterations: {n_iterations}')
 		self.logs.addItem("Generating Output file")
-		nfindr_data.tofile("NFinder_" + self.OUTPUT_FILENAME, ",")
-		self.logs.addItem(f'Output file NFinder_{self.OUTPUT_FILENAME} generated')
+		nfindr_data.tofile(self.OUTPUT_FILENAME, ",")
+		self.logs.addItem("Output file generated")
 		self.setProgressBar(False)
 		
 
 	def plot1DGraph(self,data):
-		'''
-		Plots one dimensional data
-		'''
-
 		x = data[:,0]
 		y = np.zeros((len(x),), dtype=np.int)
 		plt.close('all')
@@ -499,10 +379,6 @@ class Software(QMainWindow, Ui_MainWindow):
 		plt.show()
 
 	def plot2DGraph(self,data):
-		'''
-		Plots two dimensional data
-		'''
-
 		x = data[:,0]
 		y = data[:,1]
 		plt.close('all')
@@ -521,10 +397,6 @@ class Software(QMainWindow, Ui_MainWindow):
 		plt.show()	
 
 	def plot3DGraph(self,data):
-		'''
-		Plots three dimensional data
-		'''
-
 		x = data[:,0]
 		y = data[:,1]
 		z = data[:,2]

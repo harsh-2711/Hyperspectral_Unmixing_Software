@@ -7,7 +7,7 @@ import numpy as np
 
 from mpl_toolkits.mplot3d import Axes3D
 
-from PyQt5.QtWidgets import QMainWindow, QApplication, QFileDialog, QPushButton, QTextEdit, QListWidget, QProgressBar, QLabel
+from PyQt5.QtWidgets import QMainWindow, QApplication, QFileDialog, QPushButton, QTextEdit, QListWidget, QProgressBar, QLabel, QAction
 
 from osgeo import gdal
 from numpy import genfromtxt
@@ -41,7 +41,120 @@ class Software(QMainWindow, Ui_MainWindow):
 		self.title = "Hyperspectral Unmixing Toolbox"
 		self.OUTPUT_FILENAME = "Data.mat"
 
+		# Initialising Menu Bar
+		self.initMenu()
+
+		# Initialising UI Components
 		self.initUI()
+
+	def processtrigger(self,q):
+		print(q.text()+" is triggered")
+
+	def initMenu(self):
+		'''
+		Initialises the menu bar in the software for easy navigation
+		'''
+
+		menubar = self.menuBar()
+		file = menubar.addMenu("File")
+
+		new = QAction("New", self)
+		new.setShortcut("Ctrl+N")
+		file.addAction(new)
+
+		save = QAction("Save", self)
+		save.setShortcut("Ctrl+S")
+		file.addAction(save)
+
+		'''
+		edit = file.addMenu("Edit")
+		edit.addAction("copy")
+		edit.addAction("paste")
+
+		quit = QAction("Quit",self) 
+		file.addAction(quit)
+		file.triggered[QAction].connect(self.processtrigger)
+		'''
+
+		''' Algorithm Section '''
+
+		# Dimensionality Reduction
+		dimReduction = menubar.addMenu("Dimensionality Reduction")
+
+		pcaMenu = QAction("PCA", self)
+		dimReduction.addAction(pcaMenu) 
+
+		mnf = QAction("MNF", self)
+		dimReduction.addAction(mnf)
+
+		kerPCA = QAction("Kernel PCA", self)
+		dimReduction.addAction(kerPCA)
+
+		fda = QAction("FDA", self)
+		dimReduction.addAction(fda) 
+
+		lle = QAction("LLE", self)
+		dimReduction.addAction(lle)
+
+		# End Member Extraction
+		eme = menubar.addMenu("End Member Extraction")
+
+		nFinder = QAction("N-Finder", self)
+		eme.addAction(nFinder)
+
+		atgp = QAction("ATGP", self)
+		eme.addAction(atgp)
+
+		ppi = QAction("PPI", self)
+		eme.addAction(ppi)
+
+		sisal = QAction("SISAL", self)
+		eme.addAction(sisal)
+
+		vca = QAction("VCA", self)
+		eme.addAction(vca)
+
+		# Material Count
+		mc = menubar.addMenu("Material Count")
+
+		virDim = QAction("Virtual Dimension", self)
+		mc.addAction(virDim)
+
+		hysime = QAction("Hysime", self)
+		mc.addAction(hysime)
+
+		# Linear Unmixing
+		lu = menubar.addMenu("Linear Unmixing")
+
+		sunsal = QAction("SUNSAL", self)
+		lu.addAction(sunsal)
+
+		nnls = QAction("NNLS", self)
+		lu.addAction(nnls)
+
+		ucls = QAction("UCLS", self)
+		lu.addAction(ucls)
+
+		fcls = QAction("FCLS", self)
+		lu.addAction(fcls)
+
+		# Non-linear Unmixing
+		nlu = menubar.addMenu("Non Linear Unmixing")
+
+		gbmNMF = QAction("GBM using semi-NMF", self)
+		nlu.addAction(gbmNMF)
+
+		gbmGrad = QAction("GBM using gradient", self)
+		nlu.addAction(gbmGrad)
+
+		mulLin = QAction("Multi-Linear", self)
+		nlu.addAction(mulLin)
+
+		kerBase = QAction("Kernel Base", self)
+		nlu.addAction(kerBase)
+
+		graphLapBase = QAction("Graph Laplacian Base", self)
+		nlu.addAction(graphLapBase)
 
 	def initUI(self):
 		'''
@@ -264,6 +377,7 @@ class Software(QMainWindow, Ui_MainWindow):
 		'''
 		Validates the number of jobs desired as per processors available
 		'''
+
 		n_processors = mp.cpu_count()
 		if n_jobs.isdigit():
 			if (int)(n_jobs) > 0 and (int)(n_jobs) <= n_processors:
@@ -350,6 +464,9 @@ class Software(QMainWindow, Ui_MainWindow):
 		
 
 	def plot1DGraph(self,data):
+		'''
+		Plots one dimensional data
+		'''
 		x = data[:,0]
 		y = np.zeros((len(x),), dtype=np.int)
 		plt.close('all')
@@ -367,6 +484,10 @@ class Software(QMainWindow, Ui_MainWindow):
 		plt.show()
 
 	def plot2DGraph(self,data):
+		'''
+		Plots two dimensional data
+		'''
+
 		x = data[:,0]
 		y = data[:,1]
 		plt.close('all')
@@ -385,6 +506,10 @@ class Software(QMainWindow, Ui_MainWindow):
 		plt.show()	
 
 	def plot3DGraph(self,data):
+		'''
+		Plots three dimensional data
+		'''
+
 		x = data[:,0]
 		y = data[:,1]
 		z = data[:,2]

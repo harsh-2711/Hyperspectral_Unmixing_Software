@@ -26,7 +26,7 @@ import math
 import random
 import numpy as np
 import scipy as sp
-import eea
+from Modules.End_Member_Extraction import eea
 
 class NFindrModule():
 

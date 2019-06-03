@@ -35,11 +35,13 @@ class Software(QMainWindow, Ui_MainWindow):
 		'''
 		Initializing software
 		'''
+
 		super(Software, self).__init__()
 		self.ui = Ui_MainWindow()
 		self.ui.setupUi(self)
 		self.title = "Hyperspectral Unmixing Toolbox"
 		self.OUTPUT_FILENAME = "Data.mat"
+		self.file = ""
 
 		# Initialising Menu Bar
 		self.initMenu()
@@ -160,6 +162,7 @@ class Software(QMainWindow, Ui_MainWindow):
 		'''
 		Initializing UI components and their respective listeners
 		'''
+
 		self.setWindowTitle(self.title)
 
 		# Input Label
@@ -187,6 +190,7 @@ class Software(QMainWindow, Ui_MainWindow):
 		# Output text field
 		self.output_text = QTextEdit(self)
 		self.output_text.setGeometry(142,95,402,21)
+		self.output_text.setText(os.getcwd())
 
 		# No of components Label
 		self.components_label = QLabel("Components", self)
@@ -229,29 +233,34 @@ class Software(QMainWindow, Ui_MainWindow):
 		'''
 		On click listener for input_browse button
 		'''
+
 		self.InputBrowse()
 
 	def InputBrowse(self):
 		'''
 		Opens Browse Files dialog box for selecting input dataset
 		'''
+
 		options = QFileDialog.Options()
 		options |= QFileDialog.DontUseNativeDialog
 		fileName, _ = QFileDialog.getOpenFileName(self,"Select Dataset", "","All Files (*);;Matlab Files (*.mat)", options=options)
+		self.file = fileName
 		if fileName:
-			self.input_text.setText(fileName)
+			self.input_text.setText(fileName.split('/')[-1])
 
 	@pyqtSlot()
 	def on_click_output(self):
 		'''
 		On click listener for output_browse button
 		'''
+
 		self.OutputBrowse()
 
 	def OutputBrowse(self):
 		'''
 		Opens Browse Files dialog box for selecting target file for writing output
 		'''
+
 		options = QFileDialog.Options()
 		options |= QFileDialog.DontUseNativeDialog
 		folderName = str(QFileDialog.getExistingDirectory(self, "Select Directory", options=options))
@@ -289,6 +298,7 @@ class Software(QMainWindow, Ui_MainWindow):
 		Switches the progress bar from busy to stop and vice versa based on the
 		value of switch
 		'''
+
 		if switch:
 			self.progress.setRange(0,0)
 		else:
@@ -309,7 +319,7 @@ class Software(QMainWindow, Ui_MainWindow):
 		n_jobs = self.jobs.toPlainText()
 
 		# Validating dataset path
-		self.dataExists = self.validateInputFile(filename)
+		self.dataExists = self.validateInputFile(self.file)
 
 		# Validating output folder path
 		if self.dataExists:

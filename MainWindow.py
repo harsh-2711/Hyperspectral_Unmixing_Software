@@ -40,7 +40,7 @@ class Software(QMainWindow, Ui_MainWindow):
 		self.ui = Ui_MainWindow()
 		self.ui.setupUi(self)
 		self.title = "Hyperspectral Unmixing Toolbox"
-		self.OUTPUT_FILENAME = "Data.mat"
+		self.OUTPUT_FILENAME = "Data.csv"
 		self.file = ""
 
 		# Initialising Menu Bar
@@ -336,10 +336,11 @@ class Software(QMainWindow, Ui_MainWindow):
 		# Start PCA if everything's good
 		if self.dataExists and self.outputFolderExists and self.trueComponents and self.enoughProcs:
 			self.logs.addItem(f'Starting Principal Component Analysis for getting top {self.components.toPlainText()} bands')
-			# self.startPCA(selectedComponents)
-			self.startNMF(selectedComponents)
-			self.startNFINDR(self.nmf_data, selectedComponents)
+			#self.startPCA(selectedComponents)
+			nmf_data = self.startNMF(selectedComponents)
+			self.startNFINDR(nmf_data, selectedComponents)
 
+		self.progress.setRange(0,1)
 		
 	def validateInputFile(self, filename):
 		'''
@@ -409,7 +410,7 @@ class Software(QMainWindow, Ui_MainWindow):
 		self.logs.addItem("Analysis completed")
 		self.logs.addItem(f'Retained Variance: {retainedVariance}')
 		self.logs.addItem("Generating Output file")
-		pca_data.tofile(self.OUTPUT_FILENAME, ",")
+		pca_data.tofile("PCA_" + self.OUTPUT_FILENAME, ",")
 		self.logs.addItem("Output file generated")
 		self.setProgressBar(False)
 		
@@ -435,13 +436,13 @@ class Software(QMainWindow, Ui_MainWindow):
 		self.datasetAsArray = self.dataset.ReadAsArray()
 		nmf = NonNegativeMatrixFactorisation(self.datasetAsArray)
 		nmf.scaleData()
-		self.nmf_data = nmf.getReducedComponents_noOfComponents((int)(self.components.toPlainText()))
+		nmf_data = nmf.getReducedComponents_noOfComponents((int)(self.components.toPlainText()))
 		error = nmf.errorFactor((int)(self.components.toPlainText()))
 		self.logs.addItem("Analysis completed")
 		self.logs.addItem(f'RMS Error: {error}')
 		self.logs.addItem("Generating Output file")
-		self.nmf_data = nmf.denormalizeData(self.nmf_data)
-		self.nmf_data.tofile(self.OUTPUT_FILENAME, ",")
+		nmf_data = nmf.denormalizeData(nmf_data)
+		nmf_data.tofile("NMF_" + self.OUTPUT_FILENAME, ",")
 		self.logs.addItem("Output file generated")
 		self.setProgressBar(False)
 		
@@ -458,7 +459,7 @@ class Software(QMainWindow, Ui_MainWindow):
 		else:
 			self.logs.addItem('Due to high dimentionality, graph could not be plotted')
 
-
+		return nmf_data
 
 	def startNFINDR(self, nmf_data, selectedComponents):
 
@@ -468,7 +469,7 @@ class Software(QMainWindow, Ui_MainWindow):
 		self.logs.addItem("Analysis completed")
 		self.logs.addItem(f'Number of iterations: {n_iterations}')
 		self.logs.addItem("Generating Output file")
-		nfindr_data.tofile(self.OUTPUT_FILENAME, ",")
+		nfindr_data.tofile("NFinder_" + self.OUTPUT_FILENAME, ",")
 		self.logs.addItem("Output file generated")
 		self.setProgressBar(False)
 		
@@ -477,6 +478,7 @@ class Software(QMainWindow, Ui_MainWindow):
 		'''
 		Plots one dimensional data
 		'''
+
 		x = data[:,0]
 		y = np.zeros((len(x),), dtype=np.int)
 		plt.close('all')

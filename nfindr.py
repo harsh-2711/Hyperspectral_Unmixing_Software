@@ -30,7 +30,7 @@ from Modules.End_Member_Extraction import eea
 
 class NFindrModule():
 
-    def NFINDR(data, q, transform=None, maxit=None, ATGP_init=False):
+    def NFINDR(self, data, q, transform=None, maxit=None, ATGP_init=False):
         """
         N-FINDR endmembers induction algorithm.
         Parameters:

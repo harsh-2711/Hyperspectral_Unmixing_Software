@@ -3,13 +3,17 @@ import os
 
 from PyQt5 import uic
 from PyQt5.QtCore import pyqtSlot
-import numpy as np
+
+from functools import partial
 
 from mpl_toolkits.mplot3d import Axes3D
 
 from PyQt5.QtWidgets import QMainWindow, QApplication, QFileDialog, QPushButton, QTextEdit, QListWidget, QProgressBar, QLabel, QAction
+from PyQt5 import QtGui
 
 from osgeo import gdal
+
+import numpy as np
 from numpy import genfromtxt
 
 from PCA import PrincipalComponentAnalysis
@@ -42,15 +46,13 @@ class Software(QMainWindow, Ui_MainWindow):
 		self.title = "Hyperspectral Unmixing Toolbox"
 		self.OUTPUT_FILENAME = "Data.csv"
 		self.file = ""
+		self.currentAlgo = "PCA"
 
 		# Initialising Menu Bar
 		self.initMenu()
 
 		# Initialising UI Components
 		self.initUI()
-
-	def processtrigger(self,q):
-		print(q.text()+" is triggered")
 
 	def initMenu(self):
 		'''
@@ -68,16 +70,6 @@ class Software(QMainWindow, Ui_MainWindow):
 		save.setShortcut("Ctrl+S")
 		file.addAction(save)
 
-		'''
-		edit = file.addMenu("Edit")
-		edit.addAction("copy")
-		edit.addAction("paste")
-
-		quit = QAction("Quit",self) 
-		file.addAction(quit)
-		file.triggered[QAction].connect(self.processtrigger)
-		'''
-
 		''' Algorithm Section '''
 
 		# Dimensionality Reduction
@@ -85,9 +77,11 @@ class Software(QMainWindow, Ui_MainWindow):
 
 		pcaMenu = QAction("PCA", self)
 		dimReduction.addAction(pcaMenu) 
+		pcaMenu.triggered.connect(partial(self.changeCurrentAlgo, "PCA"))
 
-		mnf = QAction("MNF", self)
-		dimReduction.addAction(mnf)
+		nmf = QAction("NMF", self)
+		dimReduction.addAction(nmf)
+		nmf.triggered.connect(partial(self.changeCurrentAlgo, "NMF"))
 
 		kerPCA = QAction("Kernel PCA", self)
 		dimReduction.addAction(kerPCA)
@@ -103,6 +97,7 @@ class Software(QMainWindow, Ui_MainWindow):
 
 		nFinder = QAction("N-Finder", self)
 		eme.addAction(nFinder)
+		nFinder.triggered.connect(partial(self.changeCurrentAlgo, "NFinder"))
 
 		atgp = QAction("ATGP", self)
 		eme.addAction(atgp)
@@ -157,6 +152,9 @@ class Software(QMainWindow, Ui_MainWindow):
 
 		graphLapBase = QAction("Graph Laplacian Base", self)
 		nlu.addAction(graphLapBase)
+
+	def changeCurrentAlgo(self, algo):
+		self.currentAlgo = algo
 
 	def initUI(self):
 		'''
@@ -333,12 +331,21 @@ class Software(QMainWindow, Ui_MainWindow):
 		if self.dataExists and self.outputFolderExists and self.trueComponents:
 			self.enoughProcs = self.validateJobs(n_jobs)
 
-		# Start PCA if everything's good
+		# Starting selected algorithm if everything's good
 		if self.dataExists and self.outputFolderExists and self.trueComponents and self.enoughProcs:
-			self.logs.addItem(f'Starting Principal Component Analysis for getting top {self.components.toPlainText()} bands')
-			#self.startPCA(selectedComponents)
-			nmf_data = self.startNMF(selectedComponents)
-			self.startNFINDR(nmf_data, selectedComponents)
+
+			if self.currentAlgo == "PCA":
+				self.logs.addItem(f'Starting Principal Component Analysis for getting top {self.components.toPlainText()} bands')
+				self.startPCA(selectedComponents)
+
+			elif self.currentAlgo == "NMF":
+				self.logs.addItem(f'Starting NMF for getting top {self.components.toPlainText()} bands')
+				nmf_data = self.startNMF(selectedComponents)
+
+			elif self.currentAlgo == "NFinder":
+				self.logs.addItem(f'Starting N-Finder for getting top {self.components.toPlainText()} bands')
+				nmf_data = self.startNMF(selectedComponents)
+				self.startNFINDR(nmf_data, selectedComponents)
 
 		self.progress.setRange(0,1)
 		

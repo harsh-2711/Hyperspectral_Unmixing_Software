@@ -51,8 +51,8 @@ class Software(QMainWindow, Ui_MainWindow):
 		# Initialising Menu Bar
 		self.initMenu()
 
-		# Initialising UI Components
 		self.initUI()
+
 
 	def initMenu(self):
 		'''
@@ -153,8 +153,15 @@ class Software(QMainWindow, Ui_MainWindow):
 		graphLapBase = QAction("Graph Laplacian Base", self)
 		nlu.addAction(graphLapBase)
 
+
 	def changeCurrentAlgo(self, algo):
+		'''
+		Changes the value of variable currentAlgo with the algorithm selected
+		from the menu bar
+		'''
+
 		self.currentAlgo = algo
+
 
 	def initUI(self):
 		'''
@@ -226,6 +233,7 @@ class Software(QMainWindow, Ui_MainWindow):
 
 		self.show()
 
+
 	@pyqtSlot()
 	def on_click_input(self):
 		'''
@@ -233,6 +241,7 @@ class Software(QMainWindow, Ui_MainWindow):
 		'''
 
 		self.InputBrowse()
+
 
 	def InputBrowse(self):
 		'''
@@ -246,6 +255,7 @@ class Software(QMainWindow, Ui_MainWindow):
 		if fileName:
 			self.input_text.setText(fileName.split('/')[-1])
 
+
 	@pyqtSlot()
 	def on_click_output(self):
 		'''
@@ -253,6 +263,7 @@ class Software(QMainWindow, Ui_MainWindow):
 		'''
 
 		self.OutputBrowse()
+
 
 	def OutputBrowse(self):
 		'''
@@ -265,6 +276,7 @@ class Software(QMainWindow, Ui_MainWindow):
 		if folderName:
 			self.output_text.setText(folderName)
 
+
 	@pyqtSlot()
 	def on_click_OK(self):
 		'''
@@ -275,6 +287,7 @@ class Software(QMainWindow, Ui_MainWindow):
 		self.validation.startThread.connect(self.validate)
 		self.validation.startProgress.connect(self.setProgressBar)
 		self.validation.start()
+
 
 	@pyqtSlot()
 	def on_click_cancel(self):
@@ -289,6 +302,7 @@ class Software(QMainWindow, Ui_MainWindow):
 		self.progress.setValue(0)
 		self.logs.clear()
 
+
 	def setProgressBar(self, switch):
 		'''
 		switch - Boolean 
@@ -301,6 +315,7 @@ class Software(QMainWindow, Ui_MainWindow):
 			self.progress.setRange(0,0)
 		else:
 			self.progress.setRange(0,1)
+
 
 	def validate(self):
 		'''
@@ -344,11 +359,12 @@ class Software(QMainWindow, Ui_MainWindow):
 
 			elif self.currentAlgo == "NFinder":
 				self.logs.addItem(f'Starting N-Finder for getting top {self.components.toPlainText()} bands')
-				nmf_data = self.startNMF(selectedComponents)
-				self.startNFINDR(nmf_data, selectedComponents)
-
+				self.startNMF(selectedComponents)
+				self.startNFINDR(self.nmf_data, selectedComponents)
+	
 		self.progress.setRange(0,1)
 		
+
 	def validateInputFile(self, filename):
 		'''
 		Validates the dataset path and loads the dataset if path exists
@@ -367,6 +383,7 @@ class Software(QMainWindow, Ui_MainWindow):
 			self.logs.addItem("Please provide path to dataset")
 			return False
 
+
 	def validateOutputFolder(self, foldername):
 		'''
 		Validates the existence of output folder where outfile file will be 
@@ -379,6 +396,7 @@ class Software(QMainWindow, Ui_MainWindow):
 		self.logs.addItem("Please provide a valid directory to save output file")
 		return False
 
+
 	def validateComponents(self, selectedComponents):
 		'''
 		Validates the number of components w.r.t. the input dataset
@@ -390,6 +408,7 @@ class Software(QMainWindow, Ui_MainWindow):
 				return True
 		self.logs.addItem(f'Incorrect number of bands... Max possible number of bands are {totalComponents}')
 		return False
+
 
 	def validateJobs(self, n_jobs):
 		'''
@@ -412,24 +431,30 @@ class Software(QMainWindow, Ui_MainWindow):
 		self.datasetAsArray = self.dataset.ReadAsArray()
 		pca = PrincipalComponentAnalysis(self.datasetAsArray)
 		pca.scaleData()
-		pca_data = pca.getPrincipalComponents_noOfComponents((int)(self.components.toPlainText()))
+		self.pca_data = pca.getPrincipalComponents_noOfComponents((int)(self.components.toPlainText()))
 		retainedVariance = pca.getRetainedVariance((int)(self.components.toPlainText()))
 		self.logs.addItem("Analysis completed")
 		self.logs.addItem(f'Retained Variance: {retainedVariance}')
 		self.logs.addItem("Generating Output file")
-		pca_data.tofile("PCA_" + self.OUTPUT_FILENAME, ",")
-		self.logs.addItem(f'Output file PCA_{self.OUTPUT_FILENAME} generated')
+		self.pca_data.tofile("PCA_" + self.OUTPUT_FILENAME, ",")
+		self.logs.addItem(f"Output file PCA_{self.OUTPUT_FILENAME} generated")
 		self.setProgressBar(False)
 		
 		''' To plot the points after PCA '''
 		if (int)(selectedComponents) == 1:
-			self.plot1DGraph(pca_data)
+			newpid = os.fork()
+			if newpid == 0:
+				self.plot1DGraph(self.pca_data)
 
 		elif (int)(selectedComponents) == 2:
-			self.plot2DGraph(pca_data)
+			newpid = os.fork()
+			if newpid == 0:
+				self.plot2DGraph(self.pca_data)
 
 		elif (int)(selectedComponents) == 3:
-			self.plot3DGraph(pca_data)
+			newpid = os.fork()
+			if newpid == 0:
+				self.plot3DGraph(self.pca_data)
 
 		else:
 			self.logs.addItem('Due to high dimentionality, graph could not be plotted')
@@ -443,34 +468,39 @@ class Software(QMainWindow, Ui_MainWindow):
 		self.datasetAsArray = self.dataset.ReadAsArray()
 		nmf = NonNegativeMatrixFactorisation(self.datasetAsArray)
 		nmf.scaleData()
-		nmf_data = nmf.getReducedComponents_noOfComponents((int)(self.components.toPlainText()))
+		self.nmf_data = nmf.getReducedComponents_noOfComponents((int)(self.components.toPlainText()))
 		error = nmf.errorFactor((int)(self.components.toPlainText()))
 		self.logs.addItem("Analysis completed")
 		self.logs.addItem(f'RMS Error: {error}')
 		self.logs.addItem("Generating Output file")
-		nmf_data = nmf.denormalizeData(nmf_data)
-		nmf_data.tofile("NMF_" + self.OUTPUT_FILENAME, ",")
-		self.logs.addItem(f'Output file NMF_{self.OUTPUT_FILENAME} generated')
+		self.nmf_data = nmf.denormalizeData(self.nmf_data)
+		self.nmf_data.tofile("NMF_" + self.OUTPUT_FILENAME, ",")
+		self.logs.addItem(f"Output file NMF_{self.OUTPUT_FILENAME} generated")
 		self.setProgressBar(False)
 		
 		''' To plot the points after NMF '''
 		if (int)(selectedComponents) == 1:
-			self.plot1DGraph(nmf_data)
+			newpid = os.fork()
+			if newpid == 0:
+				self.plot1DGraph(self.nmf_data)
 
 		elif (int)(selectedComponents) == 2:
-			self.plot2DGraph(nmf_data)
+			newpid = os.fork()
+			if newpid == 0:
+				self.plot2DGraph(self.nmf_data)
 
 		elif (int)(selectedComponents) == 3:
-			self.plot3DGraph(nmf_data)
+			newpid = os.fork()
+			if newpid == 0:
+				self.plot3DGraph(self.nmf_data)
 
 		else:
 			self.logs.addItem('Due to high dimentionality, graph could not be plotted')
 
-		return nmf_data
 
 	def startNFINDR(self, nmf_data, selectedComponents):
 		'''
-		Main function for N-Finder
+		Main function for N-Finder algorithm
 		'''
 
 		self.datasetAsArray = self.dataset.ReadAsArray()
@@ -480,11 +510,11 @@ class Software(QMainWindow, Ui_MainWindow):
 		self.logs.addItem(f'Number of iterations: {n_iterations}')
 		self.logs.addItem("Generating Output file")
 		nfindr_data.tofile("NFinder_" + self.OUTPUT_FILENAME, ",")
-		self.logs.addItem(f'Output file NFinder_{self.OUTPUT_FILENAME} generated')
+		self.logs.addItem(f"Output file NFinder_{self.OUTPUT_FILENAME} generated")
 		self.setProgressBar(False)
-		
+	
 
-	def plot1DGraph(self,data):
+	def plot1DGraph(self, data):
 		'''
 		Plots one dimensional data
 		'''
@@ -505,7 +535,8 @@ class Software(QMainWindow, Ui_MainWindow):
 		plt.title("1D plot")
 		plt.show()
 
-	def plot2DGraph(self,data):
+
+	def plot2DGraph(self, data):
 		'''
 		Plots two dimensional data
 		'''
@@ -527,7 +558,8 @@ class Software(QMainWindow, Ui_MainWindow):
 		plt.title("2D plot")
 		plt.show()	
 
-	def plot3DGraph(self,data):
+
+	def plot3DGraph(self, data):
 		'''
 		Plots three dimensional data
 		'''
@@ -554,6 +586,7 @@ class Software(QMainWindow, Ui_MainWindow):
 		ax.set_title("3D plot")
 		plt.show()
 
+
 	def writeError(self, err_msg):
 		'''
 		This method receives input from stderr as PyQtSlot and prints it in the 
@@ -564,6 +597,7 @@ class Software(QMainWindow, Ui_MainWindow):
 
 
 if __name__ == "__main__":
+
 	app = QApplication(sys.argv)
 	window = Software()
 	window.show()

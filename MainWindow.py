@@ -39,6 +39,7 @@ class Software(QMainWindow, Ui_MainWindow):
 		self.ui.setupUi(self)
 		self.title = "Hyperspectral Unmixing Toolbox"
 		self.OUTPUT_FILENAME = "Data.mat"
+		self.file = ""
 
 		self.initUI()
 

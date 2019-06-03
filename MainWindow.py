@@ -14,6 +14,8 @@ from numpy import genfromtxt
 
 from PCA import PrincipalComponentAnalysis
 from NMF import NonNegativeMatrixFactorisation
+from nfindr import NFindrModule
+
 from Threads import ValidationThread
 from ErrorHandler import StdErrHandler
 
@@ -33,13 +35,11 @@ class Software(QMainWindow, Ui_MainWindow):
 		'''
 		Initializing software
 		'''
-
 		super(Software, self).__init__()
 		self.ui = Ui_MainWindow()
 		self.ui.setupUi(self)
 		self.title = "Hyperspectral Unmixing Toolbox"
 		self.OUTPUT_FILENAME = "Data.mat"
-		self.file = ""
 
 		self.initUI()
 
@@ -47,7 +47,6 @@ class Software(QMainWindow, Ui_MainWindow):
 		'''
 		Initializing UI components and their respective listeners
 		'''
-
 		self.setWindowTitle(self.title)
 
 		# Input Label
@@ -75,7 +74,6 @@ class Software(QMainWindow, Ui_MainWindow):
 		# Output text field
 		self.output_text = QTextEdit(self)
 		self.output_text.setGeometry(142,95,402,21)
-		self.output_text.setText(os.getcwd())
 
 		# No of components Label
 		self.components_label = QLabel("Components", self)
@@ -118,34 +116,29 @@ class Software(QMainWindow, Ui_MainWindow):
 		'''
 		On click listener for input_browse button
 		'''
-
 		self.InputBrowse()
 
 	def InputBrowse(self):
 		'''
 		Opens Browse Files dialog box for selecting input dataset
 		'''
-
 		options = QFileDialog.Options()
 		options |= QFileDialog.DontUseNativeDialog
 		fileName, _ = QFileDialog.getOpenFileName(self,"Select Dataset", "","All Files (*);;Matlab Files (*.mat)", options=options)
-		self.file = fileName
 		if fileName:
-			self.input_text.setText(fileName.split('/')[-1])
+			self.input_text.setText(fileName)
 
 	@pyqtSlot()
 	def on_click_output(self):
 		'''
 		On click listener for output_browse button
 		'''
-
 		self.OutputBrowse()
 
 	def OutputBrowse(self):
 		'''
 		Opens Browse Files dialog box for selecting target file for writing output
 		'''
-
 		options = QFileDialog.Options()
 		options |= QFileDialog.DontUseNativeDialog
 		folderName = str(QFileDialog.getExistingDirectory(self, "Select Directory", options=options))
@@ -203,7 +196,7 @@ class Software(QMainWindow, Ui_MainWindow):
 		n_jobs = self.jobs.toPlainText()
 
 		# Validating dataset path
-		self.dataExists = self.validateInputFile(self.file)
+		self.dataExists = self.validateInputFile(filename)
 
 		# Validating output folder path
 		if self.dataExists:
@@ -222,6 +215,8 @@ class Software(QMainWindow, Ui_MainWindow):
 			self.logs.addItem(f'Starting Principal Component Analysis for getting top {self.components.toPlainText()} bands')
 			# self.startPCA(selectedComponents)
 			self.startNMF(selectedComponents)
+			self.startNFINDR(self.nmf_data, selectedComponents)
+
 		
 	def validateInputFile(self, filename):
 		'''
@@ -316,13 +311,13 @@ class Software(QMainWindow, Ui_MainWindow):
 		self.datasetAsArray = self.dataset.ReadAsArray()
 		nmf = NonNegativeMatrixFactorisation(self.datasetAsArray)
 		nmf.scaleData()
-		nmf_data = nmf.getReducedComponents_noOfComponents((int)(self.components.toPlainText()))
+		self.nmf_data = nmf.getReducedComponents_noOfComponents((int)(self.components.toPlainText()))
 		error = nmf.errorFactor((int)(self.components.toPlainText()))
 		self.logs.addItem("Analysis completed")
 		self.logs.addItem(f'RMS Error: {error}')
 		self.logs.addItem("Generating Output file")
-		nmf_data = nmf.denormalizeData(nmf_data)
-		nmf_data.tofile(self.OUTPUT_FILENAME, ",")
+		self.nmf_data = nmf.denormalizeData(self.nmf_data)
+		self.nmf_data.tofile(self.OUTPUT_FILENAME, ",")
 		self.logs.addItem("Output file generated")
 		self.setProgressBar(False)
 		
@@ -340,8 +335,21 @@ class Software(QMainWindow, Ui_MainWindow):
 			self.logs.addItem('Due to high dimentionality, graph could not be plotted')
 
 
-	def plot1DGraph(self,data):
 
+	def startNFINDR(self, nmf_data, selectedComponents):
+
+		self.datasetAsArray = self.dataset.ReadAsArray()
+		nfindr = NFindrModule()
+		nfindr_data, Et, IDX, n_iterations = nfindr.NFINDR(nmf_data, (int)(selectedComponents))
+		self.logs.addItem("Analysis completed")
+		self.logs.addItem(f'Number of iterations: {n_iterations}')
+		self.logs.addItem("Generating Output file")
+		nfindr_data.tofile(self.OUTPUT_FILENAME, ",")
+		self.logs.addItem("Output file generated")
+		self.setProgressBar(False)
+		
+
+	def plot1DGraph(self,data):
 		x = data[:,0]
 		y = np.zeros((len(x),), dtype=np.int)
 		plt.close('all')
@@ -359,7 +367,6 @@ class Software(QMainWindow, Ui_MainWindow):
 		plt.show()
 
 	def plot2DGraph(self,data):
-
 		x = data[:,0]
 		y = data[:,1]
 		plt.close('all')
@@ -378,7 +385,6 @@ class Software(QMainWindow, Ui_MainWindow):
 		plt.show()	
 
 	def plot3DGraph(self,data):
-
 		x = data[:,0]
 		y = data[:,1]
 		z = data[:,2]
@@ -411,7 +417,6 @@ class Software(QMainWindow, Ui_MainWindow):
 
 
 if __name__ == "__main__":
-
 	app = QApplication(sys.argv)
 	window = Software()
 	window.show()

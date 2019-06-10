@@ -20,6 +20,7 @@ import csv
 from PCA import PrincipalComponentAnalysis
 from NMF import NonNegativeMatrixFactorisation
 from nfindr import NFindrModule
+from sunsal import SUNSALModule
 
 from Threads import ValidationThread
 from ErrorHandler import StdErrHandler
@@ -307,7 +308,6 @@ class Software(QMainWindow, Ui_MainWindow):
 	def setProgressBar(self, switch):
 		'''
 		switch - Boolean 
-
 		Switches the progress bar from busy to stop and vice versa based on the
 		value of switch
 		'''
@@ -352,16 +352,30 @@ class Software(QMainWindow, Ui_MainWindow):
 
 			if self.currentAlgo == "PCA":
 				self.logs.addItem(f'Starting Principal Component Analysis for getting top {self.components.toPlainText()} bands')
-				self.startPCA(selectedComponents)
+				newpid1 = os.fork()
+				if newpid1 == 0:
+					self.startPCA(selectedComponents)
 
 			elif self.currentAlgo == "NMF":
 				self.logs.addItem(f'Starting NMF for getting top {self.components.toPlainText()} bands')
-				nmf_data = self.startNMF(selectedComponents)
+				newpid1 = os.fork()
+				if newpid1 == 0:
+					nmf_data = self.startNMF(selectedComponents)
 
 			elif self.currentAlgo == "NFinder":
 				self.logs.addItem(f'Starting N-Finder for getting top {self.components.toPlainText()} bands')
-				self.startNMF(selectedComponents)
-				self.startNFINDR(self.nmf_data, selectedComponents)
+				newpid1 = os.fork()
+				if newpid1 == 0:
+					self.startNMF(selectedComponents)
+					self.startNFINDR(self.nmf_data, selectedComponents)
+
+			elif self.currentAlgo == "SUNSAL":
+				self.logs.addItem(f'Starting SUNSAL for getting estimated abundance matrix')
+				newpid1 = os.fork()
+				if newpid1 == 0:
+					self.startNMF(selectedComponents)
+					self.startNFINDR(self.nmf_data, selectedComponents)
+					self.startSUNSAL(self.nfindr_data, self.IDX)
 	
 		self.progress.setRange(0,1)
 		
@@ -443,18 +457,18 @@ class Software(QMainWindow, Ui_MainWindow):
 		
 		''' To plot the points after PCA '''
 		if (int)(selectedComponents) == 1:
-			newpid = os.fork()
-			if newpid == 0:
+			newpid2 = os.fork()
+			if newpid2 == 0:
 				self.plot1DGraph(self.pca_data)
 
 		elif (int)(selectedComponents) == 2:
-			newpid = os.fork()
-			if newpid == 0:
+			newpid2 = os.fork()
+			if newpid2 == 0:
 				self.plot2DGraph(self.pca_data)
 
 		elif (int)(selectedComponents) == 3:
-			newpid = os.fork()
-			if newpid == 0:
+			newpid2 = os.fork()
+			if newpid2 == 0:
 				self.plot3DGraph(self.pca_data)
 
 		else:
@@ -481,18 +495,18 @@ class Software(QMainWindow, Ui_MainWindow):
 		
 		''' To plot the points after NMF '''
 		if (int)(selectedComponents) == 1:
-			newpid = os.fork()
-			if newpid == 0:
+			newpid2 = os.fork()
+			if newpid2 == 0:
 				self.plot1DGraph(self.nmf_data)
 
 		elif (int)(selectedComponents) == 2:
-			newpid = os.fork()
-			if newpid == 0:
+			newpid2 = os.fork()
+			if newpid2 == 0:
 				self.plot2DGraph(self.nmf_data)
 
 		elif (int)(selectedComponents) == 3:
-			newpid = os.fork()
-			if newpid == 0:
+			newpid2 = os.fork()
+			if newpid2 == 0:
 				self.plot3DGraph(self.nmf_data)
 
 		else:
@@ -533,6 +547,23 @@ class Software(QMainWindow, Ui_MainWindow):
 
 		writeFile.close()
 	
+
+	def startSUNSAL(self, nfindr_data, IDX):
+		'''
+		Main function for SUNSAL algorithm
+		'''
+		ss = SUNSALModule()
+		self.logs.addItem("Initiating SUNSAL algorithm")
+		newpid2 = os.fork()
+		if newpid2 == 0:
+			self.sunsal_data = ss.sunsal
+		self.sunsal_data = ss.sunsal(nfindr_data)
+		self.logs.addItem("Running SUNSAL algorithm")
+		self.sunsal_data.tofile("SUNSAL_" + self.outputfille, ",")
+		self.logs.addItem(f"Output file NFinder_{self.OUTPUT_FILENAME} generated")
+		self.setProgressBar(False)
+
+
 
 	def plot1DGraph(self, data):
 		'''

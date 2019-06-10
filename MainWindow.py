@@ -20,9 +20,11 @@ import csv
 from PCA import PrincipalComponentAnalysis
 from NMF import NonNegativeMatrixFactorisation
 from nfindr import NFindrModule
-from sunsal import SUNSALModule
+# from sunsal import SUNSALModule
 
 from Threads import ValidationThread
+from threading import Thread
+import subprocess
 from ErrorHandler import StdErrHandler
 
 import multiprocessing as mp
@@ -352,9 +354,7 @@ class Software(QMainWindow, Ui_MainWindow):
 
 			if self.currentAlgo == "PCA":
 				self.logs.addItem(f'Starting Principal Component Analysis for getting top {self.components.toPlainText()} bands')
-				newpid1 = os.fork()
-				if newpid1 == 0:
-					self.startPCA(selectedComponents)
+				self.startPCA(selectedComponents)
 
 			elif self.currentAlgo == "NMF":
 				self.logs.addItem(f'Starting NMF for getting top {self.components.toPlainText()} bands')
@@ -364,18 +364,15 @@ class Software(QMainWindow, Ui_MainWindow):
 
 			elif self.currentAlgo == "NFinder":
 				self.logs.addItem(f'Starting N-Finder for getting top {self.components.toPlainText()} bands')
-				newpid1 = os.fork()
-				if newpid1 == 0:
-					self.startNMF(selectedComponents)
-					self.startNFINDR(self.nmf_data, selectedComponents)
+				self.startNMF(selectedComponents)
+				self.startNFINDR(self.nmf_data, selectedComponents)
+				# self.startSUNSAL(self.nfindr_data, self.IDX)
 
 			elif self.currentAlgo == "SUNSAL":
 				self.logs.addItem(f'Starting SUNSAL for getting estimated abundance matrix')
-				newpid1 = os.fork()
-				if newpid1 == 0:
-					self.startNMF(selectedComponents)
-					self.startNFINDR(self.nmf_data, selectedComponents)
-					self.startSUNSAL(self.nfindr_data, self.IDX)
+				self.startNMF(selectedComponents)
+				self.startNFINDR(self.nmf_data, selectedComponents)
+				self.startSUNSAL(self.nfindr_data, self.IDX)
 	
 		self.progress.setRange(0,1)
 		
@@ -443,36 +440,48 @@ class Software(QMainWindow, Ui_MainWindow):
 		Main function for PCA
 		'''
 
+		# t1 = Thread(target=PCAThread2)
 		self.datasetAsArray = self.dataset.ReadAsArray()
 		pca = PrincipalComponentAnalysis(self.datasetAsArray)
 		pca.scaleData()
+
+		# t1.start()
 		self.pca_data = pca.getPrincipalComponents_noOfComponents((int)(self.components.toPlainText()))
 		retainedVariance = pca.getRetainedVariance((int)(self.components.toPlainText()))
+		
 		self.logs.addItem("Analysis completed")
-		self.logs.addItem(f'Retained Variance: {retainedVariance}')
 		self.logs.addItem("Generating Output file")
-		self.writeData("PCA_", self.pca_data)
+		
+		# t1.join()
 		self.logs.addItem(f"Output file PCA_{self.OUTPUT_FILENAME} generated")
+		self.logs.addItem(f'Retained Variance: {retainedVariance}')
 		self.setProgressBar(False)
 		
 		''' To plot the points after PCA '''
 		if (int)(selectedComponents) == 1:
-			newpid2 = os.fork()
-			if newpid2 == 0:
+			newpid = os.fork()
+			if newpid == 0:
 				self.plot1DGraph(self.pca_data)
 
 		elif (int)(selectedComponents) == 2:
-			newpid2 = os.fork()
-			if newpid2 == 0:
+			newpid = os.fork()
+			if newpid == 0:
 				self.plot2DGraph(self.pca_data)
 
 		elif (int)(selectedComponents) == 3:
-			newpid2 = os.fork()
-			if newpid2 == 0:
+			newpid = os.fork()
+			if newpid == 0:
 				self.plot3DGraph(self.pca_data)
 
 		else:
 			self.logs.addItem('Due to high dimentionality, graph could not be plotted')
+
+	# def PCAThread2():
+	# 	subprocess.call()
+	# 	self.pca_data = pca.getPrincipalComponents_noOfComponents((int)(self.components.toPlainText()))
+	# 	self.retainedVariance = pca.getRetainedVariance((int)(self.components.toPlainText()))
+	# 	self.writeData("PCA_", self.pca_data)
+
 
 
 	def startNMF(self,selectedComponents):
@@ -520,7 +529,7 @@ class Software(QMainWindow, Ui_MainWindow):
 
 		self.datasetAsArray = self.dataset.ReadAsArray()
 		nfindr = NFindrModule()
-		self.nfindr_data, Et, IDX, n_iterations = nfindr.NFINDR(nmf_data, (int)(selectedComponents))
+		self.nfindr_data, Et, self.IDX, n_iterations = nfindr.NFINDR(nmf_data, (int)(selectedComponents))
 		self.logs.addItem("Analysis completed")
 		self.logs.addItem(f'Number of iterations: {n_iterations}')
 		self.logs.addItem("Generating Output file")
@@ -548,20 +557,17 @@ class Software(QMainWindow, Ui_MainWindow):
 		writeFile.close()
 	
 
-	def startSUNSAL(self, nfindr_data, IDX):
-		'''
-		Main function for SUNSAL algorithm
-		'''
-		ss = SUNSALModule()
-		self.logs.addItem("Initiating SUNSAL algorithm")
-		newpid2 = os.fork()
-		if newpid2 == 0:
-			self.sunsal_data = ss.sunsal
-		self.sunsal_data = ss.sunsal(nfindr_data)
-		self.logs.addItem("Running SUNSAL algorithm")
-		self.sunsal_data.tofile("SUNSAL_" + self.outputfille, ",")
-		self.logs.addItem(f"Output file NFinder_{self.OUTPUT_FILENAME} generated")
-		self.setProgressBar(False)
+	# def startSUNSAL(self, nfindr_data, IDX):
+	# 	'''
+	# 	Main function for SUNSAL algorithm
+	# 	'''
+	# 	ss = SUNSALModule()
+	# 	self.logs.addItem("Initiating SUNSAL algorithm")
+	# 	self.sunsal_data = ss.SUNSAL(IDX)
+	# 	self.logs.addItem("Running SUNSAL algorithm")
+	# 	self.sunsal_data.tofile("SUNSAL_" + self.outputfille, ",")
+	# 	self.logs.addItem(f"Output file NFinder_{self.OUTPUT_FILENAME} generated")
+	# 	self.setProgressBar(False)
 
 
 

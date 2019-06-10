@@ -15,6 +15,7 @@ from osgeo import gdal
 
 import numpy as np
 from numpy import genfromtxt
+import csv
 
 from PCA import PrincipalComponentAnalysis
 from NMF import NonNegativeMatrixFactorisation
@@ -436,7 +437,7 @@ class Software(QMainWindow, Ui_MainWindow):
 		self.logs.addItem("Analysis completed")
 		self.logs.addItem(f'Retained Variance: {retainedVariance}')
 		self.logs.addItem("Generating Output file")
-		self.pca_data.tofile("PCA_" + self.OUTPUT_FILENAME, ",")
+		self.writeData("PCA_", self.pca_data)
 		self.logs.addItem(f"Output file PCA_{self.OUTPUT_FILENAME} generated")
 		self.setProgressBar(False)
 		
@@ -474,7 +475,7 @@ class Software(QMainWindow, Ui_MainWindow):
 		self.logs.addItem(f'RMS Error: {error}')
 		self.logs.addItem("Generating Output file")
 		self.nmf_data = nmf.denormalizeData(self.nmf_data)
-		self.nmf_data.tofile("NMF_" + self.OUTPUT_FILENAME, ",")
+		self.writeData("NMF_", self.nmf_data)
 		self.logs.addItem(f"Output file NMF_{self.OUTPUT_FILENAME} generated")
 		self.setProgressBar(False)
 		
@@ -505,13 +506,32 @@ class Software(QMainWindow, Ui_MainWindow):
 
 		self.datasetAsArray = self.dataset.ReadAsArray()
 		nfindr = NFindrModule()
-		nfindr_data, Et, IDX, n_iterations = nfindr.NFINDR(nmf_data, (int)(selectedComponents))
+		self.nfindr_data, Et, IDX, n_iterations = nfindr.NFINDR(nmf_data, (int)(selectedComponents))
 		self.logs.addItem("Analysis completed")
 		self.logs.addItem(f'Number of iterations: {n_iterations}')
 		self.logs.addItem("Generating Output file")
-		nfindr_data.tofile("NFinder_" + self.OUTPUT_FILENAME, ",")
+		self.writeData("NFinder_", self.nfindr_data)
 		self.logs.addItem(f"Output file NFinder_{self.OUTPUT_FILENAME} generated")
 		self.setProgressBar(False)
+
+
+	def writeData(self, prefix, data):
+		'''
+		Writes data into a file in CSV (Comma Seperated Value) format
+		'''
+
+		with open(prefix + self.OUTPUT_FILENAME, 'w') as writeFile:
+			writer = csv.writer(writeFile)
+
+			dataList = []
+			for row in data:
+				temp = []
+				for cols in row:
+					temp.append(cols)
+				dataList.append(temp)
+			writer.writerows(dataList)
+
+		writeFile.close()
 	
 
 	def plot1DGraph(self, data):
@@ -603,8 +623,8 @@ if __name__ == "__main__":
 	window.show()
 
 	# Adding error handler
-	std_err_handler = StdErrHandler()
-	sys.stderr = std_err_handler
-	std_err_handler.err_msg.connect(window.writeError)
+	#std_err_handler = StdErrHandler()
+	#sys.stderr = std_err_handler
+	#std_err_handler.err_msg.connect(window.writeError)
 
 	sys.exit(app.exec_())

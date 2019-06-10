@@ -20,7 +20,7 @@ import csv
 from PCA import PrincipalComponentAnalysis
 from NMF import NonNegativeMatrixFactorisation
 from nfindr import NFindrModule
-# from sunsal import SUNSALModule
+from sunsal import SUNSALModule
 
 from Threads import ValidationThread
 from threading import Thread
@@ -366,13 +366,13 @@ class Software(QMainWindow, Ui_MainWindow):
 				self.logs.addItem(f'Starting N-Finder for getting top {self.components.toPlainText()} bands')
 				self.startNMF(selectedComponents)
 				self.startNFINDR(self.nmf_data, selectedComponents)
-				# self.startSUNSAL(self.nfindr_data, self.IDX)
+				# self.startSUNSAL(self.nfindr_data, self.Et)
 
 			elif self.currentAlgo == "SUNSAL":
 				self.logs.addItem(f'Starting SUNSAL for getting estimated abundance matrix')
 				self.startNMF(selectedComponents)
 				self.startNFINDR(self.nmf_data, selectedComponents)
-				self.startSUNSAL(self.nfindr_data, self.IDX)
+				self.startSUNSAL(self.nfindr_data, self.Et)
 	
 		self.progress.setRange(0,1)
 		
@@ -504,18 +504,18 @@ class Software(QMainWindow, Ui_MainWindow):
 		
 		''' To plot the points after NMF '''
 		if (int)(selectedComponents) == 1:
-			newpid2 = os.fork()
-			if newpid2 == 0:
+			newpid = os.fork()
+			if newpid == 0:
 				self.plot1DGraph(self.nmf_data)
 
 		elif (int)(selectedComponents) == 2:
-			newpid2 = os.fork()
-			if newpid2 == 0:
+			newpid = os.fork()
+			if newpid == 0:
 				self.plot2DGraph(self.nmf_data)
 
 		elif (int)(selectedComponents) == 3:
-			newpid2 = os.fork()
-			if newpid2 == 0:
+			newpid = os.fork()
+			if newpid == 0:
 				self.plot3DGraph(self.nmf_data)
 
 		else:
@@ -529,7 +529,7 @@ class Software(QMainWindow, Ui_MainWindow):
 
 		self.datasetAsArray = self.dataset.ReadAsArray()
 		nfindr = NFindrModule()
-		self.nfindr_data, Et, self.IDX, n_iterations = nfindr.NFINDR(nmf_data, (int)(selectedComponents))
+		self.nfindr_data, self.Et, self.IDX, n_iterations = nfindr.NFINDR(nmf_data, (int)(selectedComponents))
 		self.logs.addItem("Analysis completed")
 		self.logs.addItem(f'Number of iterations: {n_iterations}')
 		self.logs.addItem("Generating Output file")
@@ -557,18 +557,19 @@ class Software(QMainWindow, Ui_MainWindow):
 		writeFile.close()
 	
 
-	# def startSUNSAL(self, nfindr_data, IDX):
-	# 	'''
-	# 	Main function for SUNSAL algorithm
-	# 	'''
-	# 	ss = SUNSALModule()
-	# 	self.logs.addItem("Initiating SUNSAL algorithm")
-	# 	self.sunsal_data = ss.SUNSAL(IDX)
-	# 	self.logs.addItem("Running SUNSAL algorithm")
-	# 	self.sunsal_data.tofile("SUNSAL_" + self.outputfille, ",")
-	# 	self.logs.addItem(f"Output file NFinder_{self.OUTPUT_FILENAME} generated")
-	# 	self.setProgressBar(False)
+	def startSUNSAL(self, nfindr_data, nmf_data):
+		'''
+		Main function for SUNSAL algorithm
+		'''
 
+		ss = SUNSALModule()
+		self.logs.addItem("Initiating SUNSAL algorithm")
+		self.sunsal_data, res_p, res_d, sunsal_i = ss.SUNSAL(nfindr_data, nmf_data)
+		self.logs.addItem("Running SUNSAL algorithm")
+		self.writeData("SUNSAL_", self.sunsal_data)
+		self.logs.addItem(f"Output file SUNSAL_{self.OUTPUT_FILENAME} generated")
+		self.logs.addItem(f"Number of iterations is {sunsal_i}")
+		self.setProgressBar(False)
 
 
 	def plot1DGraph(self, data):

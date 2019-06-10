@@ -26,7 +26,7 @@ import matplotlib.pyplot as plt
 
 class SUNSALModule():
 	
-	def sunsal(M,y,**kwargs):
+	def SUNSAL(self, M, y, **kwargs):
 	    """
 	    x = sunsal_v2(M,Y,**kwargs)
 	        
@@ -260,7 +260,7 @@ class SUNSALModule():
 	        if (i%10) == 1:
 	            z0 = z.copy();
 	#    % minimize with respect to z
-	        z =  soft(x-d,Lambda/mu);
+	        z = self.soft(x-d,Lambda/mu);
 	#    % teste for positivity
 	        if positivity=='yes':
 	            maskz = (z >= 0);
@@ -313,7 +313,7 @@ class SUNSALModule():
 	softthresh = lambda x,th : np.sign(x)*np.maximum(np.abs(x)-th,0)
 
 
-	def soft(x,T):
+	def soft(self,x,T):
 	#        y = soft(x,T)
 	# soft-thresholding function
 	## proximity operator for l1 norm

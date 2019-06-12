@@ -134,6 +134,7 @@ class Software(QMainWindow, Ui_MainWindow):
 
 		sunsal = QAction("SUNSAL", self)
 		lu.addAction(sunsal)
+		sunsal.triggered.connect(partial(self.changeCurrentAlgo, "SUNSAL"))
 
 		nnls = QAction("NNLS", self)
 		lu.addAction(nnls)
@@ -375,9 +376,9 @@ class Software(QMainWindow, Ui_MainWindow):
 
 			elif self.currentAlgo == "SUNSAL":
 				self.logs.addItem(f'Starting SUNSAL for getting estimated abundance matrix')
-				self.startNMF(selectedComponents)
-				self.startNFINDR(self.nmf_data, selectedComponents)
-				self.startSUNSAL(self.nfindr_data, self.Et)
+				self.startHfcVd(selectedComponents)
+				self.startNFINDR(self.pca_data, selectedComponents)
+				self.startSUNSAL(self.nfindr_data)
 
 			elif self.currentAlgo == "HfcVd":
 				self.logs.addItem(f'Starting HfcVd for getting number of end members')
@@ -547,14 +548,14 @@ class Software(QMainWindow, Ui_MainWindow):
 		self.setProgressBar(False)
 
 
-	def startSUNSAL(self, nfindr_data, nmf_data):
+	def startSUNSAL(self, nfindr_data):
 		'''
 		Main function for SUNSAL algorithm
 		'''
 
 		ss = SUNSALModule()
 		self.logs.addItem("Initiating SUNSAL algorithm")
-		self.sunsal_data, res_p, res_d, sunsal_i = ss.SUNSAL(nfindr_data, nmf_data)
+		self.sunsal_data, res_p, res_d, sunsal_i = ss.SUNSAL(np.transpose(nfindr_data), np.transpose(self.pca_data))
 		self.logs.addItem("Running SUNSAL algorithm")
 		self.writeData("SUNSAL_", self.sunsal_data)
 		self.logs.addItem(f"Output file SUNSAL_{self.OUTPUT_FILENAME} generated")

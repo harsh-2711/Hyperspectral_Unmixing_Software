@@ -24,7 +24,7 @@ from sunsal import SUNSALModule
 import vd
 
 from Modules.End_Member_Extraction import eea
-from Modules.Linear_Unmixing import sparse
+from Modules.Linear_Unmixing import sparse, LMM
 
 from Threads import ValidationThread
 from threading import Thread
@@ -143,9 +143,11 @@ class Software(QMainWindow, Ui_MainWindow):
 
 		nnls = QAction("NNLS", self)
 		lu.addAction(nnls)
+		nnls.triggered.connect(partial(self.changeCurrentAlgo, "NNLS"))
 
 		ucls = QAction("UCLS", self)
 		lu.addAction(ucls)
+		ucls.triggered.connect(partial(self.changeCurrentAlgo, "UCLS"))
 
 		fcls = QAction("FCLS", self)
 		lu.addAction(fcls)
@@ -399,6 +401,18 @@ class Software(QMainWindow, Ui_MainWindow):
 				self.startHfcVd(selectedComponents)
 				self.startNFINDR(self.pca_data)
 				self.startVCA(self.nfindr_data)
+
+			elif self.currentAlgo == "NNLS":
+				self.logs.addItem(f'Starting NNLS for getting estimated abundance matrix')
+				self.startHfcVd(selectedComponents)
+				self.startNFINDR(self.pca_data)
+				self.startNNLS(self.pca_data, self.nfindr_data)
+
+			elif self.currentAlgo == "UCLS":
+				self.logs.addItem(f'Starting UCLS for getting estimated abundance matrix')
+				self.startHfcVd(selectedComponents)
+				self.startNFINDR(self.pca_data)
+				self.startUCLS(self.pca_data, self.nfindr_data)
 	
 		self.progress.setRange(0,1)
 		
@@ -617,6 +631,33 @@ class Software(QMainWindow, Ui_MainWindow):
 		self.logs.addItem(f"Output file VCA_{self.OUTPUT_FILENAME} generated")
 		self.setProgressBar(False)
 
+
+	def startNNLS(self, pca_data, nfindr_data):
+		'''
+		Main function for NNLS algorithm
+		'''
+
+		self.logs.addItem("Initiating NNLS algorithm")
+		self.NNLS_data = LMM.NNLS(pca_data, nfindr_data)
+		self.logs.addItem("Analysis completed")
+		self.logs.addItem("Generating output file")
+		self.writeData("NNLS_", self.NNLS_data)
+		self.logs.addItem(f"Output File NNLS_{self.OUTPUT_FILENAME} generated")
+		self.setProgressBar(False)
+
+
+	def startUCLS(self, pca_data, nfindr_data):
+		'''
+		Main function for UCLS algorithm
+		'''
+
+		self.logs.addItem("Initiating UCLS algorithm")
+		self.UCLS_data = LMM.UCLS(pca_data, nfindr_data)
+		self.logs.addItem("Analysis completed")
+		self.logs.addItem("Generating output file")
+		self.writeData("UCLS_", self.UCLS_data)
+		self.logs.addItem(f"Output File UCLS_{self.OUTPUT_FILENAME} generated")
+		self.setProgressBar(False)
 
 
 	def writeData(self, prefix, data):

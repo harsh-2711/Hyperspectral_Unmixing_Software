@@ -23,6 +23,8 @@ from nfindr import NFindrModule
 from sunsal import SUNSALModule
 import vd
 
+from Modules.End_Member_Extraction import eea
+
 from Threads import ValidationThread
 from threading import Thread
 import subprocess
@@ -371,18 +373,23 @@ class Software(QMainWindow, Ui_MainWindow):
 			elif self.currentAlgo == "NFinder":
 				self.logs.addItem(f'Starting N-Finder for getting top {self.components.toPlainText()} bands')
 				self.startHfcVd(selectedComponents)
-				self.startNFINDR(self.pca_data, selectedComponents)
+				self.startNFINDR(self.pca_data)
 				# self.startSUNSAL(self.nfindr_data, self.Et)
 
 			elif self.currentAlgo == "SUNSAL":
 				self.logs.addItem(f'Starting SUNSAL for getting estimated abundance matrix')
 				self.startHfcVd(selectedComponents)
-				self.startNFINDR(self.pca_data, selectedComponents)
+				self.startNFINDR(self.pca_data)
 				self.startSUNSAL(self.nfindr_data)
 
 			elif self.currentAlgo == "HfcVd":
 				self.logs.addItem(f'Starting HfcVd for getting number of end members')
 				self.startHfcVd(selectedComponents)
+
+			elif self.currentAlgo == "ATGP":
+				self.logs.addItem(f'Starting ATGP for getting Endmember abundances')
+				self.startHfcVd(selectedComponents)
+				self.startATGP(self.pca_data)
 	
 		self.progress.setRange(0,1)
 		
@@ -532,7 +539,20 @@ class Software(QMainWindow, Ui_MainWindow):
 			self.logs.addItem('Due to high dimentionality, graph could not be plotted')
 
 
-	def startNFINDR(self, pca_data, selectedComponents):
+	def startATGP(self, pca_data):
+		'''
+		Main function to run ATGP
+		'''
+		self.logs.addItem("Initiating ATGP algorithm")
+		self.ATGP_data, IDX = eea.ATGP(np.transpose(pca_data), self.end_member_list[2])
+		self.logs.addItem("Analysis completed")
+		self.logs.addItem("Generating output file")
+		self.writeData("ATGP_", self.ATGP_data)
+		self.logs.addItem(f"Output File ATGP_{self.OUTPUT_FILENAME} generated")
+		self.setProgressBar(False)
+
+
+	def startNFINDR(self, pca_data):
 		'''
 		Main function for N-Finder algorithm
 		'''
@@ -688,4 +708,4 @@ if __name__ == "__main__":
 	#sys.stderr = std_err_handler
 	#std_err_handler.err_msg.connect(window.writeError)
 
-	sys.exit(app.exec_())
+sys.exit(app.exec_())

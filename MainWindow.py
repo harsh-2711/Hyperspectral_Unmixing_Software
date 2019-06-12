@@ -21,6 +21,7 @@ from PCA import PrincipalComponentAnalysis
 from NMF import NonNegativeMatrixFactorisation
 from nfindr import NFindrModule
 from sunsal import SUNSALModule
+import vd
 
 from Threads import ValidationThread
 from threading import Thread
@@ -96,6 +97,19 @@ class Software(QMainWindow, Ui_MainWindow):
 		lle = QAction("LLE", self)
 		dimReduction.addAction(lle)
 
+		# Material Count
+		mc = menubar.addMenu("Material Count")
+
+		virDim = QAction("Virtual Dimension", self)
+		mc.addAction(virDim)
+
+		hysime = QAction("Hysime", self)
+		mc.addAction(hysime)
+
+		hfcvd = QAction("HfcVd", self)
+		mc.addAction(hfcvd)
+		hfcvd.triggered.connect(partial(self.changeCurrentAlgo, "HfcVd"))
+
 		# End Member Extraction
 		eme = menubar.addMenu("End Member Extraction")
 
@@ -114,15 +128,6 @@ class Software(QMainWindow, Ui_MainWindow):
 
 		vca = QAction("VCA", self)
 		eme.addAction(vca)
-
-		# Material Count
-		mc = menubar.addMenu("Material Count")
-
-		virDim = QAction("Virtual Dimension", self)
-		mc.addAction(virDim)
-
-		hysime = QAction("Hysime", self)
-		mc.addAction(hysime)
 
 		# Linear Unmixing
 		lu = menubar.addMenu("Linear Unmixing")
@@ -373,6 +378,10 @@ class Software(QMainWindow, Ui_MainWindow):
 				self.startNMF(selectedComponents)
 				self.startNFINDR(self.nmf_data, selectedComponents)
 				self.startSUNSAL(self.nfindr_data, self.Et)
+
+			elif self.currentAlgo == "HfcVd":
+				self.logs.addItem(f'Starting HfcVd for getting number of end members')
+				self.startHfcVd(selectedComponents)
 	
 		self.progress.setRange(0,1)
 		
@@ -538,6 +547,34 @@ class Software(QMainWindow, Ui_MainWindow):
 		self.setProgressBar(False)
 
 
+	def startSUNSAL(self, nfindr_data, nmf_data):
+		'''
+		Main function for SUNSAL algorithm
+		'''
+
+		ss = SUNSALModule()
+		self.logs.addItem("Initiating SUNSAL algorithm")
+		self.sunsal_data, res_p, res_d, sunsal_i = ss.SUNSAL(nfindr_data, nmf_data)
+		self.logs.addItem("Running SUNSAL algorithm")
+		self.writeData("SUNSAL_", self.sunsal_data)
+		self.logs.addItem(f"Output file SUNSAL_{self.OUTPUT_FILENAME} generated")
+		self.logs.addItem(f"Number of iterations is {sunsal_i}")
+		self.setProgressBar(False)
+
+
+	def startHfcVd(self, selectedComponents):
+		'''
+		Main function for HfcVd algorithm
+		'''
+
+		self.startPCA(selectedComponents)
+		self.logs.addItem("Initiating HfcVd algorithm")
+		self.end_member_list = vd.HfcVd(self.pca_data)
+		self.logs.addItem("Running SUNSAL algorithm")
+		self.logs.addItem(f"Number of end member(s) found is/are {self.end_member_list[2]}")
+		self.setProgressBar(False)
+
+
 	def writeData(self, prefix, data):
 		'''
 		Writes data into a file in CSV (Comma Seperated Value) format
@@ -555,21 +592,6 @@ class Software(QMainWindow, Ui_MainWindow):
 			writer.writerows(dataList)
 
 		writeFile.close()
-	
-
-	def startSUNSAL(self, nfindr_data, nmf_data):
-		'''
-		Main function for SUNSAL algorithm
-		'''
-
-		ss = SUNSALModule()
-		self.logs.addItem("Initiating SUNSAL algorithm")
-		self.sunsal_data, res_p, res_d, sunsal_i = ss.SUNSAL(nfindr_data, nmf_data)
-		self.logs.addItem("Running SUNSAL algorithm")
-		self.writeData("SUNSAL_", self.sunsal_data)
-		self.logs.addItem(f"Output file SUNSAL_{self.OUTPUT_FILENAME} generated")
-		self.logs.addItem(f"Number of iterations is {sunsal_i}")
-		self.setProgressBar(False)
 
 
 	def plot1DGraph(self, data):

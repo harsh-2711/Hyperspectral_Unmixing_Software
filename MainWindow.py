@@ -24,6 +24,7 @@ from sunsal import SUNSALModule
 import vd
 
 from Modules.End_Member_Extraction import eea
+from Modules.Linear_Unmixing import sparse
 
 from Threads import ValidationThread
 from threading import Thread
@@ -129,15 +130,16 @@ class Software(QMainWindow, Ui_MainWindow):
 		sisal = QAction("SISAL", self)
 		eme.addAction(sisal)
 
-		vca = QAction("VCA", self)
-		eme.addAction(vca)
-
 		# Linear Unmixing
 		lu = menubar.addMenu("Linear Unmixing")
 
 		sunsal = QAction("SUNSAL", self)
 		lu.addAction(sunsal)
 		sunsal.triggered.connect(partial(self.changeCurrentAlgo, "SUNSAL"))
+
+		vca = QAction("VCA", self)
+		lu.addAction(vca)
+		vca.triggered.connect(partial(self.changeCurrentAlgo, "VCA"))
 
 		nnls = QAction("NNLS", self)
 		lu.addAction(nnls)
@@ -391,6 +393,12 @@ class Software(QMainWindow, Ui_MainWindow):
 				self.logs.addItem(f'Starting ATGP for getting Endmember abundances')
 				self.startHfcVd(selectedComponents)
 				self.startATGP(self.pca_data)
+
+			elif self.currentAlgo == "VCA":
+				self.logs.addItem(f'Starting VCA for getting estimated endmembers signature matrix')
+				self.startHfcVd(selectedComponents)
+				self.startNFINDR(self.pca_data)
+				self.startVCA(self.nfindr_data)
 	
 		self.progress.setRange(0,1)
 		
@@ -560,7 +568,7 @@ class Software(QMainWindow, Ui_MainWindow):
 
 		self.datasetAsArray = self.dataset.ReadAsArray()
 		nfindr = NFindrModule()
-		self.nfindr_data, self.Et, self.IDX, n_iterations = nfindr.NFINDR(pca_data, self.end_member_list[2])
+		self.nfindr_data, Et, IDX, n_iterations = nfindr.NFINDR(pca_data, self.end_member_list[2])
 		self.logs.addItem("Analysis completed")
 		self.logs.addItem(f'Number of iterations: {n_iterations}')
 		self.logs.addItem("Generating Output file")
@@ -580,7 +588,7 @@ class Software(QMainWindow, Ui_MainWindow):
 		self.logs.addItem("Running SUNSAL algorithm")
 		self.writeData("SUNSAL_", self.sunsal_data)
 		self.logs.addItem(f"Output file SUNSAL_{self.OUTPUT_FILENAME} generated")
-		self.logs.addItem(f"Number of iterations is {sunsal_i}")
+		self.logs.addItem(f"Number of iterations are {sunsal_i}")
 		self.setProgressBar(False)
 
 
@@ -595,6 +603,20 @@ class Software(QMainWindow, Ui_MainWindow):
 		self.logs.addItem("Running SUNSAL algorithm")
 		self.logs.addItem(f"Number of end member(s) found is/are {self.end_member_list[2]}")
 		self.setProgressBar(False)
+
+
+	def startVCA(self, nfindr_data):
+		'''
+		Main function for VCA algorithm
+		'''
+
+		self.logs.addItem("Initiating VCA algorithm")
+		self.vca_data, IDX, proj_data = sparse.vca(nfindr_data, self.end_member_list[2])
+		self.logs.addItem("Running VCA algorithm")
+		self.writeData("VCA_", self.vca_data)
+		self.logs.addItem(f"Output file VCA_{self.OUTPUT_FILENAME} generated")
+		self.setProgressBar(False)
+
 
 
 	def writeData(self, prefix, data):

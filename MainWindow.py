@@ -369,8 +369,8 @@ class Software(QMainWindow, Ui_MainWindow):
 
 			elif self.currentAlgo == "NFinder":
 				self.logs.addItem(f'Starting N-Finder for getting top {self.components.toPlainText()} bands')
-				self.startNMF(selectedComponents)
-				self.startNFINDR(self.nmf_data, selectedComponents)
+				self.startHfcVd(selectedComponents)
+				self.startNFINDR(self.pca_data, selectedComponents)
 				# self.startSUNSAL(self.nfindr_data, self.Et)
 
 			elif self.currentAlgo == "SUNSAL":
@@ -531,14 +531,14 @@ class Software(QMainWindow, Ui_MainWindow):
 			self.logs.addItem('Due to high dimentionality, graph could not be plotted')
 
 
-	def startNFINDR(self, nmf_data, selectedComponents):
+	def startNFINDR(self, pca_data, selectedComponents):
 		'''
 		Main function for N-Finder algorithm
 		'''
 
 		self.datasetAsArray = self.dataset.ReadAsArray()
 		nfindr = NFindrModule()
-		self.nfindr_data, self.Et, self.IDX, n_iterations = nfindr.NFINDR(nmf_data, (int)(selectedComponents))
+		self.nfindr_data, self.Et, self.IDX, n_iterations = nfindr.NFINDR(pca_data, self.end_member_list[2])
 		self.logs.addItem("Analysis completed")
 		self.logs.addItem(f'Number of iterations: {n_iterations}')
 		self.logs.addItem("Generating Output file")

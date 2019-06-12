@@ -151,6 +151,7 @@ class Software(QMainWindow, Ui_MainWindow):
 
 		fcls = QAction("FCLS", self)
 		lu.addAction(fcls)
+		fcls.triggered.connect(partial(self.changeCurrentAlgo, "FCLS"))
 
 		# Non-linear Unmixing
 		nlu = menubar.addMenu("Non Linear Unmixing")
@@ -413,6 +414,12 @@ class Software(QMainWindow, Ui_MainWindow):
 				self.startHfcVd(selectedComponents)
 				self.startNFINDR(self.pca_data)
 				self.startUCLS(self.pca_data, self.nfindr_data)
+
+			elif self.currentAlgo == "FCLS":
+				self.logs.addItem(f'Starting FCLS for getting estimated abundance matrix')
+				self.startHfcVd(selectedComponents)
+				self.startNFINDR(self.pca_data)
+				self.startFCLS(self.pca_data, self.nfindr_data)
 	
 		self.progress.setRange(0,1)
 		
@@ -657,6 +664,20 @@ class Software(QMainWindow, Ui_MainWindow):
 		self.logs.addItem("Generating output file")
 		self.writeData("UCLS_", self.UCLS_data)
 		self.logs.addItem(f"Output File UCLS_{self.OUTPUT_FILENAME} generated")
+		self.setProgressBar(False)
+
+
+	def startFCLS(self, pca_data, nfindr_data):
+		'''
+		Main function for FCLS algorithm
+		'''
+
+		self.logs.addItem("Initiating FCLS algorithm")
+		self.UCLS_data = LMM.FCLS(pca_data, nfindr_data)
+		self.logs.addItem("Analysis completed")
+		self.logs.addItem("Generating output file")
+		self.writeData("FCLS_", self.UCLS_data)
+		self.logs.addItem(f"Output File FCLS_{self.OUTPUT_FILENAME} generated")
 		self.setProgressBar(False)
 
 

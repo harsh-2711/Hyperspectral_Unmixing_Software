@@ -121,6 +121,7 @@ class Software(QMainWindow, Ui_MainWindow):
 
 		atgp = QAction("ATGP", self)
 		eme.addAction(atgp)
+		atgp.triggered.connect(partial(self.changeCurrentAlgo, "ATGP"))
 
 		ppi = QAction("PPI", self)
 		eme.addAction(ppi)

@@ -17,7 +17,7 @@ import numpy as np
 from numpy import genfromtxt
 import csv
 
-from PCA import PrincipalComponentAnalysis
+from PCA import PrincipalComponentAnalysis, KernelPCAAlgorithm
 from NMF import NonNegativeMatrixFactorisation
 from nfindr import NFindrModule
 from sunsal import SUNSALModule
@@ -93,6 +93,7 @@ class Software(QMainWindow, Ui_MainWindow):
 
 		kerPCA = QAction("Kernel PCA", self)
 		dimReduction.addAction(kerPCA)
+		kerPCA.triggered.connect(partial(self.changeCurrentAlgo, "KerPCA"))
 
 		fda = QAction("FDA", self)
 		dimReduction.addAction(fda) 
@@ -422,6 +423,10 @@ class Software(QMainWindow, Ui_MainWindow):
 				self.startHfcVd(selectedComponents)
 				self.startNFINDR(self.pca_data)
 				self.startFCLS(self.pca_data, self.nfindr_data)
+
+			elif self.currentAlgo == "KerPCA":
+				self.logs.addItem(f'Starting Kernel Principal Component Analysis for getting top {self.components.toPlainText()} bands')
+				self.startKerPCA(selectedComponents)
 	
 		self.progress.setRange(0,1)
 		
@@ -500,7 +505,7 @@ class Software(QMainWindow, Ui_MainWindow):
 		
 		self.logs.addItem("Analysis completed")
 		self.logs.addItem("Generating Output file")
-		
+		self.writeData("PCA_", self.pca_data)
 		# t1.join()
 		self.logs.addItem(f"Output file PCA_{self.OUTPUT_FILENAME} generated")
 		self.logs.addItem(f'Retained Variance: {retainedVariance}')
@@ -530,6 +535,43 @@ class Software(QMainWindow, Ui_MainWindow):
 	# 	self.pca_data = pca.getPrincipalComponents_noOfComponents((int)(self.components.toPlainText()))
 	# 	self.retainedVariance = pca.getRetainedVariance((int)(self.components.toPlainText()))
 	# 	self.writeData("PCA_", self.pca_data)
+
+
+	def startKerPCA(self, selectedComponents):
+		'''
+		Main function for Kernel PCA
+		'''
+
+		self.datasetAsArray = self.dataset.ReadAsArray()
+		kernelpca = KernelPCAAlgorithm(self.datasetAsArray, (int)(self.jobs.toPlainText()))
+		kernelpca.scaleData()
+
+		self.ker_pca_data = kernelpca.getPrincipalComponents_noOfComponents((int)(self.components.toPlainText()))
+		
+		self.logs.addItem("Analysis completed")
+		self.logs.addItem("Generating Output file")
+		self.writeData("KernelPCA_", self.ker_pca_data)
+		self.logs.addItem(f"Output file KernelPCA_{self.OUTPUT_FILENAME} generated")
+		self.setProgressBar(False)
+		
+		''' To plot the points after PCA '''
+		if (int)(selectedComponents) == 1:
+			newpid = os.fork()
+			if newpid == 0:
+				self.plot1DGraph(self.ker_pca_data)
+
+		elif (int)(selectedComponents) == 2:
+			newpid = os.fork()
+			if newpid == 0:
+				self.plot2DGraph(self.ker_pca_data)
+
+		elif (int)(selectedComponents) == 3:
+			newpid = os.fork()
+			if newpid == 0:
+				self.plot3DGraph(self.ker_pca_data)
+
+		else:
+			self.logs.addItem('Due to high dimentionality, graph could not be plotted')
 
 
 

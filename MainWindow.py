@@ -17,7 +17,7 @@ import numpy as np
 from numpy import genfromtxt
 import csv
 
-from PCA import PrincipalComponentAnalysis, KernelPCAAlgorithm
+from DimensionalityReduction import PrincipalComponentAnalysis, KernelPCAAlgorithm, LLE
 from NMF import NonNegativeMatrixFactorisation
 from nfindr import NFindrModule
 from sunsal import SUNSALModule
@@ -95,11 +95,12 @@ class Software(QMainWindow, Ui_MainWindow):
 		dimReduction.addAction(kerPCA)
 		kerPCA.triggered.connect(partial(self.changeCurrentAlgo, "KerPCA"))
 
-		fda = QAction("FDA", self)
-		dimReduction.addAction(fda) 
+		lda = QAction("FDA", self)
+		dimReduction.addAction(lda) 
 
 		lle = QAction("LLE", self)
 		dimReduction.addAction(lle)
+		lle.triggered.connect(partial(self.changeCurrentAlgo, "LLE"))
 
 		# Material Count
 		mc = menubar.addMenu("Material Count")
@@ -427,6 +428,10 @@ class Software(QMainWindow, Ui_MainWindow):
 			elif self.currentAlgo == "KerPCA":
 				self.logs.addItem(f'Starting Kernel Principal Component Analysis for getting top {self.components.toPlainText()} bands')
 				self.startKerPCA(selectedComponents)
+
+			elif self.currentAlgo == "LLE":
+				self.logs.addItem(f'Starting Locally Linear Embedding algorithm for getting top {self.components.toPlainText()} bands')
+				self.startLLE(selectedComponents)
 	
 		self.progress.setRange(0,1)
 		
@@ -554,7 +559,7 @@ class Software(QMainWindow, Ui_MainWindow):
 		self.logs.addItem(f"Output file KernelPCA_{self.OUTPUT_FILENAME} generated")
 		self.setProgressBar(False)
 		
-		''' To plot the points after PCA '''
+		''' To plot the points after Kernel PCA '''
 		if (int)(selectedComponents) == 1:
 			newpid = os.fork()
 			if newpid == 0:
@@ -569,6 +574,43 @@ class Software(QMainWindow, Ui_MainWindow):
 			newpid = os.fork()
 			if newpid == 0:
 				self.plot3DGraph(self.ker_pca_data)
+
+		else:
+			self.logs.addItem('Due to high dimentionality, graph could not be plotted')
+
+
+	def startLLE(self, selectedComponents):
+		'''
+		Main function for LLE
+		'''
+
+		self.datasetAsArray = self.dataset.ReadAsArray()
+		lleAlgo = LLE(self.datasetAsArray, (int)(self.jobs.toPlainText()))
+		lleAlgo.scaleData()
+
+		self.lle_data = lleAlgo.getPrincipalComponents_noOfComponents((int)(self.components.toPlainText()))
+		
+		self.logs.addItem("Analysis completed")
+		self.logs.addItem("Generating Output file")
+		self.writeData("LLE_", self.lle_data)
+		self.logs.addItem(f"Output file LLE_{self.OUTPUT_FILENAME} generated")
+		self.setProgressBar(False)
+		
+		''' To plot the points after LDA '''
+		if (int)(selectedComponents) == 1:
+			newpid = os.fork()
+			if newpid == 0:
+				self.plot1DGraph(self.lle_data)
+
+		elif (int)(selectedComponents) == 2:
+			newpid = os.fork()
+			if newpid == 0:
+				self.plot2DGraph(self.lle_data)
+
+		elif (int)(selectedComponents) == 3:
+			newpid = os.fork()
+			if newpid == 0:
+				self.plot3DGraph(self.lle_data)
 
 		else:
 			self.logs.addItem('Due to high dimentionality, graph could not be plotted')

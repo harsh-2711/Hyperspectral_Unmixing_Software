@@ -22,7 +22,6 @@ from NMF import NonNegativeMatrixFactorisation
 from nfindr import NFindrModule
 from sunsal import SUNSALModule
 import vd
-from Modules.Material_Count import vd_int
 
 from Modules.End_Member_Extraction import eea
 from Modules.Linear_Unmixing import sparse, LMM
@@ -111,7 +110,6 @@ class Software(QMainWindow, Ui_MainWindow):
 
 		hysime = QAction("Hysime", self)
 		mc.addAction(hysime)
-		hysime.triggered.connect(partial(self.changeCurrentAlgo, "Hysime"))
 
 		hfcvd = QAction("HfcVd", self)
 		mc.addAction(hfcvd)
@@ -403,6 +401,11 @@ class Software(QMainWindow, Ui_MainWindow):
 				self.startHfcVd(selectedComponents)
 				self.startATGP(self.pca_data)
 
+			elif self.currentAlgo == "PPI":
+				self.logs.addItem(f'Starting PPI for getting Endmember Extraction')
+				self.startHfcVd(selectedComponents)
+				self.startPPI(self.pca_data)
+
 			elif self.currentAlgo == "VCA":
 				self.logs.addItem(f'Starting VCA for getting estimated endmembers signature matrix')
 				self.startHfcVd(selectedComponents)
@@ -434,18 +437,7 @@ class Software(QMainWindow, Ui_MainWindow):
 			elif self.currentAlgo == "LLE":
 				self.logs.addItem(f'Starting Locally Linear Embedding algorithm for getting top {self.components.toPlainText()} bands')
 				self.startLLE(selectedComponents)
-
-			elif self.currentAlgo == "PPI":
-				self.logs.addItem(f'Starting Pixel Purity-based Algorithm for endmember extraction')
-				self.startHfcVd(selectedComponents)
-				self.startPPI(self.pca_data)
-
-			elif self.currentAlgo == "Hysime":
-				self.logs.addItem(f'Starting Hysime Algorithm for endmember extraction')
-				self.startPCA(selectedComponents)
-				self.startHysime(self.pca_data)
-
-
+	
 		self.progress.setRange(0,1)
 		
 
@@ -751,19 +743,6 @@ class Software(QMainWindow, Ui_MainWindow):
 		self.setProgressBar(False)
 
 
-	def startHysime(self, pca_data):
-		'''
-		Main function for PPI algorithm
-		'''
-
-		self.logs.addItem("Initiating Hysime algorithm")
-		HYSIME = Hysime()
-		self.hysime_data, Ek = HYSIME.count(np.transpose(pca_data))
-		self.logs.addItem("Running Hysime algorithm")
-		self.writeData("Hysime_", self.hysime_data)
-		self.logs.addItem(f"Output file Hysime_{self.OUTPUT_FILENAME} generated")
-		self.setProgressBar(False)
-
 
 	def startNNLS(self, pca_data, nfindr_data):
 		'''
@@ -906,9 +885,6 @@ class Software(QMainWindow, Ui_MainWindow):
 		'''
 
 		self.logs.addItem(err_msg)
-
-class DimensionalityReduction(Qt):
-
 
 
 if __name__ == "__main__":

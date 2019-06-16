@@ -22,6 +22,7 @@ from NMF import NonNegativeMatrixFactorisation
 from nfindr import NFindrModule
 from sunsal import SUNSALModule
 import vd
+from Modules.Material_Count import vd_int
 
 from Modules.End_Member_Extraction import eea
 from Modules.Linear_Unmixing import sparse, LMM
@@ -437,7 +438,13 @@ class Software(QMainWindow, Ui_MainWindow):
 				self.logs.addItem(f'Starting Pixel Purity-based Algorithm for endmember extraction')
 				self.startHfcVd(selectedComponents)
 				self.startPPI(self.pca_data)
-	
+
+			elif self.currentAlgo == "Hysime":
+				self.logs.addItem(f'Starting Hysime Algorithm for endmember extraction')
+				self.startPCA(selectedComponents)
+				self.startHysime(self.pca_data)
+
+
 		self.progress.setRange(0,1)
 		
 
@@ -740,6 +747,20 @@ class Software(QMainWindow, Ui_MainWindow):
 		self.logs.addItem("Running PPI algorithm")
 		self.writeData("PPI_", self.ppi_data)
 		self.logs.addItem(f"Output file PPI_{self.OUTPUT_FILENAME} generated")
+		self.setProgressBar(False)
+
+
+	def startHysime(self, pca_data):
+		'''
+		Main function for PPI algorithm
+		'''
+
+		self.logs.addItem("Initiating Hysime algorithm")
+		HYSIME = Hysime()
+		self.hysime_data, Ek = HYSIME.count(np.transpose(pca_data))
+		self.logs.addItem("Running Hysime algorithm")
+		self.writeData("Hysime_", self.hysime_data)
+		self.logs.addItem(f"Output file Hysime_{self.OUTPUT_FILENAME} generated")
 		self.setProgressBar(False)
 
 

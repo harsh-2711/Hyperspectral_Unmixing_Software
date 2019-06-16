@@ -197,7 +197,7 @@ def FIPPI(M, q=None, far=None, maxit=None):
     return E, idx
 
 
-def PPI(M, q, numSkewers, ini_skewers=None):
+def PPI(M, q, numSkewers=10000, ini_skewers=None):
     """
     Performs the pixel purity index algorithm for endmember finding.
 

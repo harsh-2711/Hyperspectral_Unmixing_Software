@@ -432,6 +432,11 @@ class Software(QMainWindow, Ui_MainWindow):
 			elif self.currentAlgo == "LLE":
 				self.logs.addItem(f'Starting Locally Linear Embedding algorithm for getting top {self.components.toPlainText()} bands')
 				self.startLLE(selectedComponents)
+
+			elif self.currentAlgo == "PPI":
+				self.logs.addItem(f'Starting Pixel Purity-based Algorithm for endmember extraction')
+				self.startHfcVd(selectedComponents)
+				self.startPPI(self.pca_data)
 	
 		self.progress.setRange(0,1)
 		
@@ -725,6 +730,19 @@ class Software(QMainWindow, Ui_MainWindow):
 		self.setProgressBar(False)
 
 
+	def startPPI(self, pca_data):
+		'''
+		Main function for PPI algorithm
+		'''
+
+		self.logs.addItem("Initiating PPI algorithm")
+		self.ppi_data, IDX = eea.PPI(np.transpose(pca_data), self.end_member_list[2])
+		self.logs.addItem("Running PPI algorithm")
+		self.writeData("PPI_", self.ppi_data)
+		self.logs.addItem(f"Output file PPI_{self.OUTPUT_FILENAME} generated")
+		self.setProgressBar(False)
+
+
 	def startNNLS(self, pca_data, nfindr_data):
 		'''
 		Main function for NNLS algorithm
@@ -866,6 +884,9 @@ class Software(QMainWindow, Ui_MainWindow):
 		'''
 
 		self.logs.addItem(err_msg)
+
+class DimensionalityReduction(Qt):
+
 
 
 if __name__ == "__main__":

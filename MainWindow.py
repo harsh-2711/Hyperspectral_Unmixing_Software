@@ -111,6 +111,7 @@ class Software(QMainWindow, Ui_MainWindow):
 
 		hysime = QAction("Hysime", self)
 		mc.addAction(hysime)
+		hysime.triggered.connect(partial(self.changeCurrentAlgo, "Hysime"))
 
 		hfcvd = QAction("HfcVd", self)
 		mc.addAction(hfcvd)

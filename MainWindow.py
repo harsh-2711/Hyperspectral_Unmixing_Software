@@ -25,6 +25,7 @@ import vd
 
 from Modules.End_Member_Extraction import eea
 from Modules.Linear_Unmixing import sparse, LMM
+from Modules.Non_Linear_Unmixing import GBM_semiNMF
 
 from Threads import ValidationThread
 from threading import Thread
@@ -162,9 +163,11 @@ class Software(QMainWindow, Ui_MainWindow):
 
 		gbmNMF = QAction("GBM using semi-NMF", self)
 		nlu.addAction(gbmNMF)
+		gbmNMF.triggered.connect(partial(self.changeCurrentAlgo, "GBM using semi-NMF"))
 
 		gbmGrad = QAction("GBM using gradient", self)
 		nlu.addAction(gbmGrad)
+		gbmGrad.triggered.connect(partial(self.changeCurrentAlgo, "GBM using gradient"))
 
 		mulLin = QAction("Multi-Linear", self)
 		nlu.addAction(mulLin)
@@ -437,6 +440,13 @@ class Software(QMainWindow, Ui_MainWindow):
 			elif self.currentAlgo == "LLE":
 				self.logs.addItem(f'Starting Locally Linear Embedding algorithm for getting top {self.components.toPlainText()} bands')
 				self.startLLE(selectedComponents)
+
+			elif self.currentAlgo == "GBM using semi-NMF":
+				self.logs.addItem(f'Starting Generalized Bilinear Model for Non-Linear Unmixing')
+				self.startHfcVd(selectedComponents)
+				self.startNFINDR(self.pca_data)
+				self.startGBMsemiNMF(self.pca_data, self.nfindr_data)
+
 	
 		self.progress.setRange(0,1)
 		
@@ -783,6 +793,21 @@ class Software(QMainWindow, Ui_MainWindow):
 		self.logs.addItem("Generating output file")
 		self.writeData("FCLS_", self.UCLS_data)
 		self.logs.addItem(f"Output File FCLS_{self.OUTPUT_FILENAME} generated")
+		self.setProgressBar(False)
+
+
+	def startGBMsemiNMF(self, pca_data, nfindr_data):
+		'''
+		Main function to run GBM using semi NMF
+		'''
+
+		self.logs.addItem("Initiating GBM using semiNMF algorithm")
+		self.GBMsemiNMF_data, rmse = GBM_semiNMF.GBM_semiNMF(np.transpose(pca_data), np.transpose(nfindr_data))
+		self.logs.addItem("Analysis completed")
+		self.logs.addItem(f"RMS Error: {rmse}")
+		self.logs.addItem("Generating output file")
+		self.writeData("GBMsemiNMF_", self.GBMsemiNMF_data)
+		self.logs.addItem(f"Output File GBMsemiNMF_{self.OUTPUT_FILENAME} generated")
 		self.setProgressBar(False)
 
 

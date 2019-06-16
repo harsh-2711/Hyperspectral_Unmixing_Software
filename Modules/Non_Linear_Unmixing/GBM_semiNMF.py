@@ -6,7 +6,7 @@ Created on Wed Mar  6 11:59:44 2019
 """
 import numpy as np
 import scipy as sp
-import LMM as lmm
+from Modules.Linear_Unmixing import LMM as lmm
 
 
 def UPDATE_W(data,W,H):
@@ -60,7 +60,7 @@ def separate_positive(m):
 def separate_negative(m):
     return (np.abs(m) - m)/2.0
 
-def GBM_semiNMF(Y, E, tol=1e-6, maxiter_iter=1000,verbose='on'):
+def GBM_semiNMF(Y, E, tol=1e-6, maxiter_iter=1000,verbose='off'):
 
     ## Initializing optimization variables
     A = lmm.FCLS(Y.T, E.T).T;
@@ -107,7 +107,7 @@ def GBM_semiNMF(Y, E, tol=1e-6, maxiter_iter=1000,verbose='on'):
         cost = np.sum((Y- (np.dot(E,A)+ np.dot(M,B)))**2)
         if k > 2 and (cost0-cost)/cost < tol:
             if verbose == 'on':
-                print 'Initialization of H_hyper converged at the ', k, 'th iteration '
+                print('Initialization of H_hyper converged at the ', k, 'th iteration')
             break
         cost0 = cost
         
@@ -118,17 +118,17 @@ def GBM_semiNMF(Y, E, tol=1e-6, maxiter_iter=1000,verbose='on'):
         k = k + 1;
     
     if k == maxiter_iter:
-        print 'Maximum iteration has been reached!'
+        print ('Maximum iteration has been reached!')
     
-    RMSE_h = (cost0/(y.shape[1]*y.shape[0]))**0.5
+    RMSE_h = (cost0/(Y.shape[1]*Y.shape[0]))**0.5
     if verbose == 'on':
-        print ' RMSE = ', RMSE_h
+        print (' RMSE = ', RMSE_h)
         
         
     Y = E.dot(A) + M.dot(B);
     Results=(A,M,B,Y);
     
-    return Results
+    return Results, RMSE_h
 
 def Bilinear_endmember( E ):
     M = np.size(E,1);

@@ -164,6 +164,93 @@ class KerPCAUI(QMainWindow, Ui_MainWindow):
 
 		self.show()
 
+class NFINDRUI(QMainWindow, Ui_MainWindow):
+
+	def __init__(self):
+		super(NFINDRUI, self).__init__()
+
+
+		# Input Label
+		self.input_label = QLabel("Input", self)
+		self.input_label.move(20, 30)
+
+		# Input browse button
+		self.input_browse = QPushButton("Browse", self)
+		self.input_browse.move(550,30)
+
+		# Input text field
+		self.input_text = QTextEdit(self)
+		self.input_text.setGeometry(142,35,402,21)
+
+		# Transform Input Label
+		self.output_label = QLabel("Transform I/P", self)
+		self.output_label.move(20, 85)
+
+		# Transform Input browse button
+		self.output_browse = QPushButton("Browse", self)
+		self.output_browse.move(550,85)
+
+		# Transform Input text field
+		self.output_text = QTextEdit(self)
+		self.output_text.setGeometry(142,90,402,21)
+		self.output_text.setText(os.getcwd())
+
+
+		# Output Label
+		self.output_label = QLabel("Output", self)
+		self.output_label.move(20, 140)
+
+		# Output browse button
+		self.output_browse = QPushButton("Browse", self)
+		self.output_browse.move(550,140)
+
+		# Output text field
+		self.output_text = QTextEdit(self)
+		self.output_text.setGeometry(142,145,402,21)
+		self.output_text.setText(os.getcwd())
+
+		# No of endmembers Label
+		self.components_label = QLabel("Endmembers", self)
+		self.components_label.move(20, 200)
+
+		# Endmembers text field
+		self.components = QTextEdit(self)
+		self.components.setGeometry(140,205,45,21)
+
+		# Max iterations Label
+		self.jobs_label = QLabel("Max iterations", self)
+		self.jobs_label.move(220, 200)
+
+		# Max iterations text field
+		self.jobs = QTextEdit(self)
+		self.jobs.setGeometry(350,205,40,21)
+
+		# ATGP label
+		self.fit_inverse_transform = QLabel("ATGP", self)
+		self.fit_inverse_transform.setGeometry(440,208,280,15)
+		
+		# ATGP Checkbox
+		self.checkbox_fit_inverse_transform = QCheckBox(self)
+		self.checkbox_fit_inverse_transform.move(500, 202)
+
+		# OK button
+		self.OK = QPushButton("OK", self)
+		self.OK.move(230, 250)
+
+		# Cancel button
+		self.cancel = QPushButton("Cancel", self)
+		self.cancel.move(380, 250)
+
+		# Logs entry
+		self.logs = QListWidget(self)
+		self.logs.setGeometry(10, 300, 640, 130)
+
+		# Progress Bar
+		self.progress = QProgressBar(self)
+		self.progress.setGeometry(10, 450, 640, 20)
+
+		self.show()
+
 
 class Software(QMainWindow, Ui_MainWindow):
 
@@ -246,6 +333,7 @@ class Software(QMainWindow, Ui_MainWindow):
 
 		nFinder = QAction("N-Finder", self)
 		eme.addAction(nFinder)
+		nFinder.triggered.connect(partial(startNFINDRWindow, self))
 		nFinder.triggered.connect(partial(self.changeCurrentAlgo, "NFinder"))
 
 		atgp = QAction("ATGP", self)
@@ -1046,6 +1134,14 @@ def startKerPCAWindow(context):
 	context.input_label.hide()
 	context.ToolTab = KerPCAUI()
 	context.setWindowTitle("Kernel PCA")
+	context.setCentralWidget(context.ToolTab)
+	context.show()
+
+def startNFINDRWindow(context):
+	clearWidgets(context)
+	context.input_label.hide()
+	context.ToolTab = NFINDRUI()
+	context.setWindowTitle("NFINDR")
 	context.setCentralWidget(context.ToolTab)
 	context.show()
 

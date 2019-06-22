@@ -616,30 +616,51 @@ class PPIUI(QMainWindow, Ui_MainWindow):
 		super(PPIUI, self).__init__()
 
 
-		# HSI Label
-		self.input_label = QLabel("Input", self)
+		# Endmember sign Label
+		self.input_label = QLabel("2D HS Image", self)
 		self.input_label.move(20, 20)
 
-		# HSI browse button
+		# Endmember sign browse button
 		self.input_browse = QPushButton("Browse", self)
 		self.input_browse.move(550,20)
 
-		# HSI text field
+		# Endmember sign text field
 		self.input_text = QTextEdit(self)
 		self.input_text.setGeometry(142,25,402,21)
 
+		# Data matrix Label
+		self.output_label = QLabel("Init Skewers", self)
+		self.output_label.move(20, 70)
+
+		# Data Matrix browse button
+		self.output_browse = QPushButton("Browse", self)
+		self.output_browse.move(550,70)
+
+		# Data Matrix text field
+		self.output_text = QTextEdit(self)
+		self.output_text.setGeometry(142,75,402,21)
+		self.output_text.setText(os.getcwd())
+
 		# Output Label
 		self.output_label = QLabel("Output", self)
-		self.output_label.move(20, 50)
+		self.output_label.move(20, 120)
 
 		# Output browse button
 		self.output_browse = QPushButton("Browse", self)
-		self.output_browse.move(550,50)
+		self.output_browse.move(550,120)
 
 		# Output text field
 		self.output_text = QTextEdit(self)
-		self.output_text.setGeometry(142,55,402,21)
+		self.output_text.setGeometry(142,125,402,21)
 		self.output_text.setText(os.getcwd())
+
+		# Tolerance Label		
+		self.jobs_label = QLabel("No of Skewers", self)
+		self.jobs_label.move(150, 180)
+
+		# Tolerance text field
+		self.jobs = QTextEdit(self)
+		self.jobs.setGeometry(280,185,40,21)
 
 		# OK button
 		self.OK = QPushButton("OK", self)
@@ -659,36 +680,57 @@ class PPIUI(QMainWindow, Ui_MainWindow):
 		
 		self.show()
 
-class SISALUI(QMainWindow, Ui_MainWindow):
+class VCAUI(QMainWindow, Ui_MainWindow):
 
 	def __init__(self):
-		super(SISALUI, self).__init__()
+		super(VCAUI, self).__init__()
 
 
 		# HSI Label
-		self.input_label = QLabel("Input", self)
-		self.input_label.move(20, 20)
+		self.input_label = QLabel("HSI Input", self)
+		self.input_label.move(20, 45)
 
 		# HSI browse button
 		self.input_browse = QPushButton("Browse", self)
-		self.input_browse.move(550,20)
+		self.input_browse.move(550,45)
 
 		# HSI text field
 		self.input_text = QTextEdit(self)
-		self.input_text.setGeometry(142,25,402,21)
+		self.input_text.setGeometry(142,50,402,21)
 
 		# Output Label
 		self.output_label = QLabel("Output", self)
-		self.output_label.move(20, 50)
+		self.output_label.move(20, 100)
 
 		# Output browse button
 		self.output_browse = QPushButton("Browse", self)
-		self.output_browse.move(550,50)
+		self.output_browse.move(550,100)
 
 		# Output text field
 		self.output_text = QTextEdit(self)
-		self.output_text.setGeometry(142,55,402,21)
+		self.output_text.setGeometry(142,105,402,21)
 		self.output_text.setText(os.getcwd())
+
+		self.jobs_label = QLabel("Endmembers", self)
+		self.jobs_label.move(150, 150)
+
+		# Tolerance text field
+		self.jobs = QTextEdit(self)
+		self.jobs.setGeometry(260,155,40,21)
+
+		self.jobs_label = QLabel("SNR input", self)
+		self.jobs_label.move(340, 150)
+
+		# Tolerance text field
+		self.jobs = QTextEdit(self)
+		self.jobs.setGeometry(420,155,40,21)
+
+		self.fit_inverse_transform = QLabel("Verbose", self)
+		self.fit_inverse_transform.setGeometry(150,212,280,15)
+		
+		# Verbose Checkbox
+		self.checkbox_fit_inverse_transform = QCheckBox(self)
+		self.checkbox_fit_inverse_transform.move(220, 206)
 
 		# OK button
 		self.OK = QPushButton("OK", self)
@@ -715,28 +757,100 @@ class ATGPUI(QMainWindow, Ui_MainWindow):
 
 
 		# HSI Label
-		self.input_label = QLabel("Input", self)
-		self.input_label.move(20, 20)
+		self.input_label = QLabel("2D HSI", self)
+		self.input_label.move(20, 60)
 
 		# HSI browse button
 		self.input_browse = QPushButton("Browse", self)
-		self.input_browse.move(550,20)
+		self.input_browse.move(550,60)
 
 		# HSI text field
 		self.input_text = QTextEdit(self)
-		self.input_text.setGeometry(142,25,402,21)
+		self.input_text.setGeometry(142,65,402,21)
 
 		# Output Label
 		self.output_label = QLabel("Output", self)
-		self.output_label.move(20, 50)
+		self.output_label.move(20, 120)
 
 		# Output browse button
 		self.output_browse = QPushButton("Browse", self)
-		self.output_browse.move(550,50)
+		self.output_browse.move(550,120)
 
 		# Output text field
 		self.output_text = QTextEdit(self)
-		self.output_text.setGeometry(142,55,402,21)
+		self.output_text.setGeometry(142,125,402,21)
+		self.output_text.setText(os.getcwd())
+
+		# Tolerance Label		
+		self.jobs_label = QLabel("No of Endmembers", self)
+		self.jobs_label.move(150, 180)
+
+		# Tolerance text field
+		self.jobs = QTextEdit(self)
+		self.jobs.setGeometry(280,185,40,21)
+
+
+		# OK button
+		self.OK = QPushButton("OK", self)
+		self.OK.move(230, 250)
+
+		# Cancel button
+		self.cancel = QPushButton("Cancel", self)
+		self.cancel.move(380, 250)
+
+		# Logs entry
+		self.logs = QListWidget(self)
+		self.logs.setGeometry(10, 300, 640, 130)
+
+		# Progress Bar
+		self.progress = QProgressBar(self)
+		self.progress.setGeometry(10, 450, 640, 20)
+		
+		self.show()
+
+
+class NNLSUI(QMainWindow, Ui_MainWindow):
+
+	def __init__(self):
+		super(NNLSUI, self).__init__()
+
+
+		# Endmember sign Label
+		self.input_label = QLabel("2D HS Image", self)
+		self.input_label.move(20, 40)
+
+		# Endmember sign browse button
+		self.input_browse = QPushButton("Browse", self)
+		self.input_browse.move(550,40)
+
+		# Endmember sign text field
+		self.input_text = QTextEdit(self)
+		self.input_text.setGeometry(142,45,402,21)
+
+		# Data matrix Label
+		self.output_label = QLabel("Endmember Mat", self)
+		self.output_label.move(20, 95)
+
+		# Data Matrix browse button
+		self.output_browse = QPushButton("Browse", self)
+		self.output_browse.move(550,95)
+
+		# Data Matrix text field
+		self.output_text = QTextEdit(self)
+		self.output_text.setGeometry(142,100,402,21)
+		self.output_text.setText(os.getcwd())
+
+		# Output Label
+		self.output_label = QLabel("Output", self)
+		self.output_label.move(20, 150)
+
+		# Output browse button
+		self.output_browse = QPushButton("Browse", self)
+		self.output_browse.move(550,150)
+
+		# Output text field
+		self.output_text = QTextEdit(self)
+		self.output_text.setGeometry(142,155,402,21)
 		self.output_text.setText(os.getcwd())
 
 		# OK button
@@ -856,7 +970,6 @@ class Software(QMainWindow, Ui_MainWindow):
 
 		sisal = QAction("SISAL", self)
 		eme.addAction(sisal)
-		sisal.triggered.connect(partial(startSISALWindow, self))
 		sisal.triggered.connect(partial(self.changeCurrentAlgo, "SISAL"))
 
 		# Linear Unmixing
@@ -869,18 +982,22 @@ class Software(QMainWindow, Ui_MainWindow):
 
 		vca = QAction("VCA", self)
 		lu.addAction(vca)
+		vca.triggered.connect(partial(startVCAWindow, self))
 		vca.triggered.connect(partial(self.changeCurrentAlgo, "VCA"))
 
 		nnls = QAction("NNLS", self)
 		lu.addAction(nnls)
+		nnls.triggered.connect(partial(startNNLSWindow, self))
 		nnls.triggered.connect(partial(self.changeCurrentAlgo, "NNLS"))
 
 		ucls = QAction("UCLS", self)
 		lu.addAction(ucls)
+		ucls.triggered.connect(partial(startUCLSWindow, self))
 		ucls.triggered.connect(partial(self.changeCurrentAlgo, "UCLS"))
 
 		fcls = QAction("FCLS", self)
 		lu.addAction(fcls)
+		fcls.triggered.connect(partial(startFCLSWindow, self))
 		fcls.triggered.connect(partial(self.changeCurrentAlgo, "FCLS"))
 
 		# Non-linear Unmixing
@@ -1697,11 +1814,11 @@ def startPPIWindow(context):
 	context.setCentralWidget(context.ToolTab)
 	context.show()
 
-def startSISALWindow(context):
+def startVCAWindow(context):
 	clearWidgets(context)
 	context.input_label.hide()
-	context.ToolTab = SISALUI()
-	context.setWindowTitle("SISAL")
+	context.ToolTab = VCAUI()
+	context.setWindowTitle("Vertex Component Analysis")
 	context.setCentralWidget(context.ToolTab)
 	context.show()
 
@@ -1710,6 +1827,30 @@ def startNMFWindow(context):
 	context.input_label.hide()
 	context.ToolTab = NMFUI()
 	context.setWindowTitle("Non-negative Matrix Factorization")
+	context.setCentralWidget(context.ToolTab)
+	context.show()	
+
+def startNNLSWindow(context):
+	clearWidgets(context)
+	context.input_label.hide()
+	context.ToolTab = NNLSUI()
+	context.setWindowTitle("Non-negative Constrained Least Square Abundance Estimation")
+	context.setCentralWidget(context.ToolTab)
+	context.show()	
+
+def startUCLSWindow(context):
+	clearWidgets(context)
+	context.input_label.hide()
+	context.ToolTab = NNLSUI()
+	context.setWindowTitle("Unconstrained Least Squares Abundance Estimation")
+	context.setCentralWidget(context.ToolTab)
+	context.show()	
+
+def startFCLSWindow(context):
+	clearWidgets(context)
+	context.input_label.hide()
+	context.ToolTab = NNLSUI()
+	context.setWindowTitle("Fully Constrained Least Squares Abundance Estimation")
 	context.setCentralWidget(context.ToolTab)
 	context.show()	
 

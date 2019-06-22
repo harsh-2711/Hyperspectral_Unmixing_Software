@@ -252,6 +252,511 @@ class NFINDRUI(QMainWindow, Ui_MainWindow):
 		self.show()
 
 
+class LLEUI(QMainWindow, Ui_MainWindow):
+
+	def __init__(self):
+		super(LLEUI, self).__init__()
+
+
+		# Input Label
+		self.input_label = QLabel("Input", self)
+		self.input_label.move(20, 20)
+
+		# Input browse button
+		self.input_browse = QPushButton("Browse", self)
+		self.input_browse.move(550,20)
+
+		# Input text field
+		self.input_text = QTextEdit(self)
+		self.input_text.setGeometry(142,25,402,21)
+
+		# Output Label
+		self.output_label = QLabel("Output", self)
+		self.output_label.move(20, 70)
+
+		# Output browse button
+		self.output_browse = QPushButton("Browse", self)
+		self.output_browse.move(550,70)
+
+		# Output text field
+		self.output_text = QTextEdit(self)
+		self.output_text.setGeometry(142,75,402,21)
+		self.output_text.setText(os.getcwd())
+
+		# No of endmembers Label
+		self.components_label = QLabel("Neighbours", self)
+		self.components_label.move(20, 120)
+
+		# Endmembers text field
+		self.components = QTextEdit(self)
+		self.components.setGeometry(140,125,45,21)
+
+		# Components Label
+		self.jobs_label = QLabel("Components", self)
+		self.jobs_label.move(240, 120)
+
+		# Components text field
+		self.jobs = QTextEdit(self)
+		self.jobs.setGeometry(340,125,40,21)
+
+		# Jobs Label
+		self.jobs_label = QLabel("Jobs", self)
+		self.jobs_label.move(450, 120)
+
+		# Jobs text field
+		self.jobs = QTextEdit(self)
+		self.jobs.setGeometry(510,125,40,21)
+
+		# Eigen solver Label
+		self.kernel_label = QLabel("Eigen solver", self)
+		self.kernel_label.move(140, 180)
+
+		# Eigen Solver Choice List
+		self.kernelChoiceList = QComboBox(self)
+		self.kernelChoiceList.addItem("auto")
+		self.kernelChoiceList.addItem("arpack")	
+		self.kernelChoiceList.addItem("dense")
+		self.kernelChoiceList.move(230, 180)
+
+		# Method Label
+		self.kernel_label = QLabel("Method", self)
+		self.kernel_label.move(400, 180)
+
+		# Method Choice List
+		self.kernelChoiceList = QComboBox(self)
+		self.kernelChoiceList.addItem("standard")
+		self.kernelChoiceList.addItem("hessian")
+		self.kernelChoiceList.addItem("modified")
+		self.kernelChoiceList.addItem("ltsa")
+		self.kernelChoiceList.move(465, 180)
+
+		# OK button
+		self.OK = QPushButton("OK", self)
+		self.OK.move(230, 250)
+
+		# Cancel button
+		self.cancel = QPushButton("Cancel", self)
+		self.cancel.move(380, 250)
+
+		# Logs entry
+		self.logs = QListWidget(self)
+		self.logs.setGeometry(10, 300, 640, 130)
+
+		# Progress Bar
+		self.progress = QProgressBar(self)
+		self.progress.setGeometry(10, 450, 640, 20)
+
+		self.show()
+
+
+class SUNSALUI(QMainWindow, Ui_MainWindow):
+
+	def __init__(self):
+		super(SUNSALUI, self).__init__()
+
+
+		# Endmember sign Label
+		self.input_label = QLabel("EM signature", self)
+		self.input_label.move(20, 20)
+
+		# Endmember sign browse button
+		self.input_browse = QPushButton("Browse", self)
+		self.input_browse.move(550,20)
+
+		# Endmember sign text field
+		self.input_text = QTextEdit(self)
+		self.input_text.setGeometry(142,25,402,21)
+
+		# Data matrix Label
+		self.output_label = QLabel("Data Matrix", self)
+		self.output_label.move(20, 70)
+
+		# Data Matrix browse button
+		self.output_browse = QPushButton("Browse", self)
+		self.output_browse.move(550,70)
+
+		# Data Matrix text field
+		self.output_text = QTextEdit(self)
+		self.output_text.setGeometry(142,75,402,21)
+		self.output_text.setText(os.getcwd())
+
+		# Output Label
+		self.output_label = QLabel("Output", self)
+		self.output_label.move(20, 120)
+
+		# Output browse button
+		self.output_browse = QPushButton("Browse", self)
+		self.output_browse.move(550,120)
+
+		# Output text field
+		self.output_text = QTextEdit(self)
+		self.output_text.setGeometry(142,125,402,21)
+		self.output_text.setText(os.getcwd())
+
+		# No of iterations Label
+		self.components_label = QLabel("Min AL iter", self)
+		self.components_label.move(60, 170)
+
+		# iterations text field
+		self.components = QTextEdit(self)
+		self.components.setGeometry(140,175,45,21)
+
+		# Components Label
+		self.jobs_label = QLabel("Lambda", self)
+		self.jobs_label.move(260, 170)
+
+		# Components text field
+		self.jobs = QTextEdit(self)
+		self.jobs.setGeometry(320,175,40,21)
+
+		# Tolerance Label
+		self.jobs_label = QLabel("Tolerance", self)
+		self.jobs_label.move(430, 170)
+
+		# Tolerance text field
+		self.jobs = QTextEdit(self)
+		self.jobs.setGeometry(510,175,40,21)
+
+
+		# Positivity label
+		self.fit_inverse_transform = QLabel("Positivity", self)
+		self.fit_inverse_transform.setGeometry(130,212,280,15)
+		
+		# Positivity Checkbox
+		self.checkbox_fit_inverse_transform = QCheckBox(self)
+		self.checkbox_fit_inverse_transform.move(200, 206)
+
+		# Addone label
+		self.fit_inverse_transform = QLabel("Add one", self)
+		self.fit_inverse_transform.setGeometry(250,212,280,15)
+		
+		# Addone Checkbox
+		self.checkbox_fit_inverse_transform = QCheckBox(self)
+		self.checkbox_fit_inverse_transform.move(320, 206)
+
+		# Verbose label
+		self.fit_inverse_transform = QLabel("Verbose", self)
+		self.fit_inverse_transform.setGeometry(370,212,280,15)
+		
+		# Verbose Checkbox
+		self.checkbox_fit_inverse_transform = QCheckBox(self)
+		self.checkbox_fit_inverse_transform.move(440, 206)
+
+		# OK button
+		self.OK = QPushButton("OK", self)
+		self.OK.move(230, 250)
+
+		# Cancel button
+		self.cancel = QPushButton("Cancel", self)
+		self.cancel.move(380, 250)
+
+		# Logs entry
+		self.logs = QListWidget(self)
+		self.logs.setGeometry(10, 300, 640, 130)
+
+		# Progress Bar
+		self.progress = QProgressBar(self)
+		self.progress.setGeometry(10, 450, 640, 20)
+		
+		self.show()
+
+
+class HFCVDUI(QMainWindow, Ui_MainWindow):
+
+	def __init__(self):
+		super(HFCVDUI, self).__init__()
+
+
+		# HSI Label
+		self.input_label = QLabel("2D HSI", self)
+		self.input_label.move(20, 60)
+
+		# HSI browse button
+		self.input_browse = QPushButton("Browse", self)
+		self.input_browse.move(550,60)
+
+		# HSI text field
+		self.input_text = QTextEdit(self)
+		self.input_text.setGeometry(142,65,402,21)
+
+		# Output Label
+		self.output_label = QLabel("Output", self)
+		self.output_label.move(20, 120)
+
+		# Output browse button
+		self.output_browse = QPushButton("Browse", self)
+		self.output_browse.move(550,120)
+
+		# Output text field
+		self.output_text = QTextEdit(self)
+		self.output_text.setGeometry(142,125,402,21)
+		self.output_text.setText(os.getcwd())
+
+		# OK button
+		self.OK = QPushButton("OK", self)
+		self.OK.move(230, 250)
+
+		# Cancel button
+		self.cancel = QPushButton("Cancel", self)
+		self.cancel.move(380, 250)
+
+		# Logs entry
+		self.logs = QListWidget(self)
+		self.logs.setGeometry(10, 300, 640, 130)
+
+		# Progress Bar
+		self.progress = QProgressBar(self)
+		self.progress.setGeometry(10, 450, 640, 20)
+		
+		self.show()
+
+
+class NMFUI(QMainWindow, Ui_MainWindow):
+
+	def __init__(self):
+		super(NMFUI, self).__init__()
+
+
+		# HSI Label
+		self.input_label = QLabel("Input", self)
+		self.input_label.move(20, 20)
+
+		# HSI browse button
+		self.input_browse = QPushButton("Browse", self)
+		self.input_browse.move(550,20)
+
+		# HSI text field
+		self.input_text = QTextEdit(self)
+		self.input_text.setGeometry(142,25,402,21)
+
+		# Output Label
+		self.output_label = QLabel("Output", self)
+		self.output_label.move(20, 70)
+
+		# Output browse button
+		self.output_browse = QPushButton("Browse", self)
+		self.output_browse.move(550, 70)
+
+		# Output text field
+		self.output_text = QTextEdit(self)
+		self.output_text.setGeometry(142,75,402,21)
+		self.output_text.setText(os.getcwd())
+
+		# Tolerance Label	
+		self.jobs_label = QLabel("Components", self)
+		self.jobs_label.move(70, 120)
+
+		# Tolerance text field
+		self.jobs = QTextEdit(self)
+		self.jobs.setGeometry(170,125,40,21)
+
+		# Tolerance Label		
+		self.jobs_label = QLabel("Tolerance", self)
+		self.jobs_label.move(250, 120)
+
+		# Tolerance text field
+		self.jobs = QTextEdit(self)
+		self.jobs.setGeometry(330,125,40,21)
+
+		# Tolerance Label		
+		self.jobs_label = QLabel("Max iter", self)
+		self.jobs_label.move(410, 120)
+
+		# Method Label
+		self.kernel_label = QLabel("Method", self)
+		self.kernel_label.move(100, 180)
+
+		# Method Choice List
+		self.kernelChoiceList = QComboBox(self)
+		self.kernelChoiceList.addItem("random")
+		self.kernelChoiceList.addItem("nndsvd")
+		self.kernelChoiceList.addItem("nndsvda")
+		self.kernelChoiceList.addItem("nndsvdar")
+		self.kernelChoiceList.addItem("custom")
+		self.kernelChoiceList.move(165, 180)
+
+
+		# Method Label
+		self.kernel_label = QLabel("Solver", self)
+		self.kernel_label.move(300, 180)
+
+		# Method Choice List
+		self.kernelChoiceList = QComboBox(self)
+		self.kernelChoiceList.addItem("Coordinate Descent")
+		self.kernelChoiceList.addItem("Multiplicative Update")
+		self.kernelChoiceList.move(365, 180)
+
+
+		# Tolerance text field
+		self.jobs = QTextEdit(self)
+		self.jobs.setGeometry(480,125,40,21)
+
+		# OK button
+		self.OK = QPushButton("OK", self)
+		self.OK.move(230, 250)
+
+		# Cancel button
+		self.cancel = QPushButton("Cancel", self)
+		self.cancel.move(380, 250)
+
+		# Logs entry
+		self.logs = QListWidget(self)
+		self.logs.setGeometry(10, 300, 640, 130)
+
+		# Progress Bar
+		self.progress = QProgressBar(self)
+		self.progress.setGeometry(10, 450, 640, 20)
+		
+		self.show()
+
+
+class PPIUI(QMainWindow, Ui_MainWindow):
+
+	def __init__(self):
+		super(PPIUI, self).__init__()
+
+
+		# HSI Label
+		self.input_label = QLabel("Input", self)
+		self.input_label.move(20, 20)
+
+		# HSI browse button
+		self.input_browse = QPushButton("Browse", self)
+		self.input_browse.move(550,20)
+
+		# HSI text field
+		self.input_text = QTextEdit(self)
+		self.input_text.setGeometry(142,25,402,21)
+
+		# Output Label
+		self.output_label = QLabel("Output", self)
+		self.output_label.move(20, 50)
+
+		# Output browse button
+		self.output_browse = QPushButton("Browse", self)
+		self.output_browse.move(550,50)
+
+		# Output text field
+		self.output_text = QTextEdit(self)
+		self.output_text.setGeometry(142,55,402,21)
+		self.output_text.setText(os.getcwd())
+
+		# OK button
+		self.OK = QPushButton("OK", self)
+		self.OK.move(230, 250)
+
+		# Cancel button
+		self.cancel = QPushButton("Cancel", self)
+		self.cancel.move(380, 250)
+
+		# Logs entry
+		self.logs = QListWidget(self)
+		self.logs.setGeometry(10, 300, 640, 130)
+
+		# Progress Bar
+		self.progress = QProgressBar(self)
+		self.progress.setGeometry(10, 450, 640, 20)
+		
+		self.show()
+
+class SISALUI(QMainWindow, Ui_MainWindow):
+
+	def __init__(self):
+		super(SISALUI, self).__init__()
+
+
+		# HSI Label
+		self.input_label = QLabel("Input", self)
+		self.input_label.move(20, 20)
+
+		# HSI browse button
+		self.input_browse = QPushButton("Browse", self)
+		self.input_browse.move(550,20)
+
+		# HSI text field
+		self.input_text = QTextEdit(self)
+		self.input_text.setGeometry(142,25,402,21)
+
+		# Output Label
+		self.output_label = QLabel("Output", self)
+		self.output_label.move(20, 50)
+
+		# Output browse button
+		self.output_browse = QPushButton("Browse", self)
+		self.output_browse.move(550,50)
+
+		# Output text field
+		self.output_text = QTextEdit(self)
+		self.output_text.setGeometry(142,55,402,21)
+		self.output_text.setText(os.getcwd())
+
+		# OK button
+		self.OK = QPushButton("OK", self)
+		self.OK.move(230, 250)
+
+		# Cancel button
+		self.cancel = QPushButton("Cancel", self)
+		self.cancel.move(380, 250)
+
+		# Logs entry
+		self.logs = QListWidget(self)
+		self.logs.setGeometry(10, 300, 640, 130)
+
+		# Progress Bar
+		self.progress = QProgressBar(self)
+		self.progress.setGeometry(10, 450, 640, 20)
+		
+		self.show()
+
+class ATGPUI(QMainWindow, Ui_MainWindow):
+
+	def __init__(self):
+		super(ATGPUI, self).__init__()
+
+
+		# HSI Label
+		self.input_label = QLabel("Input", self)
+		self.input_label.move(20, 20)
+
+		# HSI browse button
+		self.input_browse = QPushButton("Browse", self)
+		self.input_browse.move(550,20)
+
+		# HSI text field
+		self.input_text = QTextEdit(self)
+		self.input_text.setGeometry(142,25,402,21)
+
+		# Output Label
+		self.output_label = QLabel("Output", self)
+		self.output_label.move(20, 50)
+
+		# Output browse button
+		self.output_browse = QPushButton("Browse", self)
+		self.output_browse.move(550,50)
+
+		# Output text field
+		self.output_text = QTextEdit(self)
+		self.output_text.setGeometry(142,55,402,21)
+		self.output_text.setText(os.getcwd())
+
+		# OK button
+		self.OK = QPushButton("OK", self)
+		self.OK.move(230, 250)
+
+		# Cancel button
+		self.cancel = QPushButton("Cancel", self)
+		self.cancel.move(380, 250)
+
+		# Logs entry
+		self.logs = QListWidget(self)
+		self.logs.setGeometry(10, 300, 640, 130)
+
+		# Progress Bar
+		self.progress = QProgressBar(self)
+		self.progress.setGeometry(10, 450, 640, 20)
+		
+		self.show()
+
 class Software(QMainWindow, Ui_MainWindow):
 
 	def __init__(self):
@@ -301,6 +806,7 @@ class Software(QMainWindow, Ui_MainWindow):
 
 		nmf = QAction("NMF", self)
 		dimReduction.addAction(nmf)
+		nmf.triggered.connect(partial(startNMFWindow, self))
 		nmf.triggered.connect(partial(self.changeCurrentAlgo, "NMF"))
 
 		kerPCA = QAction("Kernel PCA", self)
@@ -313,6 +819,7 @@ class Software(QMainWindow, Ui_MainWindow):
 
 		lle = QAction("LLE", self)
 		dimReduction.addAction(lle)
+		lle.triggered.connect(partial(startLLEWindow, self))
 		lle.triggered.connect(partial(self.changeCurrentAlgo, "LLE"))
 
 		# Material Count
@@ -326,6 +833,7 @@ class Software(QMainWindow, Ui_MainWindow):
 
 		hfcvd = QAction("HfcVd", self)
 		mc.addAction(hfcvd)
+		hfcvd.triggered.connect(partial(startHFCVDWindow, self))
 		hfcvd.triggered.connect(partial(self.changeCurrentAlgo, "HfcVd"))
 
 		# End Member Extraction
@@ -338,14 +846,17 @@ class Software(QMainWindow, Ui_MainWindow):
 
 		atgp = QAction("ATGP", self)
 		eme.addAction(atgp)
+		atgp.triggered.connect(partial(startATGPWindow, self))
 		atgp.triggered.connect(partial(self.changeCurrentAlgo, "ATGP"))
 
 		ppi = QAction("PPI", self)
 		eme.addAction(ppi)
+		ppi.triggered.connect(partial(startPPIWindow, self))
 		ppi.triggered.connect(partial(self.changeCurrentAlgo, "PPI"))
 
 		sisal = QAction("SISAL", self)
 		eme.addAction(sisal)
+		sisal.triggered.connect(partial(startSISALWindow, self))
 		sisal.triggered.connect(partial(self.changeCurrentAlgo, "SISAL"))
 
 		# Linear Unmixing
@@ -353,6 +864,7 @@ class Software(QMainWindow, Ui_MainWindow):
 
 		sunsal = QAction("SUNSAL", self)
 		lu.addAction(sunsal)
+		sunsal.triggered.connect(partial(startSUNSALWindow, self))
 		sunsal.triggered.connect(partial(self.changeCurrentAlgo, "SUNSAL"))
 
 		vca = QAction("VCA", self)
@@ -1145,6 +1657,61 @@ def startNFINDRWindow(context):
 	context.setCentralWidget(context.ToolTab)
 	context.show()
 
+def startLLEWindow(context):
+	clearWidgets(context)
+	context.input_label.hide()
+	context.ToolTab = LLEUI()
+	context.setWindowTitle("Locally Linear Embedding")
+	context.setCentralWidget(context.ToolTab)
+	context.show()
+
+def startSUNSALWindow(context):
+	clearWidgets(context)
+	context.input_label.hide()
+	context.ToolTab = SUNSALUI()
+	context.setWindowTitle("SUNSAL")
+	context.setCentralWidget(context.ToolTab)
+	context.show()
+
+def startHFCVDWindow(context):
+	clearWidgets(context)
+	context.input_label.hide()
+	context.ToolTab = HFCVDUI()
+	context.setWindowTitle("HFCVD")
+	context.setCentralWidget(context.ToolTab)
+	context.show()
+
+def startATGPWindow(context):
+	clearWidgets(context)
+	context.input_label.hide()
+	context.ToolTab = ATGPUI()
+	context.setWindowTitle("ATGP")
+	context.setCentralWidget(context.ToolTab)
+	context.show()
+
+def startPPIWindow(context):
+	clearWidgets(context)
+	context.input_label.hide()
+	context.ToolTab = PPIUI()
+	context.setWindowTitle("PPI")
+	context.setCentralWidget(context.ToolTab)
+	context.show()
+
+def startSISALWindow(context):
+	clearWidgets(context)
+	context.input_label.hide()
+	context.ToolTab = SISALUI()
+	context.setWindowTitle("SISAL")
+	context.setCentralWidget(context.ToolTab)
+	context.show()
+
+def startNMFWindow(context):
+	clearWidgets(context)
+	context.input_label.hide()
+	context.ToolTab = NMFUI()
+	context.setWindowTitle("Non-negative Matrix Factorization")
+	context.setCentralWidget(context.ToolTab)
+	context.show()	
 
 def clearWidgets(context):
 

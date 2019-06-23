@@ -468,7 +468,7 @@ class HFCVDUI(QMainWindow, Ui_MainWindow):
 
 
 		# HSI Label
-		self.input_label = QLabel("2D HSI", self)
+		self.input_label = QLabel("Input", self)
 		self.input_label.move(20, 60)
 
 		# HSI browse button
@@ -617,7 +617,7 @@ class PPIUI(QMainWindow, Ui_MainWindow):
 
 
 		# Endmember sign Label
-		self.input_label = QLabel("2D HS Image", self)
+		self.input_label = QLabel("Input", self)
 		self.input_label.move(20, 20)
 
 		# Endmember sign browse button
@@ -757,7 +757,7 @@ class ATGPUI(QMainWindow, Ui_MainWindow):
 
 
 		# HSI Label
-		self.input_label = QLabel("2D HSI", self)
+		self.input_label = QLabel("Input", self)
 		self.input_label.move(20, 60)
 
 		# HSI browse button
@@ -816,7 +816,7 @@ class NNLSUI(QMainWindow, Ui_MainWindow):
 
 
 		# Endmember sign Label
-		self.input_label = QLabel("2D HS Image", self)
+		self.input_label = QLabel("Input", self)
 		self.input_label.move(20, 40)
 
 		# Endmember sign browse button
@@ -852,6 +852,92 @@ class NNLSUI(QMainWindow, Ui_MainWindow):
 		self.output_text = QTextEdit(self)
 		self.output_text.setGeometry(142,155,402,21)
 		self.output_text.setText(os.getcwd())
+
+		# OK button
+		self.OK = QPushButton("OK", self)
+		self.OK.move(230, 250)
+
+		# Cancel button
+		self.cancel = QPushButton("Cancel", self)
+		self.cancel.move(380, 250)
+
+		# Logs entry
+		self.logs = QListWidget(self)
+		self.logs.setGeometry(10, 300, 640, 130)
+
+		# Progress Bar
+		self.progress = QProgressBar(self)
+		self.progress.setGeometry(10, 450, 640, 20)
+		
+		self.show()
+
+
+class GBMsemiNMFUI(QMainWindow, Ui_MainWindow):
+
+	def __init__(self):
+		super(GBMsemiNMFUI, self).__init__()
+
+
+		# Endmember sign Label
+		self.input_label = QLabel("Input", self)
+		self.input_label.move(20, 20)
+
+		# Endmember sign browse button
+		self.input_browse = QPushButton("Browse", self)
+		self.input_browse.move(550,20)
+
+		# Endmember sign text field
+		self.input_text = QTextEdit(self)
+		self.input_text.setGeometry(142,25,402,21)
+
+		# Data matrix Label
+		self.output_label = QLabel("Endmember Mat", self)
+		self.output_label.move(20, 75)
+
+		# Data Matrix browse button
+		self.output_browse = QPushButton("Browse", self)
+		self.output_browse.move(550,75)
+
+		# Data Matrix text field
+		self.output_text = QTextEdit(self)
+		self.output_text.setGeometry(142,80,402,21)
+		self.output_text.setText(os.getcwd())
+
+		# Output Label
+		self.output_label = QLabel("Output", self)
+		self.output_label.move(20, 130)
+
+		# Output browse button
+		self.output_browse = QPushButton("Browse", self)
+		self.output_browse.move(550,130)
+
+		# Output text field
+		self.output_text = QTextEdit(self)
+		self.output_text.setGeometry(142,135,402,21)
+		self.output_text.setText(os.getcwd())
+
+		self.jobs_label = QLabel("Tolerance", self)
+		self.jobs_label.move(150, 170)
+
+		# Tolerance text field
+		self.jobs = QTextEdit(self)
+		self.jobs.setGeometry(230,175,40,21)
+
+		# Tolerance Label		
+		self.jobs_label = QLabel("Max iter", self)
+		self.jobs_label.move(340, 170)
+
+		# Tolerance text field
+		self.jobs = QTextEdit(self)
+		self.jobs.setGeometry(420,175,40,21)
+
+
+		self.fit_inverse_transform = QLabel("Verbose", self)
+		self.fit_inverse_transform.setGeometry(150,212,280,15)
+		
+		# Verbose Checkbox
+		self.checkbox_fit_inverse_transform = QCheckBox(self)
+		self.checkbox_fit_inverse_transform.move(220, 206)
 
 		# OK button
 		self.OK = QPushButton("OK", self)
@@ -1005,6 +1091,7 @@ class Software(QMainWindow, Ui_MainWindow):
 
 		gbmNMF = QAction("GBM using semi-NMF", self)
 		nlu.addAction(gbmNMF)
+		gbmNMF.triggered.connect(partial(startGBMsemiNMFWindow, self))
 		gbmNMF.triggered.connect(partial(self.changeCurrentAlgo, "GBM using semi-NMF"))
 
 		gbmGrad = QAction("GBM using gradient", self)
@@ -1851,6 +1938,14 @@ def startFCLSWindow(context):
 	context.input_label.hide()
 	context.ToolTab = NNLSUI()
 	context.setWindowTitle("Fully Constrained Least Squares Abundance Estimation")
+	context.setCentralWidget(context.ToolTab)
+	context.show()
+
+def startGBMsemiNMFWindow(context):
+	clearWidgets(context)
+	context.input_label.hide()
+	context.ToolTab = GBMsemiNMFUI()
+	context.setWindowTitle("Generalized Bilinear Model using Semi-NMF")
 	context.setCentralWidget(context.ToolTab)
 	context.show()	
 

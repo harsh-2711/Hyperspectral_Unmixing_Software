@@ -77,11 +77,11 @@ class NonNegativeMatrixFactorisation():
 
 		return nmf.explained_variance_ratio_.sum()
 
-	def errorFactor(self, noOfComponents):
+	def errorFactor(self, noOfComponents, tolerance, max_iterations):
 		'''
 		Calculates the difference between the input values and the reduced values
 		'''
-		nmf = NMF(n_components=noOfComponents)
+		nmf = NMF(n_components=noOfComponents, tol=tolerance, max_iter=max_iterations)
 		W = nmf.fit_transform(X = self.normalizedData)
 		H = nmf.components_
 		error = ((self.normalizedData - np.matmul(W,H))**2).sum()
@@ -102,13 +102,13 @@ class NonNegativeMatrixFactorisation():
 
 		return self.reducedComponents
 
-	def getReducedComponents_noOfComponents(self, noOfComponents):
+	def getReducedComponents_noOfComponents(self, noOfComponents, tolerance, max_iterations):
 		'''
 		Returns the principal components based on the given nnumber of components
 		to be retained
 		'''
 
-		nmf = NMF(n_components=noOfComponents)
+		nmf = NMF(n_components=noOfComponents, tol=tolerance, max_iter=max_iterations)
 		self.reducedComponents = nmf.fit_transform(X = self.normalizedData)
 		
 		return self.reducedComponents				

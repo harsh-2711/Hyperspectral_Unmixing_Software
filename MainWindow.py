@@ -543,53 +543,52 @@ class NMFUI(QMainWindow, Ui_MainWindow):
 		self.output_text.setText(os.getcwd())
 
 		# Tolerance Label	
-		self.jobs_label = QLabel("Components", self)
-		self.jobs_label.move(70, 120)
+		self.components_label = QLabel("Components", self)
+		self.components_label.move(70, 120)
 
 		# Tolerance text field
-		self.jobs = QTextEdit(self)
-		self.jobs.setGeometry(170,125,40,21)
+		self.components = QTextEdit(self)
+		self.components.setGeometry(170,125,40,21)
 
 		# Tolerance Label		
-		self.jobs_label = QLabel("Tolerance", self)
-		self.jobs_label.move(250, 120)
+		self.tolerance_label = QLabel("Tolerance", self)
+		self.tolerance_label.move(250, 120)
 
 		# Tolerance text field
-		self.jobs = QTextEdit(self)
-		self.jobs.setGeometry(330,125,40,21)
+		self.tolerance = QTextEdit(self)
+		self.tolerance.setGeometry(330,125,40,21)
 
 		# Tolerance Label		
-		self.jobs_label = QLabel("Max iter", self)
-		self.jobs_label.move(410, 120)
-
-		# Method Label
-		self.kernel_label = QLabel("Method", self)
-		self.kernel_label.move(100, 180)
-
-		# Method Choice List
-		self.kernelChoiceList = QComboBox(self)
-		self.kernelChoiceList.addItem("random")
-		self.kernelChoiceList.addItem("nndsvd")
-		self.kernelChoiceList.addItem("nndsvda")
-		self.kernelChoiceList.addItem("nndsvdar")
-		self.kernelChoiceList.addItem("custom")
-		self.kernelChoiceList.move(165, 180)
-
-
-		# Method Label
-		self.kernel_label = QLabel("Solver", self)
-		self.kernel_label.move(300, 180)
-
-		# Method Choice List
-		self.kernelChoiceList = QComboBox(self)
-		self.kernelChoiceList.addItem("Coordinate Descent")
-		self.kernelChoiceList.addItem("Multiplicative Update")
-		self.kernelChoiceList.move(365, 180)
-
+		self.maxit_label = QLabel("Max iter", self)
+		self.maxit_label.move(410, 120)
 
 		# Tolerance text field
-		self.jobs = QTextEdit(self)
-		self.jobs.setGeometry(480,125,40,21)
+		self.maxit = QTextEdit(self)
+		self.maxit.setGeometry(480,125,40,21)
+
+		# Method Label
+		self.method_label = QLabel("Method", self)
+		self.method_label.move(100, 180)
+
+		# Method Choice List
+		self.methodChoiceList = QComboBox(self)
+		self.methodChoiceList.addItem("random")
+		self.methodChoiceList.addItem("nndsvd")
+		self.methodChoiceList.addItem("nndsvda")
+		self.methodChoiceList.addItem("nndsvdar")
+		self.methodChoiceList.addItem("custom")
+		self.methodChoiceList.move(165, 180)
+
+
+		# Method Label
+		self.solver_label = QLabel("Solver", self)
+		self.solver_label.move(300, 180)
+
+		# Method Choice List
+		self.solverChoiceList = QComboBox(self)
+		self.solverChoiceList.addItem("Coordinate Descent")
+		self.solverChoiceList.addItem("Multiplicative Update")
+		self.solverChoiceList.move(365, 180)
 
 		# OK button
 		self.OK = QPushButton("OK", self)
@@ -1252,7 +1251,8 @@ class Software(QMainWindow, Ui_MainWindow):
 		self.input_text.setText("")
 		self.output_text.setText("")
 		self.components.setText("")
-		self.jobs.setText("")
+		self.tolerance.setText("")
+		self.maxit.setText("")
 		self.progress.setValue(0)
 		self.logs.clear()
 
@@ -1283,6 +1283,8 @@ class Software(QMainWindow, Ui_MainWindow):
 		foldername = self.output_text.toPlainText()
 		selectedComponents = self.components.toPlainText()
 		n_jobs = self.jobs.toPlainText()
+		tolerance = self.tolerance.toPlainText()
+		max_iterations = self.maxit.toPlainText()
 
 		# Validating dataset path
 		self.dataExists = self.validateInputFile(self.file)
@@ -1310,7 +1312,7 @@ class Software(QMainWindow, Ui_MainWindow):
 				self.logs.addItem(f'Starting NMF for getting top {self.components.toPlainText()} bands')
 				newpid1 = os.fork()
 				if newpid1 == 0:
-					nmf_data = self.startNMF(selectedComponents)
+					nmf_data = self.startNMF(selectedComponents, tolerance, max_iterations)
 
 			elif self.currentAlgo == "NFinder":
 				self.logs.addItem(f'Starting N-Finder for getting top {self.components.toPlainText()} bands')
@@ -1561,7 +1563,7 @@ class Software(QMainWindow, Ui_MainWindow):
 
 
 
-	def startNMF(self,selectedComponents):
+	def startNMF(self,selectedComponents, tolerance, max_iterations):
 		'''
 		Main function for NMF
 		'''
@@ -1569,7 +1571,7 @@ class Software(QMainWindow, Ui_MainWindow):
 		self.datasetAsArray = self.dataset.ReadAsArray()
 		nmf = NonNegativeMatrixFactorisation(self.datasetAsArray)
 		nmf.scaleData()
-		self.nmf_data = nmf.getReducedComponents_noOfComponents((int)(self.components.toPlainText()))
+		self.nmf_data = nmf.getReducedComponents_noOfComponents((int)(self.components.toPlainText()), (int)(self.tolerance.toPlainText()), (int)(self.max_iterations.toPlainText()))
 		error = nmf.errorFactor((int)(self.components.toPlainText()))
 		self.logs.addItem("Analysis completed")
 		self.logs.addItem(f'RMS Error: {error}')

@@ -1,3 +1,4 @@
+
 import sys
 import os
 
@@ -1287,8 +1288,8 @@ class Software(QMainWindow, Ui_MainWindow):
 		foldername = self.output_text.toPlainText()
 		selectedComponents = self.components.toPlainText()
 		n_jobs = self.jobs.toPlainText()
-		tolerance = self.tolerance.toPlainText()
-		max_iterations = self.maxit.toPlainText()
+		# tolerance = self.tolerance.toPlainText()
+		# max_iterations = self.maxit.toPlainText()
 
 		# Validating dataset path
 		self.dataExists = self.validateInputFile(self.file)
@@ -1461,7 +1462,7 @@ class Software(QMainWindow, Ui_MainWindow):
 		
 		self.logs.addItem("Analysis completed")
 		self.logs.addItem("Generating Output file")
-		self.writeData("PCA_", self.pca_data)
+		writeData(self, "PCA_", self.pca_data)
 		# t1.join()
 		self.logs.addItem(f"Output file PCA_{self.OUTPUT_FILENAME} generated")
 		self.logs.addItem(f'Retained Variance: {retainedVariance}')
@@ -1471,17 +1472,17 @@ class Software(QMainWindow, Ui_MainWindow):
 		if (int)(selectedComponents) == 1:
 			newpid = os.fork()
 			if newpid == 0:
-				self.plot1DGraph(self.pca_data)
+				plot1DGraph(self, self.pca_data)
 
 		elif (int)(selectedComponents) == 2:
 			newpid = os.fork()
 			if newpid == 0:
-				self.plot2DGraph(self.pca_data)
+				plot2DGraph(self, self.pca_data)
 
 		elif (int)(selectedComponents) == 3:
 			newpid = os.fork()
 			if newpid == 0:
-				self.plot3DGraph(self.pca_data)
+				plot3DGraph(self, self.pca_data)
 
 		else:
 			self.logs.addItem('Due to high dimentionality, graph could not be plotted')
@@ -1490,7 +1491,7 @@ class Software(QMainWindow, Ui_MainWindow):
 	# 	subprocess.call()
 	# 	self.pca_data = pca.getPrincipalComponents_noOfComponents((int)(self.components.toPlainText()))
 	# 	self.retainedVariance = pca.getRetainedVariance((int)(self.components.toPlainText()))
-	# 	self.writeData("PCA_", self.pca_data)
+	# 	writeData(self, "PCA_", self.pca_data)
 
 
 	def startKerPCA(self, selectedComponents):
@@ -1506,7 +1507,7 @@ class Software(QMainWindow, Ui_MainWindow):
 		
 		self.logs.addItem("Analysis completed")
 		self.logs.addItem("Generating Output file")
-		self.writeData("KernelPCA_", self.ker_pca_data)
+		writeData(self, "KernelPCA_", self.ker_pca_data)
 		self.logs.addItem(f"Output file KernelPCA_{self.OUTPUT_FILENAME} generated")
 		self.setProgressBar(False)
 		
@@ -1514,17 +1515,17 @@ class Software(QMainWindow, Ui_MainWindow):
 		if (int)(selectedComponents) == 1:
 			newpid = os.fork()
 			if newpid == 0:
-				self.plot1DGraph(self.ker_pca_data)
+				plot1DGraph(self,self.ker_pca_data)
 
 		elif (int)(selectedComponents) == 2:
 			newpid = os.fork()
 			if newpid == 0:
-				self.plot2DGraph(self.ker_pca_data)
+				plot2DGraph(self,self.ker_pca_data)
 
 		elif (int)(selectedComponents) == 3:
 			newpid = os.fork()
 			if newpid == 0:
-				self.plot3DGraph(self.ker_pca_data)
+				plot3DGraph(self,self.ker_pca_data)
 
 		else:
 			self.logs.addItem('Due to high dimentionality, graph could not be plotted')
@@ -1543,7 +1544,7 @@ class Software(QMainWindow, Ui_MainWindow):
 		
 		self.logs.addItem("Analysis completed")
 		self.logs.addItem("Generating Output file")
-		self.writeData("LLE_", self.lle_data)
+		writeData(self, "LLE_", self.lle_data)
 		self.logs.addItem(f"Output file LLE_{self.OUTPUT_FILENAME} generated")
 		self.setProgressBar(False)
 		
@@ -1551,18 +1552,17 @@ class Software(QMainWindow, Ui_MainWindow):
 		if (int)(selectedComponents) == 1:
 			newpid = os.fork()
 			if newpid == 0:
-				self.plot1DGraph(self.lle_data)
+				plot1DGraph(self,self.lle_data)
 
 		elif (int)(selectedComponents) == 2:
 			newpid = os.fork()
 			if newpid == 0:
-				self.plot2DGraph(self.lle_data)
+				plot2DGraph(self,self.lle_data)
 
 		elif (int)(selectedComponents) == 3:
 			newpid = os.fork()
 			if newpid == 0:
-				self.plot3DGraph(self.lle_data)
-
+				plot3DGraph(self,self.lle_data)
 		else:
 			self.logs.addItem('Due to high dimentionality, graph could not be plotted')
 
@@ -1582,7 +1582,7 @@ class Software(QMainWindow, Ui_MainWindow):
 		self.logs.addItem(f'RMS Error: {error}')
 		self.logs.addItem("Generating Output file")
 		self.nmf_data = nmf.denormalizeData(self.nmf_data)
-		self.writeData("NMF_", self.nmf_data)
+		writeData(self, "NMF_", self.nmf_data)
 		self.logs.addItem(f"Output file NMF_{self.OUTPUT_FILENAME} generated")
 		self.setProgressBar(False)
 		
@@ -1590,17 +1590,17 @@ class Software(QMainWindow, Ui_MainWindow):
 		if (int)(selectedComponents) == 1:
 			newpid = os.fork()
 			if newpid == 0:
-				self.plot1DGraph(self.nmf_data)
+				plot1DGraph(self, self.nmf_data)
 
 		elif (int)(selectedComponents) == 2:
 			newpid = os.fork()
 			if newpid == 0:
-				self.plot2DGraph(self.nmf_data)
+				plot2DGraph(self, self.nmf_data)
 
 		elif (int)(selectedComponents) == 3:
 			newpid = os.fork()
 			if newpid == 0:
-				self.plot3DGraph(self.nmf_data)
+				plot3DGraph(self, self.nmf_data)
 
 		else:
 			self.logs.addItem('Due to high dimentionality, graph could not be plotted')
@@ -1614,7 +1614,7 @@ class Software(QMainWindow, Ui_MainWindow):
 		self.ATGP_data, IDX = eea.ATGP(np.transpose(pca_data), self.end_member_list[2])
 		self.logs.addItem("Analysis completed")
 		self.logs.addItem("Generating output file")
-		self.writeData("ATGP_", self.ATGP_data)
+		writeData(self, "ATGP_", self.ATGP_data)
 		self.logs.addItem(f"Output File ATGP_{self.OUTPUT_FILENAME} generated")
 		self.setProgressBar(False)
 
@@ -1630,7 +1630,7 @@ class Software(QMainWindow, Ui_MainWindow):
 		self.logs.addItem("Analysis completed")
 		self.logs.addItem(f'Number of iterations: {n_iterations}')
 		self.logs.addItem("Generating Output file")
-		self.writeData("NFinder_", self.nfindr_data)
+		writeData(self, "NFinder_", self.nfindr_data)
 		self.logs.addItem(f"Output file NFinder_{self.OUTPUT_FILENAME} generated")
 		self.setProgressBar(False)
 
@@ -1644,7 +1644,7 @@ class Software(QMainWindow, Ui_MainWindow):
 		self.logs.addItem("Initiating SUNSAL algorithm")
 		self.sunsal_data, res_p, res_d, sunsal_i = ss.SUNSAL(np.transpose(nfindr_data), np.transpose(self.pca_data))
 		self.logs.addItem("Running SUNSAL algorithm")
-		self.writeData("SUNSAL_", self.sunsal_data)
+		writeData(self, "SUNSAL_", self.sunsal_data)
 		self.logs.addItem(f"Output file SUNSAL_{self.OUTPUT_FILENAME} generated")
 		self.logs.addItem(f"Number of iterations are {sunsal_i}")
 		self.setProgressBar(False)
@@ -1671,7 +1671,7 @@ class Software(QMainWindow, Ui_MainWindow):
 		self.logs.addItem("Initiating VCA algorithm")
 		self.vca_data, IDX, proj_data = sparse.vca(nfindr_data, self.end_member_list[2])
 		self.logs.addItem("Running VCA algorithm")
-		self.writeData("VCA_", self.vca_data)
+		writeData(self, "VCA_", self.vca_data)
 		self.logs.addItem(f"Output file VCA_{self.OUTPUT_FILENAME} generated")
 		self.setProgressBar(False)
 
@@ -1684,7 +1684,7 @@ class Software(QMainWindow, Ui_MainWindow):
 		self.logs.addItem("Initiating PPI algorithm")
 		self.ppi_data, IDX = eea.PPI(np.transpose(pca_data), self.end_member_list[2])
 		self.logs.addItem("Running PPI algorithm")
-		self.writeData("PPI_", self.ppi_data)
+		writeData(self, "PPI_", self.ppi_data)
 		self.logs.addItem(f"Output file PPI_{self.OUTPUT_FILENAME} generated")
 		self.setProgressBar(False)
 
@@ -1699,7 +1699,7 @@ class Software(QMainWindow, Ui_MainWindow):
 		self.NNLS_data = LMM.NNLS(pca_data, nfindr_data)
 		self.logs.addItem("Analysis completed")
 		self.logs.addItem("Generating output file")
-		self.writeData("NNLS_", self.NNLS_data)
+		writeData(self, "NNLS_", self.NNLS_data)
 		self.logs.addItem(f"Output File NNLS_{self.OUTPUT_FILENAME} generated")
 		self.setProgressBar(False)
 
@@ -1713,7 +1713,7 @@ class Software(QMainWindow, Ui_MainWindow):
 		self.UCLS_data = LMM.UCLS(pca_data, nfindr_data)
 		self.logs.addItem("Analysis completed")
 		self.logs.addItem("Generating output file")
-		self.writeData("UCLS_", self.UCLS_data)
+		writeData(self, "UCLS_", self.UCLS_data)
 		self.logs.addItem(f"Output File UCLS_{self.OUTPUT_FILENAME} generated")
 		self.setProgressBar(False)
 
@@ -1727,7 +1727,7 @@ class Software(QMainWindow, Ui_MainWindow):
 		self.UCLS_data = LMM.FCLS(pca_data, nfindr_data)
 		self.logs.addItem("Analysis completed")
 		self.logs.addItem("Generating output file")
-		self.writeData("FCLS_", self.UCLS_data)
+		writeData(self, "FCLS_", self.UCLS_data)
 		self.logs.addItem(f"Output File FCLS_{self.OUTPUT_FILENAME} generated")
 		self.setProgressBar(False)
 
@@ -1742,110 +1742,110 @@ class Software(QMainWindow, Ui_MainWindow):
 		self.logs.addItem("Analysis completed")
 		self.logs.addItem(f"RMS Error: {rmse}")
 		self.logs.addItem("Generating output file")
-		self.writeData("GBMsemiNMF_", self.GBMsemiNMF_data)
+		writeData(self, "GBMsemiNMF_", self.GBMsemiNMF_data)
 		self.logs.addItem(f"Output File GBMsemiNMF_{self.OUTPUT_FILENAME} generated")
 		self.setProgressBar(False)
 
 
-	def writeData(self, prefix, data):
-		'''
-		Writes data into a file in CSV (Comma Seperated Value) format
-		'''
+def writeData(context, prefix, data):
+	'''
+	Writes data into a file in CSV (Comma Seperated Value) format
+	'''
 
-		with open(prefix + self.OUTPUT_FILENAME, 'w') as writeFile:
-			writer = csv.writer(writeFile)
+	with open(prefix + context.OUTPUT_FILENAME, 'w') as writeFile:
+		writer = csv.writer(writeFile)
 
-			dataList = []
-			for row in data:
-				temp = []
-				for cols in row:
-					temp.append(cols)
-				dataList.append(temp)
-			writer.writerows(dataList)
+		dataList = []
+		for row in data:
+			temp = []
+			for cols in row:
+				temp.append(cols)
+			dataList.append(temp)
+		writer.writerows(dataList)
 
-		writeFile.close()
-
-
-	def plot1DGraph(self, data):
-		'''
-		Plots one dimensional data
-		'''
-
-		x = data[:,0]
-		y = np.zeros((len(x),), dtype=np.int)
-		plt.close('all')
-		fig1 = plt.figure()
-		pltData = [x,y]
-		plt.scatter(pltData[0],pltData[1])
-		
-		xAxisLine = ((min(pltData[0]), max(pltData[0])), (0, 0))
-		plt.plot(xAxisLine[0], xAxisLine[1], 'r')
-		# yAxisLine = ((0, 0), (min(pltData[1]), max(pltData[1])))
-		# plt.plot(yAxisLine[0], yAxisLine[1], 'r')
-
-		plt.xlabel("comp 1") 
-		plt.title("1D plot")
-		plt.show()
+	writeFile.close()
 
 
-	def plot2DGraph(self, data):
-		'''
-		Plots two dimensional data
-		'''
+def plot1DGraph(context, data):
+	'''
+	Plots one dimensional data
+	'''
 
-		x = data[:,0]
-		y = data[:,1]
-		plt.close('all')
-		fig1 = plt.figure()
-		pltData = [x,y]
-		plt.scatter(pltData[0],pltData[1])
-		
-		xAxisLine = ((min(pltData[0]), max(pltData[0])), (0, 0))
-		plt.plot(xAxisLine[0], xAxisLine[1], 'r')
-		yAxisLine = ((0, 0), (min(pltData[1]), max(pltData[1])))
-		plt.plot(yAxisLine[0], yAxisLine[1], 'r')
+	x = data[:,0]
+	y = np.zeros((len(x),), dtype=np.int)
+	plt.close('all')
+	fig1 = plt.figure()
+	pltData = [x,y]
+	plt.scatter(pltData[0],pltData[1])
+	
+	xAxisLine = ((min(pltData[0]), max(pltData[0])), (0, 0))
+	plt.plot(xAxisLine[0], xAxisLine[1], 'r')
+	# yAxisLine = ((0, 0), (min(pltData[1]), max(pltData[1])))
+	# plt.plot(yAxisLine[0], yAxisLine[1], 'r')
 
-		plt.xlabel("comp 1") 
-		plt.ylabel("comp 2")
-		plt.title("2D plot")
-		plt.show()	
-
-
-	def plot3DGraph(self, data):
-		'''
-		Plots three dimensional data
-		'''
-
-		x = data[:,0]
-		y = data[:,1]
-		z = data[:,2]
-		plt.close('all')
-		fig1 = plt.figure()
-		ax = Axes3D(fig1)
-		pltData = [x,y,z]
-		ax.scatter(pltData[0],pltData[1],pltData[2])
-		
-		xAxisLine = ((min(pltData[0]), max(pltData[0])), (0, 0), (0,0))
-		ax.plot(xAxisLine[0], xAxisLine[1], xAxisLine[2], 'r')
-		yAxisLine = ((0, 0), (min(pltData[1]), max(pltData[1])), (0,0))
-		ax.plot(yAxisLine[0], yAxisLine[1], yAxisLine[2], 'r')
-		zAxisLine = ((0, 0), (0,0), (min(pltData[2]), max(pltData[2])))
-		ax.plot(zAxisLine[0], zAxisLine[1], zAxisLine[2], 'r')
-
-		ax.set_xlabel("comp 1") 
-		ax.set_ylabel("comp 2")
-		ax.set_zlabel("comp 3")
-		ax.set_title("3D plot")
-		plt.show()
+	plt.xlabel("comp 1") 
+	plt.title("1D plot")
+	plt.show()
 
 
-	def writeError(self, err_msg):
-		'''
-		This method receives input from stderr as PyQtSlot and prints it in the 
-		logs section
-		'''
+def plot2DGraph(context, data):
+	'''
+	Plots two dimensional data
+	'''
 
-		self.logs.addItem(err_msg)
+	x = data[:,0]
+	y = data[:,1]
+	plt.close('all')
+	fig1 = plt.figure()
+	pltData = [x,y]
+	plt.scatter(pltData[0],pltData[1])
+	
+	xAxisLine = ((min(pltData[0]), max(pltData[0])), (0, 0))
+	plt.plot(xAxisLine[0], xAxisLine[1], 'r')
+	yAxisLine = ((0, 0), (min(pltData[1]), max(pltData[1])))
+	plt.plot(yAxisLine[0], yAxisLine[1], 'r')
+
+	plt.xlabel("comp 1") 
+	plt.ylabel("comp 2")
+	plt.title("2D plot")
+	plt.show()	
+
+
+def plot3DGraph(context, data):
+	'''
+	Plots three dimensional data
+	'''
+
+	x = data[:,0]
+	y = data[:,1]
+	z = data[:,2]
+	plt.close('all')
+	fig1 = plt.figure()
+	ax = Axes3D(fig1)
+	pltData = [x,y,z]
+	ax.scatter(pltData[0],pltData[1],pltData[2])
+	
+	xAxisLine = ((min(pltData[0]), max(pltData[0])), (0, 0), (0,0))
+	ax.plot(xAxisLine[0], xAxisLine[1], xAxisLine[2], 'r')
+	yAxisLine = ((0, 0), (min(pltData[1]), max(pltData[1])), (0,0))
+	ax.plot(yAxisLine[0], yAxisLine[1], yAxisLine[2], 'r')
+	zAxisLine = ((0, 0), (0,0), (min(pltData[2]), max(pltData[2])))
+	ax.plot(zAxisLine[0], zAxisLine[1], zAxisLine[2], 'r')
+
+	ax.set_xlabel("comp 1") 
+	ax.set_ylabel("comp 2")
+	ax.set_zlabel("comp 3")
+	ax.set_title("3D plot")
+	plt.show()
+
+
+def writeError(context, err_msg):
+	'''
+	This method receives input from stderr as PyQtSlot and prints it in the 
+	logs section
+	'''
+
+	context.logs.addItem(err_msg)
 
 
 ##########################################

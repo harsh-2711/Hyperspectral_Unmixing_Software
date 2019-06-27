@@ -960,6 +960,7 @@ class GBMsemiNMFUI(QMainWindow, Ui_MainWindow):
 		
 		self.show()
 
+
 class Software(QMainWindow, Ui_MainWindow):
 
 	def __init__(self):
@@ -1292,459 +1293,454 @@ class Software(QMainWindow, Ui_MainWindow):
 		# max_iterations = self.maxit.toPlainText()
 
 		# Validating dataset path
-		self.dataExists = self.validateInputFile(self.file)
+		self.dataExists = validateInputFile(self, self.file)
 
 		# Validating output folder path
 		if self.dataExists:
-			self.outputFolderExists = self.validateOutputFolder(foldername)
+			self.outputFolderExists = validateOutputFolder(self, foldername)
 
 		# Validating number of components
 		if self.dataExists and self.outputFolderExists:
-			self.trueComponents = self.validateComponents(selectedComponents)
+			self.trueComponents = validateComponents(self, selectedComponents)
 
 		# Validating number of jobs
 		if self.dataExists and self.outputFolderExists and self.trueComponents:
-			self.enoughProcs = self.validateJobs(n_jobs)
+			self.enoughProcs = validateJobs(self,n_jobs)
 
 		# Starting selected algorithm if everything's good
 		if self.dataExists and self.outputFolderExists and self.trueComponents and self.enoughProcs:
 
 			if self.currentAlgo == "PCA":
 				self.logs.addItem(f'Starting Principal Component Analysis for getting top {self.components.toPlainText()} bands')
-				self.startPCA(selectedComponents)
+				startPCA(self, selectedComponents)
 
 			elif self.currentAlgo == "NMF":
 				self.startNMFWindow()
 				self.logs.addItem(f'Starting NMF for getting top {self.components.toPlainText()} bands')
 				newpid1 = os.fork()
 				if newpid1 == 0:
-					nmf_data = self.startNMF(selectedComponents, tolerance, max_iterations)
+					nmf_data = startNMF(selectedComponents, tolerance, max_iterations)
 
 			elif self.currentAlgo == "NFinder":
 				self.logs.addItem(f'Starting N-Finder for getting top {self.components.toPlainText()} bands')
-				self.startHfcVd(selectedComponents)
-				self.startNFINDR(self.pca_data)
+				startNFINDR(self, self.pca_data)
+				startHfcVd(self, selectedComponents)
 				# self.startSUNSAL(self.nfindr_data, self.Et)
 
 			elif self.currentAlgo == "SUNSAL":
 				self.logs.addItem(f'Starting SUNSAL for getting estimated abundance matrix')
-				self.startHfcVd(selectedComponents)
-				self.startNFINDR(self.pca_data)
-				self.startSUNSAL(self.nfindr_data)
+				startHfcVd(self, selectedComponents)
+				startNFINDR(self, self.pca_data)
+				startSUNSAL(self, self.nfindr_data)
 
 			elif self.currentAlgo == "HfcVd":
 				self.logs.addItem(f'Starting HfcVd for getting number of end members')
-				self.startHfcVd(selectedComponents)
+				startHfcVd(self, selectedComponents)
 
 			elif self.currentAlgo == "ATGP":
 				self.logs.addItem(f'Starting ATGP for getting Endmember abundances')
-				self.startHfcVd(selectedComponents)
-				self.startATGP(self.pca_data)
+				startHfcVd(self, selectedComponents)
+				startATGP(self, self.pca_data)
 
 			elif self.currentAlgo == "PPI":
 				self.logs.addItem(f'Starting PPI for getting Endmember Extraction')
-				self.startHfcVd(selectedComponents)
-				self.startPPI(self.pca_data)
+				startHfcVd(self, selectedComponents)
+				startPPI(self, self.pca_data)
 
 			elif self.currentAlgo == "VCA":
 				self.logs.addItem(f'Starting VCA for getting estimated endmembers signature matrix')
-				self.startHfcVd(selectedComponents)
-				self.startNFINDR(self.pca_data)
-				self.startVCA(self.nfindr_data)
+				startHfcVd(self, selectedComponents)
+				startNFINDR(self, self.pca_data)
+				startVCA(self, self.nfindr_data)
 
 			elif self.currentAlgo == "NNLS":
 				self.logs.addItem(f'Starting NNLS for getting estimated abundance matrix')
-				self.startHfcVd(selectedComponents)
-				self.startNFINDR(self.pca_data)
-				self.startNNLS(self.pca_data, self.nfindr_data)
+				startHfcVd(selectedComponents)
+				startNFINDR(self, self.pca_data)
+				startNNLS(self, self.pca_data, self.nfindr_data)
 
 			elif self.currentAlgo == "UCLS":
 				self.logs.addItem(f'Starting UCLS for getting estimated abundance matrix')
-				self.startHfcVd(selectedComponents)
-				self.startNFINDR(self.pca_data)
-				self.startUCLS(self.pca_data, self.nfindr_data)
+				startHfcVd(self, selectedComponents)
+				startNFINDR(self, self.pca_data)
+				startUCLS(self, self.pca_data, self.nfindr_data)
 
 			elif self.currentAlgo == "FCLS":
 				self.logs.addItem(f'Starting FCLS for getting estimated abundance matrix')
-				self.startHfcVd(selectedComponents)
-				self.startNFINDR(self.pca_data)
-				self.startFCLS(self.pca_data, self.nfindr_data)
+				startHfcVd(self, selectedComponents)
+				startNFINDR(self, self.pca_data)
+				startFCLS(self, self.pca_data, self.nfindr_data)
 
 			elif self.currentAlgo == "KerPCA":
 				self.logs.addItem(f'Starting Kernel Principal Component Analysis for getting top {self.components.toPlainText()} bands')
-				self.startKerPCA(selectedComponents)
+				startKerPCA(self, selectedComponents)
 
 			elif self.currentAlgo == "LLE":
 				self.logs.addItem(f'Starting Locally Linear Embedding algorithm for getting top {self.components.toPlainText()} bands')
-				self.startLLE(selectedComponents)
+				startLLE(self, selectedComponents)
 
 			elif self.currentAlgo == "GBM using semi-NMF":
 				self.logs.addItem(f'Starting Generalized Bilinear Model for Non-Linear Unmixing')
-				self.startHfcVd(selectedComponents)
-				self.startNFINDR(self.pca_data)
-				self.startGBMsemiNMF(self.pca_data, self.nfindr_data)
+				startHfcVd(self, selectedComponents)
+				startNFINDR(self, self.pca_data)
+				startGBMsemiNMF(self, self.pca_data, self.nfindr_data)
 
 	
 		self.progress.setRange(0,1)
 		
 
-	def validateInputFile(self, filename):
-		'''
-		Validates the dataset path and loads the dataset if path exists
-		'''
+def validateInputFile(context, filename):
+	'''
+	Validates the dataset path and loads the dataset if path exists
+	'''
 
-		if filename:
-			try:
-				self.dataset = gdal.Open(filename, gdal.GA_ReadOnly)
-				self.logs.addItem("Dataset imported successfully")
-				return True
-			except:
-				self.logs.addItem(gdal.GetLastErrorMsg())
-				self.logs.addItem('Use command line argument gdalinfo --formats to get more insights')
-				return False
-		else:
-			self.logs.addItem("Please provide path to dataset")
+	if filename:
+		try:
+			context.dataset = gdal.Open(filename, gdal.GA_ReadOnly)
+			context.logs.addItem("Dataset imported successfully")
+			return True
+		except:
+			context.logs.addItem(gdal.GetLastErrorMsg())
+			context.logs.addItem('Use command line argument gdalinfo --formats to get more insights')
 			return False
-
-
-	def validateOutputFolder(self, foldername):
-		'''
-		Validates the existence of output folder where outfile file will be 
-		created after analysis
-		'''
-
-		if foldername:
-			if os.path.isdir(foldername):
-				return True
-		self.logs.addItem("Please provide a valid directory to save output file")
+	else:
+		context.logs.addItem("Please provide path to dataset")
 		return False
 
 
-	def validateComponents(self, selectedComponents):
-		'''
-		Validates the number of components w.r.t. the input dataset
-		'''
+def validateOutputFolder(context, foldername):
+	'''
+	Validates the existence of output folder where outfile file will be 
+	created after analysis
+	'''
 
-		totalComponents = self.dataset.RasterCount
-		if selectedComponents.isdigit():
-			if (int)(selectedComponents) > 0 and (int)(selectedComponents) <= totalComponents:
-				return True
-		self.logs.addItem(f'Incorrect number of bands... Max possible number of bands are {totalComponents}')
-		return False
+	if foldername:
+		if os.path.isdir(foldername):
+			return True
+	context.logs.addItem("Please provide a valid directory to save output file")
+	return False
 
 
-	def validateJobs(self, n_jobs):
-		'''
-		Validates the number of jobs desired as per processors available
-		'''
+def validateComponents(context, selectedComponents):
+	'''
+	Validates the number of components w.r.t. the input dataset
+	'''
 
-		n_processors = mp.cpu_count()
-		if n_jobs.isdigit():
-			if (int)(n_jobs) > 0 and (int)(n_jobs) <= n_processors:
-				return True
-		self.logs.addItem(f'Number of jobs must be greater than 0 and less than {n_processors}')
-		return False
+	totalComponents = context.dataset.RasterCount
+	if selectedComponents.isdigit():
+		if (int)(selectedComponents) > 0 and (int)(selectedComponents) <= totalComponents:
+			return True
+	context.logs.addItem(f'Incorrect number of bands... Max possible number of bands are {totalComponents}')
+	return False
+
+
+def validateJobs(context, n_jobs):
+	'''
+	Validates the number of jobs desired as per processors available
+	'''
+
+	n_processors = mp.cpu_count()
+	if n_jobs.isdigit():
+		if (int)(n_jobs) > 0 and (int)(n_jobs) <= n_processors:
+			return True
+	context.logs.addItem(f'Number of jobs must be greater than 0 and less than {n_processors}')
+	return False
+
+
+def startLLE(context, selectedComponents):
+	'''
+	Main function for LLE
+	'''
+
+	context.datasetAsArray = context.dataset.ReadAsArray()
+	lleAlgo = LLE(context.datasetAsArray, (int)(context.jobs.toPlainText()))
+	lleAlgo.scaleData()
+
+	context.lle_data = lleAlgo.getPrincipalComponents_noOfComponents((int)(context.components.toPlainText()))
 	
+	context.logs.addItem("Analysis completed")
+	context.logs.addItem("Generating Output file")
+	writeData(context, "LLE_", context.lle_data)
+	context.logs.addItem(f"Output file LLE_{context.OUTPUT_FILENAME} generated")
+	context.setProgressBar(False)
 	
-	def startPCA(self,selectedComponents):
-		'''
-		Main function for PCA
-		'''
+	''' To plot the points after LDA '''
+	if (int)(selectedComponents) == 1:
+		newpid = os.fork()
+		if newpid == 0:
+			plot1DGraph(context,context.lle_data)
 
-		# t1 = Thread(target=PCAThread2)
-		self.datasetAsArray = self.dataset.ReadAsArray()
-		pca = PrincipalComponentAnalysis(self.datasetAsArray)
-		pca.scaleData()
+	elif (int)(selectedComponents) == 2:
+		newpid = os.fork()
+		if newpid == 0:
+			plot2DGraph(context,context.lle_data)
 
-		# t1.start()
-		self.pca_data = pca.getPrincipalComponents_noOfComponents((int)(self.components.toPlainText()))
-		retainedVariance = pca.getRetainedVariance((int)(self.components.toPlainText()))
-		
-		self.logs.addItem("Analysis completed")
-		self.logs.addItem("Generating Output file")
-		writeData(self, "PCA_", self.pca_data)
-		# t1.join()
-		self.logs.addItem(f"Output file PCA_{self.OUTPUT_FILENAME} generated")
-		self.logs.addItem(f'Retained Variance: {retainedVariance}')
-		self.setProgressBar(False)
-		
-		''' To plot the points after PCA '''
-		if (int)(selectedComponents) == 1:
-			newpid = os.fork()
-			if newpid == 0:
-				plot1DGraph(self, self.pca_data)
-
-		elif (int)(selectedComponents) == 2:
-			newpid = os.fork()
-			if newpid == 0:
-				plot2DGraph(self, self.pca_data)
-
-		elif (int)(selectedComponents) == 3:
-			newpid = os.fork()
-			if newpid == 0:
-				plot3DGraph(self, self.pca_data)
-
-		else:
-			self.logs.addItem('Due to high dimentionality, graph could not be plotted')
-
-	# def PCAThread2():
-	# 	subprocess.call()
-	# 	self.pca_data = pca.getPrincipalComponents_noOfComponents((int)(self.components.toPlainText()))
-	# 	self.retainedVariance = pca.getRetainedVariance((int)(self.components.toPlainText()))
-	# 	writeData(self, "PCA_", self.pca_data)
-
-
-	def startKerPCA(self, selectedComponents):
-		'''
-		Main function for Kernel PCA
-		'''
-
-		self.datasetAsArray = self.dataset.ReadAsArray()
-		kernelpca = KernelPCAAlgorithm(self.datasetAsArray, (int)(self.jobs.toPlainText()))
-		kernelpca.scaleData()
-
-		self.ker_pca_data = kernelpca.getPrincipalComponents_noOfComponents((int)(self.components.toPlainText()))
-		
-		self.logs.addItem("Analysis completed")
-		self.logs.addItem("Generating Output file")
-		writeData(self, "KernelPCA_", self.ker_pca_data)
-		self.logs.addItem(f"Output file KernelPCA_{self.OUTPUT_FILENAME} generated")
-		self.setProgressBar(False)
-		
-		''' To plot the points after Kernel PCA '''
-		if (int)(selectedComponents) == 1:
-			newpid = os.fork()
-			if newpid == 0:
-				plot1DGraph(self,self.ker_pca_data)
-
-		elif (int)(selectedComponents) == 2:
-			newpid = os.fork()
-			if newpid == 0:
-				plot2DGraph(self,self.ker_pca_data)
-
-		elif (int)(selectedComponents) == 3:
-			newpid = os.fork()
-			if newpid == 0:
-				plot3DGraph(self,self.ker_pca_data)
-
-		else:
-			self.logs.addItem('Due to high dimentionality, graph could not be plotted')
-
-
-	def startLLE(self, selectedComponents):
-		'''
-		Main function for LLE
-		'''
-
-		self.datasetAsArray = self.dataset.ReadAsArray()
-		lleAlgo = LLE(self.datasetAsArray, (int)(self.jobs.toPlainText()))
-		lleAlgo.scaleData()
-
-		self.lle_data = lleAlgo.getPrincipalComponents_noOfComponents((int)(self.components.toPlainText()))
-		
-		self.logs.addItem("Analysis completed")
-		self.logs.addItem("Generating Output file")
-		writeData(self, "LLE_", self.lle_data)
-		self.logs.addItem(f"Output file LLE_{self.OUTPUT_FILENAME} generated")
-		self.setProgressBar(False)
-		
-		''' To plot the points after LDA '''
-		if (int)(selectedComponents) == 1:
-			newpid = os.fork()
-			if newpid == 0:
-				plot1DGraph(self,self.lle_data)
-
-		elif (int)(selectedComponents) == 2:
-			newpid = os.fork()
-			if newpid == 0:
-				plot2DGraph(self,self.lle_data)
-
-		elif (int)(selectedComponents) == 3:
-			newpid = os.fork()
-			if newpid == 0:
-				plot3DGraph(self,self.lle_data)
-		else:
-			self.logs.addItem('Due to high dimentionality, graph could not be plotted')
+	elif (int)(selectedComponents) == 3:
+		newpid = os.fork()
+		if newpid == 0:
+			plot3DGraph(context,context.lle_data)
+	else:
+		context.logs.addItem('Due to high dimentionality, graph could not be plotted')
 
 
 
-	def startNMF(self,selectedComponents, tolerance, max_iterations):
-		'''
-		Main function for NMF
-		'''
+def startNMF(context,selectedComponents, tolerance, max_iterations):
+	'''
+	Main function for NMF
+	'''
 
-		self.datasetAsArray = self.dataset.ReadAsArray()
-		nmf = NonNegativeMatrixFactorisation(self.datasetAsArray)
-		nmf.scaleData()
-		self.nmf_data = nmf.getReducedComponents_noOfComponents((int)(self.components.toPlainText()), (int)(self.tolerance.toPlainText()), (int)(self.max_iterations.toPlainText()))
-		error = nmf.errorFactor((int)(self.components.toPlainText()))
-		self.logs.addItem("Analysis completed")
-		self.logs.addItem(f'RMS Error: {error}')
-		self.logs.addItem("Generating Output file")
-		self.nmf_data = nmf.denormalizeData(self.nmf_data)
-		writeData(self, "NMF_", self.nmf_data)
-		self.logs.addItem(f"Output file NMF_{self.OUTPUT_FILENAME} generated")
-		self.setProgressBar(False)
-		
-		''' To plot the points after NMF '''
-		if (int)(selectedComponents) == 1:
-			newpid = os.fork()
-			if newpid == 0:
-				plot1DGraph(self, self.nmf_data)
+	context.datasetAsArray = context.dataset.ReadAsArray()
+	nmf = NonNegativeMatrixFactorisation(context.datasetAsArray)
+	nmf.scaleData()
+	context.nmf_data = nmf.getReducedComponents_noOfComponents((int)(context.components.toPlainText()), (int)(context.tolerance.toPlainText()), (int)(context.max_iterations.toPlainText()))
+	error = nmf.errorFactor((int)(context.components.toPlainText()))
+	context.logs.addItem("Analysis completed")
+	context.logs.addItem(f'RMS Error: {error}')
+	context.logs.addItem("Generating Output file")
+	context.nmf_data = nmf.denormalizeData(context.nmf_data)
+	writeData(context, "NMF_", context.nmf_data)
+	context.logs.addItem(f"Output file NMF_{context.OUTPUT_FILENAME} generated")
+	context.setProgressBar(False)
+	
+	''' To plot the points after NMF '''
+	if (int)(selectedComponents) == 1:
+		newpid = os.fork()
+		if newpid == 0:
+			plot1DGraph(context, context.nmf_data)
 
-		elif (int)(selectedComponents) == 2:
-			newpid = os.fork()
-			if newpid == 0:
-				plot2DGraph(self, self.nmf_data)
+	elif (int)(selectedComponents) == 2:
+		newpid = os.fork()
+		if newpid == 0:
+			plot2DGraph(context, context.nmf_data)
 
-		elif (int)(selectedComponents) == 3:
-			newpid = os.fork()
-			if newpid == 0:
-				plot3DGraph(self, self.nmf_data)
+	elif (int)(selectedComponents) == 3:
+		newpid = os.fork()
+		if newpid == 0:
+			plot3DGraph(context, context.nmf_data)
 
-		else:
-			self.logs.addItem('Due to high dimentionality, graph could not be plotted')
-
-
-	def startATGP(self, pca_data):
-		'''
-		Main function to run ATGP
-		'''
-		self.logs.addItem("Initiating ATGP algorithm")
-		self.ATGP_data, IDX = eea.ATGP(np.transpose(pca_data), self.end_member_list[2])
-		self.logs.addItem("Analysis completed")
-		self.logs.addItem("Generating output file")
-		writeData(self, "ATGP_", self.ATGP_data)
-		self.logs.addItem(f"Output File ATGP_{self.OUTPUT_FILENAME} generated")
-		self.setProgressBar(False)
+	else:
+		context.logs.addItem('Due to high dimentionality, graph could not be plotted')
 
 
-	def startNFINDR(self, pca_data):
-		'''
-		Main function for N-Finder algorithm
-		'''
-
-		self.datasetAsArray = self.dataset.ReadAsArray()
-		nfindr = NFindrModule()
-		self.nfindr_data, Et, IDX, n_iterations = nfindr.NFINDR(pca_data, self.end_member_list[2])
-		self.logs.addItem("Analysis completed")
-		self.logs.addItem(f'Number of iterations: {n_iterations}')
-		self.logs.addItem("Generating Output file")
-		writeData(self, "NFinder_", self.nfindr_data)
-		self.logs.addItem(f"Output file NFinder_{self.OUTPUT_FILENAME} generated")
-		self.setProgressBar(False)
+def startATGP(context, pca_data):
+	'''
+	Main function to run ATGP
+	'''
+	context.logs.addItem("Initiating ATGP algorithm")
+	context.ATGP_data, IDX = eea.ATGP(np.transpose(pca_data), context.end_member_list[2])
+	context.logs.addItem("Analysis completed")
+	context.logs.addItem("Generating output file")
+	writeData(context, "ATGP_", context.ATGP_data)
+	context.logs.addItem(f"Output File ATGP_{context.OUTPUT_FILENAME} generated")
+	context.setProgressBar(False)
 
 
-	def startSUNSAL(self, nfindr_data):
-		'''
-		Main function for SUNSAL algorithm
-		'''
+def startNFINDR(context, pca_data):
+	'''
+	Main function for N-Finder algorithm
+	'''
 
-		ss = SUNSALModule()
-		self.logs.addItem("Initiating SUNSAL algorithm")
-		self.sunsal_data, res_p, res_d, sunsal_i = ss.SUNSAL(np.transpose(nfindr_data), np.transpose(self.pca_data))
-		self.logs.addItem("Running SUNSAL algorithm")
-		writeData(self, "SUNSAL_", self.sunsal_data)
-		self.logs.addItem(f"Output file SUNSAL_{self.OUTPUT_FILENAME} generated")
-		self.logs.addItem(f"Number of iterations are {sunsal_i}")
-		self.setProgressBar(False)
-
-
-	def startHfcVd(self, selectedComponents):
-		'''
-		Main function for HfcVd algorithm
-		'''
-
-		self.startPCA(selectedComponents)
-		self.logs.addItem("Initiating HfcVd algorithm")
-		self.end_member_list = vd.HfcVd(self.pca_data)
-		self.logs.addItem("Running SUNSAL algorithm")
-		self.logs.addItem(f"Number of end member(s) found is/are {self.end_member_list[2]}")
-		self.setProgressBar(False)
+	context.datasetAsArray = context.dataset.ReadAsArray()
+	nfindr = NFindrModule()
+	context.nfindr_data, Et, IDX, n_iterations = nfindr.NFINDR(pca_data, context.end_member_list[2])
+	context.logs.addItem("Analysis completed")
+	context.logs.addItem(f'Number of iterations: {n_iterations}')
+	context.logs.addItem("Generating Output file")
+	writeData(context, "NFinder_", context.nfindr_data)
+	context.logs.addItem(f"Output file NFinder_{context.OUTPUT_FILENAME} generated")
+	context.setProgressBar(False)
 
 
-	def startVCA(self, nfindr_data):
-		'''
-		Main function for VCA algorithm
-		'''
+def startSUNSAL(context, nfindr_data):
+	'''
+	Main function for SUNSAL algorithm
+	'''
 
-		self.logs.addItem("Initiating VCA algorithm")
-		self.vca_data, IDX, proj_data = sparse.vca(nfindr_data, self.end_member_list[2])
-		self.logs.addItem("Running VCA algorithm")
-		writeData(self, "VCA_", self.vca_data)
-		self.logs.addItem(f"Output file VCA_{self.OUTPUT_FILENAME} generated")
-		self.setProgressBar(False)
-
-
-	def startPPI(self, pca_data):
-		'''
-		Main function for PPI algorithm
-		'''
-
-		self.logs.addItem("Initiating PPI algorithm")
-		self.ppi_data, IDX = eea.PPI(np.transpose(pca_data), self.end_member_list[2])
-		self.logs.addItem("Running PPI algorithm")
-		writeData(self, "PPI_", self.ppi_data)
-		self.logs.addItem(f"Output file PPI_{self.OUTPUT_FILENAME} generated")
-		self.setProgressBar(False)
+	ss = SUNSALModule()
+	context.logs.addItem("Initiating SUNSAL algorithm")
+	context.sunsal_data, res_p, res_d, sunsal_i = ss.SUNSAL(np.transpose(nfindr_data), np.transpose(context.pca_data))
+	context.logs.addItem("Running SUNSAL algorithm")
+	writeData(context, "SUNSAL_", context.sunsal_data)
+	context.logs.addItem(f"Output file SUNSAL_{context.OUTPUT_FILENAME} generated")
+	context.logs.addItem(f"Number of iterations are {sunsal_i}")
+	context.setProgressBar(False)
 
 
+def startHfcVd(context, selectedComponents):
+	'''
+	Main function for HfcVd algorithm
+	'''
 
-	def startNNLS(self, pca_data, nfindr_data):
-		'''
-		Main function for NNLS algorithm
-		'''
-
-		self.logs.addItem("Initiating NNLS algorithm")
-		self.NNLS_data = LMM.NNLS(pca_data, nfindr_data)
-		self.logs.addItem("Analysis completed")
-		self.logs.addItem("Generating output file")
-		writeData(self, "NNLS_", self.NNLS_data)
-		self.logs.addItem(f"Output File NNLS_{self.OUTPUT_FILENAME} generated")
-		self.setProgressBar(False)
+	startPCA(context, selectedComponents)
+	context.logs.addItem("Initiating HfcVd algorithm")
+	context.end_member_list = vd.HfcVd(context.pca_data)
+	context.logs.addItem("Running SUNSAL algorithm")
+	context.logs.addItem(f"Number of end member(s) found is/are {context.end_member_list[2]}")
+	context.setProgressBar(False)
 
 
-	def startUCLS(self, pca_data, nfindr_data):
-		'''
-		Main function for UCLS algorithm
-		'''
+def startVCA(context, nfindr_data):
+	'''
+	Main function for VCA algorithm
+	'''
 
-		self.logs.addItem("Initiating UCLS algorithm")
-		self.UCLS_data = LMM.UCLS(pca_data, nfindr_data)
-		self.logs.addItem("Analysis completed")
-		self.logs.addItem("Generating output file")
-		writeData(self, "UCLS_", self.UCLS_data)
-		self.logs.addItem(f"Output File UCLS_{self.OUTPUT_FILENAME} generated")
-		self.setProgressBar(False)
-
-
-	def startFCLS(self, pca_data, nfindr_data):
-		'''
-		Main function for FCLS algorithm
-		'''
-
-		self.logs.addItem("Initiating FCLS algorithm")
-		self.UCLS_data = LMM.FCLS(pca_data, nfindr_data)
-		self.logs.addItem("Analysis completed")
-		self.logs.addItem("Generating output file")
-		writeData(self, "FCLS_", self.UCLS_data)
-		self.logs.addItem(f"Output File FCLS_{self.OUTPUT_FILENAME} generated")
-		self.setProgressBar(False)
+	context.logs.addItem("Initiating VCA algorithm")
+	context.vca_data, IDX, proj_data = sparse.vca(nfindr_data, context.end_member_list[2])
+	context.logs.addItem("Running VCA algorithm")
+	writeData(context, "VCA_", context.vca_data)
+	context.logs.addItem(f"Output file VCA_{context.OUTPUT_FILENAME} generated")
+	context.setProgressBar(False)
 
 
-	def startGBMsemiNMF(self, pca_data, nfindr_data):
-		'''
-		Main function to run GBM using semi NMF
-		'''
+def startPPI(context, pca_data):
+	'''
+	Main function for PPI algorithm
+	'''
 
-		self.logs.addItem("Initiating GBM using semiNMF algorithm")
-		self.GBMsemiNMF_data, rmse = GBM_semiNMF.GBM_semiNMF(np.transpose(pca_data), np.transpose(nfindr_data))
-		self.logs.addItem("Analysis completed")
-		self.logs.addItem(f"RMS Error: {rmse}")
-		self.logs.addItem("Generating output file")
-		writeData(self, "GBMsemiNMF_", self.GBMsemiNMF_data)
-		self.logs.addItem(f"Output File GBMsemiNMF_{self.OUTPUT_FILENAME} generated")
-		self.setProgressBar(False)
+	context.logs.addItem("Initiating PPI algorithm")
+	context.ppi_data, IDX = eea.PPI(np.transpose(pca_data), context.end_member_list[2])
+	context.logs.addItem("Running PPI algorithm")
+	writeData(context, "PPI_", context.ppi_data)
+	context.logs.addItem(f"Output file PPI_{context.OUTPUT_FILENAME} generated")
+	context.setProgressBar(False)
+
+
+
+def startNNLS(context, pca_data, nfindr_data):
+	'''
+	Main function for NNLS algorithm
+	'''
+
+	context.logs.addItem("Initiating NNLS algorithm")
+	context.NNLS_data = LMM.NNLS(pca_data, nfindr_data)
+	context.logs.addItem("Analysis completed")
+	context.logs.addItem("Generating output file")
+	writeData(context, "NNLS_", context.NNLS_data)
+	context.logs.addItem(f"Output File NNLS_{context.OUTPUT_FILENAME} generated")
+	context.setProgressBar(False)
+
+
+def startUCLS(context, pca_data, nfindr_data):
+	'''
+	Main function for UCLS algorithm
+	'''
+
+	context.logs.addItem("Initiating UCLS algorithm")
+	context.UCLS_data = LMM.UCLS(pca_data, nfindr_data)
+	context.logs.addItem("Analysis completed")
+	context.logs.addItem("Generating output file")
+	writeData(context, "UCLS_", context.UCLS_data)
+	context.logs.addItem(f"Output File UCLS_{context.OUTPUT_FILENAME} generated")
+	context.setProgressBar(False)
+
+
+def startFCLS(context, pca_data, nfindr_data):
+	'''
+	Main function for FCLS algorithm
+	'''
+
+	context.logs.addItem("Initiating FCLS algorithm")
+	context.UCLS_data = LMM.FCLS(pca_data, nfindr_data)
+	context.logs.addItem("Analysis completed")
+	context.logs.addItem("Generating output file")
+	writeData(context, "FCLS_", context.UCLS_data)
+	context.logs.addItem(f"Output File FCLS_{context.OUTPUT_FILENAME} generated")
+	context.setProgressBar(False)
+
+
+def startGBMsemiNMF(context, pca_data, nfindr_data):
+	'''
+	Main function to run GBM using semi NMF
+	'''
+
+	context.logs.addItem("Initiating GBM using semiNMF algorithm")
+	context.GBMsemiNMF_data, rmse = GBM_semiNMF.GBM_semiNMF(np.transpose(pca_data), np.transpose(nfindr_data))
+	context.logs.addItem("Analysis completed")
+	context.logs.addItem(f"RMS Error: {rmse}")
+	context.logs.addItem("Generating output file")
+	writeData(context, "GBMsemiNMF_", context.GBMsemiNMF_data)
+	context.logs.addItem(f"Output File GBMsemiNMF_{context.OUTPUT_FILENAME} generated")
+	context.setProgressBar(False)
+
+
+def startPCA(context,selectedComponents):
+	'''
+	Main function for PCA
+	'''
+
+	# t1 = Thread(target=PCAThread2)
+	context.datasetAsArray = context.dataset.ReadAsArray()
+	pca = PrincipalComponentAnalysis(context.datasetAsArray)
+	pca.scaleData()
+
+	# t1.start()
+	context.pca_data = pca.getPrincipalComponents_noOfComponents((int)(context.components.toPlainText()))
+	retainedVariance = pca.getRetainedVariance((int)(context.components.toPlainText()))
+	
+	context.logs.addItem("Analysis completed")
+	context.logs.addItem("Generating Output file")
+	writeData(context, "PCA_", context.pca_data)
+	# t1.join()
+	context.logs.addItem(f"Output file PCA_{context.OUTPUT_FILENAME} generated")
+	context.logs.addItem(f'Retained Variance: {retainedVariance}')
+	context.setProgressBar(False)
+	
+	''' To plot the points after PCA '''
+	if (int)(selectedComponents) == 1:
+		newpid = os.fork()
+		if newpid == 0:
+			plot1DGraph(context, context.pca_data)
+
+	elif (int)(selectedComponents) == 2:
+		newpid = os.fork()
+		if newpid == 0:
+			plot2DGraph(context, context.pca_data)
+
+	elif (int)(selectedComponents) == 3:
+		newpid = os.fork()
+		if newpid == 0:
+			plot3DGraph(context, context.pca_data)
+
+	else:
+		context.logs.addItem('Due to high dimentionality, graph could not be plotted')
+
+
+def startKerPCA(context, selectedComponents):
+	'''
+	Main function for Kernel PCA
+	'''
+
+	context.datasetAsArray = context.dataset.ReadAsArray()
+	kernelpca = KernelPCAAlgorithm(context.datasetAsArray, (int)(context.jobs.toPlainText()))
+	kernelpca.scaleData()
+
+	context.ker_pca_data = kernelpca.getPrincipalComponents_noOfComponents((int)(context.components.toPlainText()))
+	
+	context.logs.addItem("Analysis completed")
+	context.logs.addItem("Generating Output file")
+	writeData(context, "KernelPCA_", context.ker_pca_data)
+	context.logs.addItem(f"Output file KernelPCA_{context.OUTPUT_FILENAME} generated")
+	context.setProgressBar(False)
+	
+	''' To plot the points after Kernel PCA '''
+	if (int)(selectedComponents) == 1:
+		newpid = os.fork()
+		if newpid == 0:
+			plot1DGraph(context, context.ker_pca_data)
+
+	elif (int)(selectedComponents) == 2:
+		newpid = os.fork()
+		if newpid == 0:
+			plot2DGraph(context, context.ker_pca_data)
+
+	elif (int)(selectedComponents) == 3:
+		newpid = os.fork()
+		if newpid == 0:
+			plot3DGraph(context, context.ker_pca_data)
+
+	else:
+		context.logs.addItem('Due to high dimentionality, graph could not be plotted')
+
 
 
 def writeData(context, prefix, data):

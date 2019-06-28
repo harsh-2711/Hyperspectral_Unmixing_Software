@@ -361,7 +361,7 @@ class LLEUI(QMainWindow, Ui_MainWindow):
 		self.output_text.setText(os.getcwd())
 
 		# No of endmembers Label
-		self.components_label = QLabel("Neighbours", self)
+		self.components_label = QLabel("Components", self)
 		self.components_label.move(20, 120)
 
 		# Endmembers text field
@@ -369,12 +369,12 @@ class LLEUI(QMainWindow, Ui_MainWindow):
 		self.components.setGeometry(140,125,45,21)
 
 		# Components Label
-		self.jobs_label = QLabel("Components", self)
-		self.jobs_label.move(240, 120)
+		self.neighbours_label = QLabel("Neighbours", self)
+		self.neighbours_label.move(240, 120)
 
 		# Components text field
-		self.jobs = QTextEdit(self)
-		self.jobs.setGeometry(340,125,40,21)
+		self.neighbours = QTextEdit(self)
+		self.neighbours.setGeometry(340,125,40,21)
 
 		# Jobs Label
 		self.jobs_label = QLabel("Jobs", self)
@@ -385,27 +385,29 @@ class LLEUI(QMainWindow, Ui_MainWindow):
 		self.jobs.setGeometry(510,125,40,21)
 
 		# Eigen solver Label
-		self.kernel_label = QLabel("Eigen solver", self)
-		self.kernel_label.move(140, 180)
+		self.eigenSolver_label = QLabel("Eigen solver", self)
+		self.eigenSolver_label.move(140, 180)
 
 		# Eigen Solver Choice List
-		self.kernelChoiceList = QComboBox(self)
-		self.kernelChoiceList.addItem("auto")
-		self.kernelChoiceList.addItem("arpack")	
-		self.kernelChoiceList.addItem("dense")
-		self.kernelChoiceList.move(230, 180)
-
+		self.eigenSolverChoiceList = QComboBox(self)
+		self.eigenSolverChoiceList.addItem("auto")
+		self.eigenSolverChoiceList.addItem("arpack")	
+		self.eigenSolverChoiceList.addItem("dense")
+		self.eigenSolverChoiceList.move(230, 180)
+		self.eigenSolver = self.eigenSolverChoiceList.currentText()
+		
 		# Method Label
-		self.kernel_label = QLabel("Method", self)
-		self.kernel_label.move(400, 180)
+		self.method_label = QLabel("Method", self)
+		self.method_label.move(400, 180)
 
 		# Method Choice List
-		self.kernelChoiceList = QComboBox(self)
-		self.kernelChoiceList.addItem("standard")
-		self.kernelChoiceList.addItem("hessian")
-		self.kernelChoiceList.addItem("modified")
-		self.kernelChoiceList.addItem("ltsa")
-		self.kernelChoiceList.move(465, 180)
+		self.methodChoiceList = QComboBox(self)
+		self.methodChoiceList.addItem("standard")
+		self.methodChoiceList.addItem("hessian")
+		self.methodChoiceList.addItem("modified")
+		self.methodChoiceList.addItem("ltsa")
+		self.methodChoiceList.move(465, 180)
+		self.method = self.methodChoiceList.currentText()
 
 		# OK button
 		self.OK = QPushButton("OK", self)
@@ -577,6 +579,14 @@ class HFCVDUI(QMainWindow, Ui_MainWindow):
 		self.output_text.setGeometry(142,125,402,21)
 		self.output_text.setText(os.getcwd())
 
+		# Tolerance Label		
+		self.components_label = QLabel("No of Components", self)
+		self.components_label.move(150, 180)
+
+		# Components text field
+		self.components = QTextEdit(self)
+		self.components.setGeometry(280,185,40,21)
+
 		# OK button
 		self.OK = QPushButton("OK", self)
 		self.OK.move(230, 250)
@@ -667,6 +677,7 @@ class NMFUI(QMainWindow, Ui_MainWindow):
 		self.methodChoiceList.addItem("nndsvdar")
 		self.methodChoiceList.addItem("custom")
 		self.methodChoiceList.move(165, 180)
+		self.method = self.methodChoiceList.currentText()
 
 
 		# Method Label
@@ -678,6 +689,7 @@ class NMFUI(QMainWindow, Ui_MainWindow):
 		self.solverChoiceList.addItem("Coordinate Descent")
 		self.solverChoiceList.addItem("Multiplicative Update")
 		self.solverChoiceList.move(365, 180)
+		self.solver = self.solverChoiceList.currentText()
 
 		# OK button
 		self.OK = QPushButton("OK", self)
@@ -930,33 +942,28 @@ class NNLSUI(QMainWindow, Ui_MainWindow):
 		self.input_text = QTextEdit(self)
 		self.input_text.setGeometry(142,45,402,21)
 
-		# Data matrix Label
-		self.output_label = QLabel("Endmember Mat", self)
-		self.output_label.move(20, 95)
-
-		# Data Matrix browse button
-		self.output_browse = QPushButton("Browse", self)
-		self.output_browse.move(550,95)
-		# self.output_browse.clicked.connect(self.on_click_input)
-
-		# Data Matrix text field
-		self.output_text = QTextEdit(self)
-		self.output_text.setGeometry(142,100,402,21)
-		self.output_text.setText(os.getcwd())
 
 		# Output Label
 		self.output_label = QLabel("Output", self)
-		self.output_label.move(20, 150)
+		self.output_label.move(20, 100)
 
 		# Output browse button
 		self.output_browse = QPushButton("Browse", self)
-		self.output_browse.move(550,150)
+		self.output_browse.move(550,100)
 		self.output_browse.clicked.connect(partial(on_click_output, self))
 
 		# Output text field
 		self.output_text = QTextEdit(self)
-		self.output_text.setGeometry(142,155,402,21)
+		self.output_text.setGeometry(142,105,402,21)
 		self.output_text.setText(os.getcwd())
+
+		# Tolerance Label		
+		self.components_label = QLabel("No of Components", self)
+		self.components_label.move(150, 180)
+
+		# Components text field
+		self.components = QTextEdit(self)
+		self.components.setGeometry(280,185,40,21)
 
 		# OK button
 		self.OK = QPushButton("OK", self)
@@ -1135,7 +1142,7 @@ class Software (QMainWindow, Ui_MainWindow):
 		lle = QAction("LLE", self)
 		dimReduction.addAction(lle)
 		lle.triggered.connect(partial(startLLEWindow, self))
-		# lle.triggered.connect(partial(changeCurrentAlgo, self, "LLE"))
+		lle.triggered.connect(partial(self.changeCurrentAlgo, "LLE"))
 
 		# Material Count
 		mc = menubar.addMenu("Material Count")
@@ -1149,7 +1156,7 @@ class Software (QMainWindow, Ui_MainWindow):
 		hfcvd = QAction("HfcVd", self)
 		mc.addAction(hfcvd)
 		hfcvd.triggered.connect(partial(startHFCVDWindow, self))
-		# hfcvd.triggered.connect(partial(changeCurrentAlgo, self, "HfcVd"))
+		hfcvd.triggered.connect(partial(self.changeCurrentAlgo, "HfcVd"))
 
 		# End Member Extraction
 		eme = menubar.addMenu("End Member Extraction")
@@ -1467,7 +1474,29 @@ def validate(context):
 			
 			if context.trueComponents:
 				context.logs.addItem(f'Starting Non-negative Matrix Factorization for getting top {context.components.toPlainText()} bands')
-				startNMF(context, selectedComponents, context.tolerance, context.maxit, context.methodChoiceList, context.solverChoiceList)
+				startNMF(context, selectedComponents, context.tolerance, context.maxit, context.method, context.solver)
+
+		if currentAlgo == "HfcVd":
+			selectedComponents = context.components.toPlainText()
+			context.trueComponents = validateComponents(context, selectedComponents)
+			if context.trueComponents:
+				context.logs.addItem(f'Starting HFCVD for finding number of endmembers')
+				startHfcVd(context, selectedComponents)
+
+		if currentAlgo == "NNLS":
+			selectedComponents = context.components.toPlainText()
+			context.trueComponents = validateComponents(context, selectedComponents)
+			if context.trueComponents:
+				startHfcVd(context, selectedComponents)
+				startNFINDR()
+				startNNLS()
+
+		if currentAlgo == "LLE":
+			selectedComponents = context.components.toPlainText()
+			context.trueComponents = validateComponents(context, selectedComponents)
+			if context.trueComponents:
+				startLLE(context, selectedComponents, context.neighbours, context.jobs, context.eigenSolver, context.method)
+		
 
 
 	# # Validating number of components
@@ -1687,7 +1716,7 @@ def validateJobs(context, n_jobs):
 	return False
 
 
-def startLLE(context, selectedComponents):
+def startLLE(context, selectedComponents, neighbours, jobs, eigenSolver, method):
 	'''
 	Main function for LLE
 	'''
@@ -1696,7 +1725,7 @@ def startLLE(context, selectedComponents):
 	lleAlgo = LLE(context.datasetAsArray, (int)(context.jobs.toPlainText()))
 	lleAlgo.scaleData()
 
-	context.lle_data = lleAlgo.getPrincipalComponents_noOfComponents((int)(context.components.toPlainText()))
+	context.lle_data = lleAlgo.getPrincipalComponents_noOfComponents((int)(selectedComponents.toPlainText()), (int)(neighbours.toPlainText()), (int)(jobs.toPlainText()), eigenSolver, method)
 	
 	context.logs.addItem("Analysis completed")
 	context.logs.addItem("Generating Output file")
@@ -1732,7 +1761,7 @@ def startNMF(context,selectedComponents, tolerance, max_iterations, method, solv
 	context.datasetAsArray = context.dataset.ReadAsArray()
 	nmf = NonNegativeMatrixFactorisation(context.datasetAsArray)
 	nmf.scaleData()
-	context.nmf_data = nmf.getReducedComponents_noOfComponents((int)(context.components.toPlainText()), (int)(context.tolerance.toPlainText()), (int)(context.max_iterations.toPlainText()), method.toPlainText(), solver.toPlainText())
+	context.nmf_data = nmf.getReducedComponents_noOfComponents((int)(context.components.toPlainText()), (int)(tolerance.toPlainText()), (int)(max_iterations.toPlainText()), method, solver)
 	
 	''' To plot the points after NMF '''
 	if (int)(selectedComponents) == 1:
@@ -1780,7 +1809,7 @@ def startNFINDR(context, pca_data):
 	context.logs.addItem("Generating Output file")
 	writeData(context, "NFinder_", context.nfindr_data)
 	context.logs.addItem(f"Output file NFinder_{context.OUTPUT_FILENAME} generated")
-	context.setProgressBar(False)
+	setProgressBar(context, False)
 
 
 def startSUNSAL(context, nfindr_data):
@@ -1795,7 +1824,7 @@ def startSUNSAL(context, nfindr_data):
 	writeData(context, "SUNSAL_", context.sunsal_data)
 	context.logs.addItem(f"Output file SUNSAL_{context.OUTPUT_FILENAME} generated")
 	context.logs.addItem(f"Number of iterations are {sunsal_i}")
-	context.setProgressBar(False)
+	setProgressBar(context, False)
 
 
 def startHfcVd(context, selectedComponents):
@@ -1808,7 +1837,7 @@ def startHfcVd(context, selectedComponents):
 	context.end_member_list = vd.HfcVd(context.pca_data)
 	context.logs.addItem("Running SUNSAL algorithm")
 	context.logs.addItem(f"Number of end member(s) found is/are {context.end_member_list[2]}")
-	context.setProgressBar(False)
+	setProgressBar(context, False)
 
 
 def startVCA(context, nfindr_data):
@@ -1821,7 +1850,7 @@ def startVCA(context, nfindr_data):
 	context.logs.addItem("Running VCA algorithm")
 	writeData(context, "VCA_", context.vca_data)
 	context.logs.addItem(f"Output file VCA_{context.OUTPUT_FILENAME} generated")
-	context.setProgressBar(False)
+	setProgressBar(context, False)
 
 
 def startPPI(context, pca_data):
@@ -1834,8 +1863,7 @@ def startPPI(context, pca_data):
 	context.logs.addItem("Running PPI algorithm")
 	writeData(context, "PPI_", context.ppi_data)
 	context.logs.addItem(f"Output file PPI_{context.OUTPUT_FILENAME} generated")
-	context.setProgressBar(False)
-
+	setProgressBar(context, False)
 
 
 def startNNLS(context, pca_data, nfindr_data):
@@ -1849,7 +1877,7 @@ def startNNLS(context, pca_data, nfindr_data):
 	context.logs.addItem("Generating output file")
 	writeData(context, "NNLS_", context.NNLS_data)
 	context.logs.addItem(f"Output File NNLS_{context.OUTPUT_FILENAME} generated")
-	context.setProgressBar(False)
+	setProgressBar(context, False)
 
 
 def startUCLS(context, pca_data, nfindr_data):
@@ -1863,7 +1891,7 @@ def startUCLS(context, pca_data, nfindr_data):
 	context.logs.addItem("Generating output file")
 	writeData(context, "UCLS_", context.UCLS_data)
 	context.logs.addItem(f"Output File UCLS_{context.OUTPUT_FILENAME} generated")
-	context.setProgressBar(False)
+	setProgressBar(context, False)
 
 
 def startFCLS(context, pca_data, nfindr_data):
@@ -1877,7 +1905,7 @@ def startFCLS(context, pca_data, nfindr_data):
 	context.logs.addItem("Generating output file")
 	writeData(context, "FCLS_", context.UCLS_data)
 	context.logs.addItem(f"Output File FCLS_{context.OUTPUT_FILENAME} generated")
-	context.setProgressBar(False)
+	setProgressBar(context, False)
 
 
 def startGBMsemiNMF(context, pca_data, nfindr_data):

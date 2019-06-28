@@ -102,13 +102,16 @@ class NonNegativeMatrixFactorisation():
 
 		return self.reducedComponents
 
-	def getReducedComponents_noOfComponents(self, noOfComponents, tolerance, max_iterations):
+	def getReducedComponents_noOfComponents(self, noOfComponents, tolerance, max_iterations, method, solver):
 		'''
 		Returns the principal components based on the given nnumber of components
 		to be retained
 		'''
-
-		nmf = NMF(n_components=noOfComponents, tol=tolerance, max_iter=max_iterations)
+		if solver == 'Coordinate Descent':
+			solver = 'cd'
+		else:
+			solver = 'mu'
+		nmf = NMF(n_components=noOfComponents, tol=tolerance, max_iter=max_iterations, init=method, solver=solver)
 		self.reducedComponents = nmf.fit_transform(X = self.normalizedData)
 		
 		return self.reducedComponents				

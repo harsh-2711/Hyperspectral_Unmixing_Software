@@ -44,6 +44,72 @@ qtCreatorFile = "MainWindow.ui"
 Ui_MainWindow, QtBaseClass = uic.loadUiType(path + qtCreatorFile)
 
 
+currentAlgo = ""
+OUTPUT_FILENAME = "Data.csv"
+
+
+class PCAUI(QMainWindow, Ui_MainWindow):
+
+	def __init__(self):
+		super(PCAUI, self).__init__()
+
+		# HSI Label
+		self.input_label = QLabel("Input", self)
+		self.input_label.move(20, 60)
+
+		# HSI browse button
+		self.input_browse = QPushButton("Browse", self)
+		self.input_browse.move(550,60)
+		self.input_browse.clicked.connect(partial(on_click_input, self))
+
+		# HSI text field
+		self.input_text = QTextEdit(self)
+		self.input_text.setGeometry(142,65,402,21)
+
+		# Output Label
+		self.output_label = QLabel("Output", self)
+		self.output_label.move(20, 120)
+
+		# Output browse button
+		self.output_browse = QPushButton("Browse", self)
+		self.output_browse.move(550,120)
+		self.output_browse.clicked.connect(partial(on_click_output, self))
+
+		# Output text field
+		self.output_text = QTextEdit(self)
+		self.output_text.setGeometry(142,125,402,21)
+		self.output_text.setText(os.getcwd())
+
+		# Tolerance Label		
+		self.components_label = QLabel("No of Components", self)
+		self.components_label.move(150, 180)
+
+		# Components text field
+		self.components = QTextEdit(self)
+		self.components.setGeometry(280,185,40,21)
+
+
+		# OK button
+		self.OK = QPushButton("OK", self)
+		self.OK.move(230, 250)
+		self.OK.clicked.connect(partial(on_click_OK, self))
+
+		# Cancel button
+		self.cancel = QPushButton("Cancel", self)
+		self.cancel.move(380, 250)
+		self.cancel.clicked.connect(partial(on_click_cancel, self))
+
+		# Logs entry
+		self.logs = QListWidget(self)
+		self.logs.setGeometry(10, 300, 640, 130)
+
+		# Progress Bar
+		self.progress = QProgressBar(self)
+		self.progress.setGeometry(10, 450, 640, 20)
+		
+		self.show()
+
+
 class KerPCAUI(QMainWindow, Ui_MainWindow):
 
 	def __init__(self):
@@ -56,6 +122,7 @@ class KerPCAUI(QMainWindow, Ui_MainWindow):
 		# Input browse button
 		self.input_browse = QPushButton("Browse", self)
 		self.input_browse.move(550,30)
+		self.input_browse.clicked.connect(partial(on_click_input, self))
 
 		# Input text field
 		self.input_text = QTextEdit(self)
@@ -68,6 +135,7 @@ class KerPCAUI(QMainWindow, Ui_MainWindow):
 		# Output browse button
 		self.output_browse = QPushButton("Browse", self)
 		self.output_browse.move(550,91)
+		self.output_browse.clicked.connect(partial(on_click_output, self))
 
 		# Output text field
 		self.output_text = QTextEdit(self)
@@ -150,10 +218,12 @@ class KerPCAUI(QMainWindow, Ui_MainWindow):
 		# OK button
 		self.OK = QPushButton("OK", self)
 		self.OK.move(230, 250)
+		self.OK.clicked.connect(partial(on_click_OK, self))
 
 		# Cancel button
 		self.cancel = QPushButton("Cancel", self)
 		self.cancel.move(380, 250)
+		self.cancel.clicked.connect(partial(on_click_cancel, self))
 
 		# Logs entry
 		self.logs = QListWidget(self)
@@ -178,6 +248,7 @@ class NFINDRUI(QMainWindow, Ui_MainWindow):
 		# Input browse button
 		self.input_browse = QPushButton("Browse", self)
 		self.input_browse.move(550,30)
+		self.input_browse.clicked.connect(partial(on_click_input, self))
 
 		# Input text field
 		self.input_text = QTextEdit(self)
@@ -204,6 +275,7 @@ class NFINDRUI(QMainWindow, Ui_MainWindow):
 		# Output browse button
 		self.output_browse = QPushButton("Browse", self)
 		self.output_browse.move(550,140)
+		self.output_browse.clicked.connect(partial(on_click_output, self))
 
 		# Output text field
 		self.output_text = QTextEdit(self)
@@ -237,10 +309,12 @@ class NFINDRUI(QMainWindow, Ui_MainWindow):
 		# OK button
 		self.OK = QPushButton("OK", self)
 		self.OK.move(230, 250)
+		self.OK.clicked.connect(partial(on_click_OK, self))
 
 		# Cancel button
 		self.cancel = QPushButton("Cancel", self)
 		self.cancel.move(380, 250)
+		self.cancel.clicked.connect(partial(on_click_cancel, self))
 
 		# Logs entry
 		self.logs = QListWidget(self)
@@ -266,7 +340,7 @@ class LLEUI(QMainWindow, Ui_MainWindow):
 		# Input browse button
 		self.input_browse = QPushButton("Browse", self)
 		self.input_browse.move(550,20)
-		self.input_browse.clicked.connect(self.on_click_input)
+		self.input_browse.clicked.connect(partial(on_click_input, self))
 
 		# Input text field
 		self.input_text = QTextEdit(self)
@@ -279,6 +353,7 @@ class LLEUI(QMainWindow, Ui_MainWindow):
 		# Output browse button
 		self.output_browse = QPushButton("Browse", self)
 		self.output_browse.move(550,70)
+		self.output_browse.clicked.connect(partial(on_click_output, self))
 
 		# Output text field
 		self.output_text = QTextEdit(self)
@@ -335,10 +410,12 @@ class LLEUI(QMainWindow, Ui_MainWindow):
 		# OK button
 		self.OK = QPushButton("OK", self)
 		self.OK.move(230, 250)
+		self.OK.clicked.connect(partial(on_click_OK, self))
 
 		# Cancel button
 		self.cancel = QPushButton("Cancel", self)
 		self.cancel.move(380, 250)
+		self.cancel.clicked.connect(partial(on_click_cancel, self))
 
 		# Logs entry
 		self.logs = QListWidget(self)
@@ -364,6 +441,7 @@ class SUNSALUI(QMainWindow, Ui_MainWindow):
 		# Endmember sign browse button
 		self.input_browse = QPushButton("Browse", self)
 		self.input_browse.move(550,20)
+		self.input_browse.clicked.connect(partial(on_click_input, self))
 
 		# Endmember sign text field
 		self.input_text = QTextEdit(self)
@@ -389,6 +467,7 @@ class SUNSALUI(QMainWindow, Ui_MainWindow):
 		# Output browse button
 		self.output_browse = QPushButton("Browse", self)
 		self.output_browse.move(550,120)
+		self.output_browse.clicked.connect(partial(on_click_output, self))
 
 		# Output text field
 		self.output_text = QTextEdit(self)
@@ -447,10 +526,12 @@ class SUNSALUI(QMainWindow, Ui_MainWindow):
 		# OK button
 		self.OK = QPushButton("OK", self)
 		self.OK.move(230, 250)
+		self.OK.clicked.connect(partial(on_click_OK, self))
 
 		# Cancel button
 		self.cancel = QPushButton("Cancel", self)
 		self.cancel.move(380, 250)
+		self.cancel.clicked.connect(partial(on_click_cancel, self))
 
 		# Logs entry
 		self.logs = QListWidget(self)
@@ -476,6 +557,7 @@ class HFCVDUI(QMainWindow, Ui_MainWindow):
 		# HSI browse button
 		self.input_browse = QPushButton("Browse", self)
 		self.input_browse.move(550,60)
+		self.input_browse.clicked.connect(partial(on_click_input, self))
 
 		# HSI text field
 		self.input_text = QTextEdit(self)
@@ -488,6 +570,7 @@ class HFCVDUI(QMainWindow, Ui_MainWindow):
 		# Output browse button
 		self.output_browse = QPushButton("Browse", self)
 		self.output_browse.move(550,120)
+		self.output_browse.clicked.connect(partial(on_click_output, self))
 
 		# Output text field
 		self.output_text = QTextEdit(self)
@@ -497,10 +580,12 @@ class HFCVDUI(QMainWindow, Ui_MainWindow):
 		# OK button
 		self.OK = QPushButton("OK", self)
 		self.OK.move(230, 250)
+		self.OK.clicked.connect(partial(on_click_OK, self))
 
 		# Cancel button
 		self.cancel = QPushButton("Cancel", self)
 		self.cancel.move(380, 250)
+		self.cancel.clicked.connect(partial(on_click_cancel, self))
 
 		# Logs entry
 		self.logs = QListWidget(self)
@@ -526,6 +611,7 @@ class NMFUI(QMainWindow, Ui_MainWindow):
 		# HSI browse button
 		self.input_browse = QPushButton("Browse", self)
 		self.input_browse.move(550,20)
+		self.input_browse.clicked.connect(partial(on_click_input, self))
 
 		# HSI text field
 		self.input_text = QTextEdit(self)
@@ -538,6 +624,7 @@ class NMFUI(QMainWindow, Ui_MainWindow):
 		# Output browse button
 		self.output_browse = QPushButton("Browse", self)
 		self.output_browse.move(550, 70)
+		self.output_browse.clicked.connect(partial(on_click_output, self))
 
 		# Output text field
 		self.output_text = QTextEdit(self)
@@ -595,10 +682,12 @@ class NMFUI(QMainWindow, Ui_MainWindow):
 		# OK button
 		self.OK = QPushButton("OK", self)
 		self.OK.move(230, 250)
+		self.OK.clicked.connect(partial(on_click_OK, self))
 
 		# Cancel button
 		self.cancel = QPushButton("Cancel", self)
 		self.cancel.move(380, 250)
+		self.cancel.clicked.connect(partial(on_click_cancel, self))
 
 		# Logs entry
 		self.logs = QListWidget(self)
@@ -624,6 +713,7 @@ class PPIUI(QMainWindow, Ui_MainWindow):
 		# Endmember sign browse button
 		self.input_browse = QPushButton("Browse", self)
 		self.input_browse.move(550,20)
+		self.input_browse.clicked.connect(partial(on_click_input, self))
 
 		# Endmember sign text field
 		self.input_text = QTextEdit(self)
@@ -649,6 +739,7 @@ class PPIUI(QMainWindow, Ui_MainWindow):
 		# Output browse button
 		self.output_browse = QPushButton("Browse", self)
 		self.output_browse.move(550,120)
+		self.output_browse.clicked.connect(partial(on_click_output, self))
 
 		# Output text field
 		self.output_text = QTextEdit(self)
@@ -666,10 +757,12 @@ class PPIUI(QMainWindow, Ui_MainWindow):
 		# OK button
 		self.OK = QPushButton("OK", self)
 		self.OK.move(230, 250)
+		self.OK.clicked.connect(partial(on_click_OK, self))
 
 		# Cancel button
 		self.cancel = QPushButton("Cancel", self)
 		self.cancel.move(380, 250)
+		self.cancel.clicked.connect(partial(on_click_cancel, self))
 
 		# Logs entry
 		self.logs = QListWidget(self)
@@ -694,6 +787,7 @@ class VCAUI(QMainWindow, Ui_MainWindow):
 		# HSI browse button
 		self.input_browse = QPushButton("Browse", self)
 		self.input_browse.move(550,45)
+		self.input_browse.clicked.connect(partial(on_click_input, self))
 
 		# HSI text field
 		self.input_text = QTextEdit(self)
@@ -706,6 +800,7 @@ class VCAUI(QMainWindow, Ui_MainWindow):
 		# Output browse button
 		self.output_browse = QPushButton("Browse", self)
 		self.output_browse.move(550,100)
+		self.output_browse.clicked.connect(partial(on_click_output, self))
 
 		# Output text field
 		self.output_text = QTextEdit(self)
@@ -736,10 +831,12 @@ class VCAUI(QMainWindow, Ui_MainWindow):
 		# OK button
 		self.OK = QPushButton("OK", self)
 		self.OK.move(230, 250)
+		self.OK.clicked.connect(partial(on_click_OK, self))
 
 		# Cancel button
 		self.cancel = QPushButton("Cancel", self)
 		self.cancel.move(380, 250)
+		self.cancel.clicked.connect(partial(on_click_cancel, self))
 
 		# Logs entry
 		self.logs = QListWidget(self)
@@ -764,6 +861,7 @@ class ATGPUI(QMainWindow, Ui_MainWindow):
 		# HSI browse button
 		self.input_browse = QPushButton("Browse", self)
 		self.input_browse.move(550,60)
+		self.input_browse.clicked.connect(partial(on_click_input, self))
 
 		# HSI text field
 		self.input_text = QTextEdit(self)
@@ -776,6 +874,7 @@ class ATGPUI(QMainWindow, Ui_MainWindow):
 		# Output browse button
 		self.output_browse = QPushButton("Browse", self)
 		self.output_browse.move(550,120)
+		self.output_browse.clicked.connect(partial(on_click_output, self))
 
 		# Output text field
 		self.output_text = QTextEdit(self)
@@ -794,10 +893,12 @@ class ATGPUI(QMainWindow, Ui_MainWindow):
 		# OK button
 		self.OK = QPushButton("OK", self)
 		self.OK.move(230, 250)
+		self.OK.clicked.connect(partial(on_click_OK, self))
 
 		# Cancel button
 		self.cancel = QPushButton("Cancel", self)
 		self.cancel.move(380, 250)
+		self.cancel.clicked.connect(partial(on_click_cancel, self))
 
 		# Logs entry
 		self.logs = QListWidget(self)
@@ -823,6 +924,7 @@ class NNLSUI(QMainWindow, Ui_MainWindow):
 		# Endmember sign browse button
 		self.input_browse = QPushButton("Browse", self)
 		self.input_browse.move(550,40)
+		self.input_browse.clicked.connect(partial(on_click_input, self))
 
 		# Endmember sign text field
 		self.input_text = QTextEdit(self)
@@ -835,7 +937,7 @@ class NNLSUI(QMainWindow, Ui_MainWindow):
 		# Data Matrix browse button
 		self.output_browse = QPushButton("Browse", self)
 		self.output_browse.move(550,95)
-		self.output_browse.clicked.connect(self.on_click_input)
+		# self.output_browse.clicked.connect(self.on_click_input)
 
 		# Data Matrix text field
 		self.output_text = QTextEdit(self)
@@ -849,6 +951,7 @@ class NNLSUI(QMainWindow, Ui_MainWindow):
 		# Output browse button
 		self.output_browse = QPushButton("Browse", self)
 		self.output_browse.move(550,150)
+		self.output_browse.clicked.connect(partial(on_click_output, self))
 
 		# Output text field
 		self.output_text = QTextEdit(self)
@@ -858,10 +961,12 @@ class NNLSUI(QMainWindow, Ui_MainWindow):
 		# OK button
 		self.OK = QPushButton("OK", self)
 		self.OK.move(230, 250)
+		self.OK.clicked.connect(partial(on_click_OK, self))
 
 		# Cancel button
 		self.cancel = QPushButton("Cancel", self)
 		self.cancel.move(380, 250)
+		self.cancel.clicked.connect(partial(on_click_cancel, self))
 
 		# Logs entry
 		self.logs = QListWidget(self)
@@ -887,7 +992,7 @@ class GBMsemiNMFUI(QMainWindow, Ui_MainWindow):
 		# Endmember sign browse button
 		self.input_browse = QPushButton("Browse", self)
 		self.input_browse.move(550,20)
-		# self.input_browse.clicked.connect(self.on_click_input)
+		self.input_browse.clicked.connect(partial(on_click_input, self))
 
 		# Endmember sign text field
 		self.input_text = QTextEdit(self)
@@ -913,6 +1018,7 @@ class GBMsemiNMFUI(QMainWindow, Ui_MainWindow):
 		# Output browse button
 		self.output_browse = QPushButton("Browse", self)
 		self.output_browse.move(550,130)
+		self.output_browse.clicked.connect(partial(on_click_output, self))
 
 		# Output text field
 		self.output_text = QTextEdit(self)
@@ -945,10 +1051,12 @@ class GBMsemiNMFUI(QMainWindow, Ui_MainWindow):
 		# OK button
 		self.OK = QPushButton("OK", self)
 		self.OK.move(230, 250)
+		self.OK.clicked.connect(partial(on_click_OK, self))
 
 		# Cancel button
 		self.cancel = QPushButton("Cancel", self)
 		self.cancel.move(380, 250)
+		self.cancel.clicked.connect(partial(on_click_cancel, self))
 
 		# Logs entry
 		self.logs = QListWidget(self)
@@ -961,7 +1069,8 @@ class GBMsemiNMFUI(QMainWindow, Ui_MainWindow):
 		self.show()
 
 
-class Software(QMainWindow, Ui_MainWindow):
+
+class Software (QMainWindow, Ui_MainWindow):
 
 	def __init__(self):
 		'''
@@ -972,9 +1081,9 @@ class Software(QMainWindow, Ui_MainWindow):
 		self.ui = Ui_MainWindow()
 		self.ui.setupUi(self)
 		self.title = "Hyperspectral Unmixing Toolbox"
-		self.OUTPUT_FILENAME = "Data.csv"
+		# self.OUTPUT_FILENAME = "Data.csv"
 		self.file = ""
-		self.currentAlgo = "PCA"
+		# self.currentAlgo = "PCA"
 
 		# Initialising Menu Bar
 		self.initMenu()
@@ -1005,8 +1114,10 @@ class Software(QMainWindow, Ui_MainWindow):
 		dimReduction = menubar.addMenu("Dimensionality Reduction")
 
 		pcaMenu = QAction("PCA", self)
-		dimReduction.addAction(pcaMenu) 
+		dimReduction.addAction(pcaMenu)
+		pcaMenu.triggered.connect(partial(startPCAWindow, self))
 		pcaMenu.triggered.connect(partial(self.changeCurrentAlgo, "PCA"))
+
 
 		nmf = QAction("NMF", self)
 		dimReduction.addAction(nmf)
@@ -1024,7 +1135,7 @@ class Software(QMainWindow, Ui_MainWindow):
 		lle = QAction("LLE", self)
 		dimReduction.addAction(lle)
 		lle.triggered.connect(partial(startLLEWindow, self))
-		lle.triggered.connect(partial(self.changeCurrentAlgo, "LLE"))
+		# lle.triggered.connect(partial(changeCurrentAlgo, self, "LLE"))
 
 		# Material Count
 		mc = menubar.addMenu("Material Count")
@@ -1038,7 +1149,7 @@ class Software(QMainWindow, Ui_MainWindow):
 		hfcvd = QAction("HfcVd", self)
 		mc.addAction(hfcvd)
 		hfcvd.triggered.connect(partial(startHFCVDWindow, self))
-		hfcvd.triggered.connect(partial(self.changeCurrentAlgo, "HfcVd"))
+		# hfcvd.triggered.connect(partial(changeCurrentAlgo, self, "HfcVd"))
 
 		# End Member Extraction
 		eme = menubar.addMenu("End Member Extraction")
@@ -1046,22 +1157,21 @@ class Software(QMainWindow, Ui_MainWindow):
 		nFinder = QAction("N-Finder", self)
 		eme.addAction(nFinder)
 		nFinder.triggered.connect(partial(startNFINDRWindow, self))
-		nFinder.triggered.connect(partial(self.changeCurrentAlgo, "NFinder"))
+		# nFinder.triggered.connect(partial(changeCurrentAlgo, self, "NFinder"))
 
 		atgp = QAction("ATGP", self)
 		eme.addAction(atgp)
 		atgp.triggered.connect(partial(startATGPWindow, self))
-		
-		atgp.triggered.connect(partial(self.changeCurrentAlgo, "ATGP"))
+		# atgp.triggered.connect(partial(changeCurrentAlgo, self, "ATGP"))
 
 		ppi = QAction("PPI", self)
 		eme.addAction(ppi)
 		ppi.triggered.connect(partial(startPPIWindow, self))
-		ppi.triggered.connect(partial(self.changeCurrentAlgo, "PPI"))
+		# ppi.triggered.connect(partial(changeCurrentAlgo, self, "PPI"))
 
 		sisal = QAction("SISAL", self)
 		eme.addAction(sisal)
-		sisal.triggered.connect(partial(self.changeCurrentAlgo, "SISAL"))
+		# sisal.triggered.connect(partial(changeCurrentAlgo, self, "SISAL"))
 
 		# Linear Unmixing
 		lu = menubar.addMenu("Linear Unmixing")
@@ -1069,27 +1179,27 @@ class Software(QMainWindow, Ui_MainWindow):
 		sunsal = QAction("SUNSAL", self)
 		lu.addAction(sunsal)
 		sunsal.triggered.connect(partial(startSUNSALWindow, self))
-		sunsal.triggered.connect(partial(self.changeCurrentAlgo, "SUNSAL"))
+		# sunsal.triggered.connect(partial(changeCurrentAlgo, self, "SUNSAL"))
 
 		vca = QAction("VCA", self)
 		lu.addAction(vca)
 		vca.triggered.connect(partial(startVCAWindow, self))
-		vca.triggered.connect(partial(self.changeCurrentAlgo, "VCA"))
+		# vca.triggered.connect(partial(changeCurrentAlgo, self, "VCA"))
 
 		nnls = QAction("NNLS", self)
 		lu.addAction(nnls)
 		nnls.triggered.connect(partial(startNNLSWindow, self))
-		nnls.triggered.connect(partial(self.changeCurrentAlgo, "NNLS"))
+		# nnls.triggered.connect(partial(changeCurrentAlgo, self, "NNLS"))
 
 		ucls = QAction("UCLS", self)
 		lu.addAction(ucls)
 		ucls.triggered.connect(partial(startUCLSWindow, self))
-		ucls.triggered.connect(partial(self.changeCurrentAlgo, "UCLS"))
+		# ucls.triggered.connect(partial(changeCurrentAlgo, self, "UCLS"))
 
 		fcls = QAction("FCLS", self)
 		lu.addAction(fcls)
 		fcls.triggered.connect(partial(startFCLSWindow, self))
-		fcls.triggered.connect(partial(self.changeCurrentAlgo, "FCLS"))
+		# fcls.triggered.connect(partial(changeCurrentAlgo, self, "FCLS"))
 
 		# Non-linear Unmixing
 		nlu = menubar.addMenu("Non Linear Unmixing")
@@ -1097,11 +1207,11 @@ class Software(QMainWindow, Ui_MainWindow):
 		gbmNMF = QAction("GBM using semi-NMF", self)
 		nlu.addAction(gbmNMF)
 		gbmNMF.triggered.connect(partial(startGBMsemiNMFWindow, self))
-		gbmNMF.triggered.connect(partial(self.changeCurrentAlgo, "GBM using semi-NMF"))
+		# gbmNMF.triggered.connect(partial(changeCurrentAlgo, self, "GBM using semi-NMF"))
 
 		gbmGrad = QAction("GBM using gradient", self)
 		nlu.addAction(gbmGrad)
-		gbmGrad.triggered.connect(partial(self.changeCurrentAlgo, "GBM using gradient"))
+		# gbmGrad.triggered.connect(partial(changeCurrentAlgo, self, "GBM using gradient"))
 
 		mulLin = QAction("Multi-Linear", self)
 		nlu.addAction(mulLin)
@@ -1111,15 +1221,6 @@ class Software(QMainWindow, Ui_MainWindow):
 
 		graphLapBase = QAction("Graph Laplacian Base", self)
 		nlu.addAction(graphLapBase)
-
-
-	def changeCurrentAlgo(self, algo):
-		'''
-		Changes the value of variable currentAlgo with the algorithm selected
-		from the menu bar
-		'''
-
-		self.currentAlgo = algo
 
 
 	def initUI(self):
@@ -1136,7 +1237,7 @@ class Software(QMainWindow, Ui_MainWindow):
 		# Input browse button
 		self.input_browse = QPushButton("Browse", self)
 		self.input_browse.move(550,30)
-		self.input_browse.clicked.connect(self.on_click_input)
+		self.input_browse.clicked.connect(partial(on_click_input, self))
 
 		# Input text field
 		self.input_text = QTextEdit(self)
@@ -1149,7 +1250,7 @@ class Software(QMainWindow, Ui_MainWindow):
 		# Output browse button
 		self.output_browse = QPushButton("Browse", self)
 		self.output_browse.move(550,91)
-		self.output_browse.clicked.connect(self.on_click_output)
+		self.output_browse.clicked.connect(partial(on_click_output, self))
 
 		# Output text field
 		self.output_text = QTextEdit(self)
@@ -1175,12 +1276,12 @@ class Software(QMainWindow, Ui_MainWindow):
 		# OK button
 		self.OK = QPushButton("OK", self)
 		self.OK.move(230, 250)
-		self.OK.clicked.connect(self.on_click_OK)
+		self.OK.clicked.connect(partial(on_click_OK, self))
 
 		# Cancel button
 		self.cancel = QPushButton("Cancel", self)
 		self.cancel.move(380, 250)
-		self.cancel.clicked.connect(self.on_click_cancel)
+		self.cancel.clicked.connect(partial(on_click_cancel, self))
 
 		# Logs entry
 		self.logs = QListWidget(self)
@@ -1193,201 +1294,340 @@ class Software(QMainWindow, Ui_MainWindow):
 		self.show()
 
 
-	@pyqtSlot()
-	def on_click_input(self):
+	def changeCurrentAlgo(self, algo):
 		'''
-		On click listener for input_browse button
+		Changes the value of variable currentAlgo with the algorithm selected
+		from the menu bar
 		'''
-
-		self.InputBrowse()
-
-
-	def InputBrowse(self):
-		'''
-		Opens Browse Files dialog box for selecting input dataset
-		'''
-
-		options = QFileDialog.Options()
-		options |= QFileDialog.DontUseNativeDialog
-		fileName, _ = QFileDialog.getOpenFileName(self,"Select Dataset", "","All Files (*);;Matlab Files (*.mat)", options=options)
-		self.file = fileName
-		if fileName:
-			self.input_text.setText(fileName.split('/')[-1])
+		global currentAlgo
+		currentAlgo = algo
 
 
-	@pyqtSlot()
-	def on_click_output(self):
-		'''
-		On click listener for output_browse button
-		'''
 
-		self.OutputBrowse()
+def setProgressBar(context,switch):
+	'''
+	switch - Boolean 
+	Switches the progress bar from busy to stop and vice versa based on the
+	value of switch
+	'''
 
-
-	def OutputBrowse(self):
-		'''
-		Opens Browse Files dialog box for selecting target file for writing output
-		'''
-
-		options = QFileDialog.Options()
-		options |= QFileDialog.DontUseNativeDialog
-		folderName = str(QFileDialog.getExistingDirectory(self, "Select Directory", options=options))
-		if folderName:
-			self.output_text.setText(folderName)
+	if switch:
+		context.progress.setRange(0,0)
+	else:
+		context.progress.setRange(0,1)
 
 
-	@pyqtSlot()
-	def on_click_OK(self):
-		'''
-		On click listener for OK button
-		'''
+	# def validate(self):
+	# 	'''
+	# 	Parent function for validating all the input fields
+	# 	'''
 
-		self.validation = ValidationThread()
-		self.validation.startThread.connect(self.validate)
-		self.validation.startProgress.connect(self.setProgressBar)
-		self.validation.start()
+	# 	# Suppressing printing of errors using GDAL lib
+	# 	gdal.UseExceptions()
+	# 	gdal.PushErrorHandler('CPLQuietErrorHandler')
 
+	# 	filename = self.input_text.toPlainText()
+	# 	foldername = self.output_text.toPlainText()
+	# 	selectedComponents = self.components.toPlainText()
+	# 	n_jobs = self.jobs.toPlainText()
+	# 	# tolerance = self.tolerance.toPlainText()
+	# 	# max_iterations = self.maxit.toPlainText()
 
-	@pyqtSlot()
-	def on_click_cancel(self):
-		'''
-		On click listener for Cancel button
-		'''
+	# 	# Validating dataset path
+	# 	self.dataExists = validateInputFile(self, self.file)
 
-		self.input_text.setText("")
-		self.output_text.setText("")
-		self.components.setText("")
-		self.tolerance.setText("")
-		self.maxit.setText("")
-		self.progress.setValue(0)
-		self.logs.clear()
+	# 	# Validating output folder path
+	# 	if self.dataExists:
+	# 		self.outputFolderExists = validateOutputFolder(self, foldername)
 
+	# 	# Validating number of components
+	# 	if self.dataExists and self.outputFolderExists:
+	# 		self.trueComponents = validateComponents(self, selectedComponents)
 
-	def setProgressBar(self, switch):
-		'''
-		switch - Boolean 
-		Switches the progress bar from busy to stop and vice versa based on the
-		value of switch
-		'''
+	# 	# Validating number of jobs
+	# 	if self.dataExists and self.outputFolderExists and self.trueComponents:
+	# 		self.enoughProcs = validateJobs(self,n_jobs)
 
-		if switch:
-			self.progress.setRange(0,0)
-		else:
-			self.progress.setRange(0,1)
+	# 	# Starting selected algorithm if everything's good
+	# 	if self.dataExists and self.outputFolderExists and self.trueComponents and self.enoughProcs:
 
+	# 		if self.currentAlgo == "PCA":
+	# 			self.logs.addItem(f'Starting Principal Component Analysis for getting top {self.components.toPlainText()} bands')
+	# 			startPCA(self, selectedComponents)
 
-	def validate(self):
-		'''
-		Parent function for validating all the input fields
-		'''
+	# 		elif self.currentAlgo == "NMF":
+	# 			self.logs.addItem(f'Starting NMF for getting top {self.components.toPlainText()} bands')
+	# 			newpid1 = os.fork()
+	# 			if newpid1 == 0:
+	# 				nmf_data = startNMF(selectedComponents, tolerance, max_iterations)
 
-		# Suppressing printing of errors using GDAL lib
-		gdal.UseExceptions()
-		gdal.PushErrorHandler('CPLQuietErrorHandler')
+	# 		elif self.currentAlgo == "NFinder":
+	# 			self.logs.addItem(f'Starting N-Finder for getting top {self.components.toPlainText()} bands')
+	# 			startNFINDR(self, self.pca_data)
+	# 			startHfcVd(self, selectedComponents)
+	# 			# self.startSUNSAL(self.nfindr_data, self.Et)
 
-		filename = self.input_text.toPlainText()
-		foldername = self.output_text.toPlainText()
-		selectedComponents = self.components.toPlainText()
-		n_jobs = self.jobs.toPlainText()
-		# tolerance = self.tolerance.toPlainText()
-		# max_iterations = self.maxit.toPlainText()
+	# 		elif self.currentAlgo == "SUNSAL":
+	# 			self.logs.addItem(f'Starting SUNSAL for getting estimated abundance matrix')
+	# 			startHfcVd(self, selectedComponents)
+	# 			startNFINDR(self, self.pca_data)
+	# 			startSUNSAL(self, self.nfindr_data)
 
-		# Validating dataset path
-		self.dataExists = validateInputFile(self, self.file)
+	# 		elif self.currentAlgo == "HfcVd":
+	# 			self.logs.addItem(f'Starting HfcVd for getting number of end members')
+	# 			startHfcVd(self, selectedComponents)
 
-		# Validating output folder path
-		if self.dataExists:
-			self.outputFolderExists = validateOutputFolder(self, foldername)
+	# 		elif self.currentAlgo == "ATGP":
+	# 			self.logs.addItem(f'Starting ATGP for getting Endmember abundances')
+	# 			startHfcVd(self, selectedComponents)
+	# 			startATGP(self, self.pca_data)
 
-		# Validating number of components
-		if self.dataExists and self.outputFolderExists:
-			self.trueComponents = validateComponents(self, selectedComponents)
+	# 		elif self.currentAlgo == "PPI":
+	# 			self.logs.addItem(f'Starting PPI for getting Endmember Extraction')
+	# 			startHfcVd(self, selectedComponents)
+	# 			startPPI(self, self.pca_data)
 
-		# Validating number of jobs
-		if self.dataExists and self.outputFolderExists and self.trueComponents:
-			self.enoughProcs = validateJobs(self,n_jobs)
+	# 		elif self.currentAlgo == "VCA":
+	# 			self.logs.addItem(f'Starting VCA for getting estimated endmembers signature matrix')
+	# 			startHfcVd(self, selectedComponents)
+	# 			startNFINDR(self, self.pca_data)
+	# 			startVCA(self, self.nfindr_data)
 
-		# Starting selected algorithm if everything's good
-		if self.dataExists and self.outputFolderExists and self.trueComponents and self.enoughProcs:
+	# 		elif self.currentAlgo == "NNLS":
+	# 			self.logs.addItem(f'Starting NNLS for getting estimated abundance matrix')
+	# 			startHfcVd(selectedComponents)
+	# 			startNFINDR(self, self.pca_data)
+	# 			startNNLS(self, self.pca_data, self.nfindr_data)
 
-			if self.currentAlgo == "PCA":
-				self.logs.addItem(f'Starting Principal Component Analysis for getting top {self.components.toPlainText()} bands')
-				startPCA(self, selectedComponents)
+	# 		elif self.currentAlgo == "UCLS":
+	# 			self.logs.addItem(f'Starting UCLS for getting estimated abundance matrix')
+	# 			startHfcVd(self, selectedComponents)
+	# 			startNFINDR(self, self.pca_data)
+	# 			startUCLS(self, self.pca_data, self.nfindr_data)
 
-			elif self.currentAlgo == "NMF":
-				self.startNMFWindow()
-				self.logs.addItem(f'Starting NMF for getting top {self.components.toPlainText()} bands')
-				newpid1 = os.fork()
-				if newpid1 == 0:
-					nmf_data = startNMF(selectedComponents, tolerance, max_iterations)
+	# 		elif self.currentAlgo == "FCLS":
+	# 			self.logs.addItem(f'Starting FCLS for getting estimated abundance matrix')
+	# 			startHfcVd(self, selectedComponents)
+	# 			startNFINDR(self, self.pca_data)
+	# 			startFCLS(self, self.pca_data, self.nfindr_data)
 
-			elif self.currentAlgo == "NFinder":
-				self.logs.addItem(f'Starting N-Finder for getting top {self.components.toPlainText()} bands')
-				startNFINDR(self, self.pca_data)
-				startHfcVd(self, selectedComponents)
-				# self.startSUNSAL(self.nfindr_data, self.Et)
+	# 		elif self.currentAlgo == "KerPCA":
+	# 			self.logs.addItem(f'Starting Kernel Principal Component Analysis for getting top {self.components.toPlainText()} bands')
+	# 			startKerPCA(self, selectedComponents)
 
-			elif self.currentAlgo == "SUNSAL":
-				self.logs.addItem(f'Starting SUNSAL for getting estimated abundance matrix')
-				startHfcVd(self, selectedComponents)
-				startNFINDR(self, self.pca_data)
-				startSUNSAL(self, self.nfindr_data)
+	# 		elif self.currentAlgo == "LLE":
+	# 			self.logs.addItem(f'Starting Locally Linear Embedding algorithm for getting top {self.components.toPlainText()} bands')
+	# 			startLLE(self, selectedComponents)
 
-			elif self.currentAlgo == "HfcVd":
-				self.logs.addItem(f'Starting HfcVd for getting number of end members')
-				startHfcVd(self, selectedComponents)
-
-			elif self.currentAlgo == "ATGP":
-				self.logs.addItem(f'Starting ATGP for getting Endmember abundances')
-				startHfcVd(self, selectedComponents)
-				startATGP(self, self.pca_data)
-
-			elif self.currentAlgo == "PPI":
-				self.logs.addItem(f'Starting PPI for getting Endmember Extraction')
-				startHfcVd(self, selectedComponents)
-				startPPI(self, self.pca_data)
-
-			elif self.currentAlgo == "VCA":
-				self.logs.addItem(f'Starting VCA for getting estimated endmembers signature matrix')
-				startHfcVd(self, selectedComponents)
-				startNFINDR(self, self.pca_data)
-				startVCA(self, self.nfindr_data)
-
-			elif self.currentAlgo == "NNLS":
-				self.logs.addItem(f'Starting NNLS for getting estimated abundance matrix')
-				startHfcVd(selectedComponents)
-				startNFINDR(self, self.pca_data)
-				startNNLS(self, self.pca_data, self.nfindr_data)
-
-			elif self.currentAlgo == "UCLS":
-				self.logs.addItem(f'Starting UCLS for getting estimated abundance matrix')
-				startHfcVd(self, selectedComponents)
-				startNFINDR(self, self.pca_data)
-				startUCLS(self, self.pca_data, self.nfindr_data)
-
-			elif self.currentAlgo == "FCLS":
-				self.logs.addItem(f'Starting FCLS for getting estimated abundance matrix')
-				startHfcVd(self, selectedComponents)
-				startNFINDR(self, self.pca_data)
-				startFCLS(self, self.pca_data, self.nfindr_data)
-
-			elif self.currentAlgo == "KerPCA":
-				self.logs.addItem(f'Starting Kernel Principal Component Analysis for getting top {self.components.toPlainText()} bands')
-				startKerPCA(self, selectedComponents)
-
-			elif self.currentAlgo == "LLE":
-				self.logs.addItem(f'Starting Locally Linear Embedding algorithm for getting top {self.components.toPlainText()} bands')
-				startLLE(self, selectedComponents)
-
-			elif self.currentAlgo == "GBM using semi-NMF":
-				self.logs.addItem(f'Starting Generalized Bilinear Model for Non-Linear Unmixing')
-				startHfcVd(self, selectedComponents)
-				startNFINDR(self, self.pca_data)
-				startGBMsemiNMF(self, self.pca_data, self.nfindr_data)
-
+	# 		elif self.currentAlgo == "GBM using semi-NMF":
+	# 			self.logs.addItem(f'Starting Generalized Bilinear Model for Non-Linear Unmixing')
+	# 			startHfcVd(self, selectedComponents)
+	# 			startNFINDR(self, self.pca_data)
+	# 			startGBMsemiNMF(self, self.pca_data, self.nfindr_data)
 	
-		self.progress.setRange(0,1)
+	# 	self.progress.setRange(0,1)
+
+
+def validate(context):
+	'''
+	Parent function for validating all the input fields
+	'''
+
+	# Suppressing printing of errors using GDAL lib
+	gdal.UseExceptions()
+	gdal.PushErrorHandler('CPLQuietErrorHandler')
+
+	filename = context.input_text.toPlainText()
+	foldername = context.output_text.toPlainText()
+
+	# selectedComponents = self.components.toPlainText()
+	# n_jobs = self.jobs.toPlainText()
+	# tolerance = self.tolerance.toPlainText()
+	# max_iterations = self.maxit.toPlainText()
+
+	# Validating dataset path
+	context.dataExists = validateInputFile(context, context.file)
+	context.logs.addItem(f'Current algo = {currentAlgo}')
+
+	# Validating output folder path
+	if context.dataExists:
+		context.outputFolderExists = validateOutputFolder(context, foldername)
+
+	if context.dataExists and context.outputFolderExists:
+		if currentAlgo == "PCA":
+			selectedComponents = context.components.toPlainText()
+			context.trueComponents = validateComponents(context, selectedComponents)
+			if context.trueComponents:
+				context.logs.addItem(f'Starting Principal Component Analysis for getting top {context.components.toPlainText()} bands')
+				startPCA(context, selectedComponents)
+
+		if currentAlgo == "NMF":
+			selectedComponents = context.components.toPlainText()
+			context.trueComponents = validateComponents(context, selectedComponents)
+			
+			if context.trueComponents:
+				context.logs.addItem(f'Starting Non-negative Matrix Factorization for getting top {context.components.toPlainText()} bands')
+				startNMF(context, selectedComponents, context.tolerance, context.maxit, context.methodChoiceList, context.solverChoiceList)
+
+
+	# # Validating number of components
+	# if self.dataExists and self.outputFolderExists:
+	# 	self.trueComponents = validateComponents(self, selectedComponents)
+
+	# # Validating number of jobs
+	# if self.dataExists and self.outputFolderExists and self.trueComponents:
+	# 	self.enoughProcs = validateJobs(self,n_jobs)
+
+	# # Starting selected algorithm if everything's good
+	# if self.dataExists and self.outputFolderExists and self.trueComponents and self.enoughProcs:
+
+	# 	if self.currentAlgo == "PCA":
+	# 		self.logs.addItem(f'Starting Principal Component Analysis for getting top {self.components.toPlainText()} bands')
+	# 		startPCA(self, selectedComponents)
+
+	# 	elif self.currentAlgo == "NMF":
+	# 		self.logs.addItem(f'Starting NMF for getting top {self.components.toPlainText()} bands')
+	# 		newpid1 = os.fork()
+	# 		if newpid1 == 0:
+	# 			nmf_data = startNMF(selectedComponents, tolerance, max_iterations)
+
+	# 	elif self.currentAlgo == "NFinder":
+	# 		self.logs.addItem(f'Starting N-Finder for getting top {self.components.toPlainText()} bands')
+	# 		startNFINDR(self, self.pca_data)
+	# 		startHfcVd(self, selectedComponents)
+	# 		# self.startSUNSAL(self.nfindr_data, self.Et)
+
+	# 	elif self.currentAlgo == "SUNSAL":
+	# 		self.logs.addItem(f'Starting SUNSAL for getting estimated abundance matrix')
+	# 		startHfcVd(self, selectedComponents)
+	# 		startNFINDR(self, self.pca_data)
+	# 		startSUNSAL(self, self.nfindr_data)
+
+	# 	elif self.currentAlgo == "HfcVd":
+	# 		self.logs.addItem(f'Starting HfcVd for getting number of end members')
+	# 		startHfcVd(self, selectedComponents)
+
+	# 	elif self.currentAlgo == "ATGP":
+	# 		self.logs.addItem(f'Starting ATGP for getting Endmember abundances')
+	# 		startHfcVd(self, selectedComponents)
+	# 		startATGP(self, self.pca_data)
+
+	# 	elif self.currentAlgo == "PPI":
+	# 		self.logs.addItem(f'Starting PPI for getting Endmember Extraction')
+	# 		startHfcVd(self, selectedComponents)
+	# 		startPPI(self, self.pca_data)
+
+	# 	elif self.currentAlgo == "VCA":
+	# 		self.logs.addItem(f'Starting VCA for getting estimated endmembers signature matrix')
+	# 		startHfcVd(self, selectedComponents)
+	# 		startNFINDR(self, self.pca_data)
+	# 		startVCA(self, self.nfindr_data)
+
+	# 	elif self.currentAlgo == "NNLS":
+	# 		self.logs.addItem(f'Starting NNLS for getting estimated abundance matrix')
+	# 		startHfcVd(selectedComponents)
+	# 		startNFINDR(self, self.pca_data)
+	# 		startNNLS(self, self.pca_data, self.nfindr_data)
+
+	# 	elif self.currentAlgo == "UCLS":
+	# 		self.logs.addItem(f'Starting UCLS for getting estimated abundance matrix')
+	# 		startHfcVd(self, selectedComponents)
+	# 		startNFINDR(self, self.pca_data)
+	# 		startUCLS(self, self.pca_data, self.nfindr_data)
+
+	# 	elif self.currentAlgo == "FCLS":
+	# 		self.logs.addItem(f'Starting FCLS for getting estimated abundance matrix')
+	# 		startHfcVd(self, selectedComponents)
+	# 		startNFINDR(self, self.pca_data)
+	# 		startFCLS(self, self.pca_data, self.nfindr_data)
+
+	# 	elif self.currentAlgo == "KerPCA":
+	# 		self.logs.addItem(f'Starting Kernel Principal Component Analysis for getting top {self.components.toPlainText()} bands')
+	# 		startKerPCA(self, selectedComponents)
+
+	# 	elif self.currentAlgo == "LLE":
+	# 		self.logs.addItem(f'Starting Locally Linear Embedding algorithm for getting top {self.components.toPlainText()} bands')
+	# 		startLLE(self, selectedComponents)
+
+	# 	elif self.currentAlgo == "GBM using semi-NMF":
+	# 		self.logs.addItem(f'Starting Generalized Bilinear Model for Non-Linear Unmixing')
+	# 		startHfcVd(self, selectedComponents)
+	# 		startNFINDR(self, self.pca_data)
+	# 		startGBMsemiNMF(self, self.pca_data, self.nfindr_data)
+
+	context.progress.setRange(0,1)
+
+
+@pyqtSlot()
+def on_click_input(context):
+	'''
+	On click listener for input_browse button
+	'''
+
+	InputBrowse(context)
+
+
+@pyqtSlot()
+def on_click_output(context):
+	'''
+	On click listener for output_browse button
+	'''
+
+	OutputBrowse(context)
+
+
+@pyqtSlot()
+def on_click_OK(context):
+	'''
+	On click listener for OK button
+	'''
+
+	context.validation = ValidationThread()
+	context.validation.startThread.connect(partial(validate, context))
+	context.validation.startProgress.connect(partial(setProgressBar, context))
+	context.validation.start()
+
+
+@pyqtSlot()
+def on_click_cancel(context):
+	'''
+	On click listener for Cancel button
+	'''
+
+	context.input_text.setText("")
+	context.output_text.setText("")
+	context.components.setText("")
+	context.progress.setValue(0)
+	context.logs.clear()
+
+	if currentAlgo == "NMF":
+		context.tolerance.setText("")
+		context.maxit.setText("")
+
 		
+def InputBrowse(context):
+	'''
+	Opens Browse Files dialog box for selecting input dataset
+	'''
+
+	options = QFileDialog.Options()
+	options |= QFileDialog.DontUseNativeDialog
+	fileName, _ = QFileDialog.getOpenFileName(context,"Select Dataset", "","All Files (*);;Matlab Files (*.mat)", options=options)
+	context.file = fileName
+	if fileName:
+		context.input_text.setText(fileName.split('/')[-1])
+
+
+def OutputBrowse(context):
+	'''
+	Opens Browse Files dialog box for selecting target file for writing output
+	'''
+
+	options = QFileDialog.Options()
+	options |= QFileDialog.DontUseNativeDialog
+	folderName = str(QFileDialog.getExistingDirectory(context, "Select Directory", options=options))
+	if folderName:
+		context.output_text.setText(folderName)
 
 def validateInputFile(context, filename):
 	'''
@@ -1461,8 +1701,8 @@ def startLLE(context, selectedComponents):
 	context.logs.addItem("Analysis completed")
 	context.logs.addItem("Generating Output file")
 	writeData(context, "LLE_", context.lle_data)
-	context.logs.addItem(f"Output file LLE_{context.OUTPUT_FILENAME} generated")
-	context.setProgressBar(False)
+	context.logs.addItem(f"Output file LLE_{OUTPUT_FILENAME} generated")
+	setProgressBar(False)
 	
 	''' To plot the points after LDA '''
 	if (int)(selectedComponents) == 1:
@@ -1484,7 +1724,7 @@ def startLLE(context, selectedComponents):
 
 
 
-def startNMF(context,selectedComponents, tolerance, max_iterations):
+def startNMF(context,selectedComponents, tolerance, max_iterations, method, solver):
 	'''
 	Main function for NMF
 	'''
@@ -1492,15 +1732,7 @@ def startNMF(context,selectedComponents, tolerance, max_iterations):
 	context.datasetAsArray = context.dataset.ReadAsArray()
 	nmf = NonNegativeMatrixFactorisation(context.datasetAsArray)
 	nmf.scaleData()
-	context.nmf_data = nmf.getReducedComponents_noOfComponents((int)(context.components.toPlainText()), (int)(context.tolerance.toPlainText()), (int)(context.max_iterations.toPlainText()))
-	error = nmf.errorFactor((int)(context.components.toPlainText()))
-	context.logs.addItem("Analysis completed")
-	context.logs.addItem(f'RMS Error: {error}')
-	context.logs.addItem("Generating Output file")
-	context.nmf_data = nmf.denormalizeData(context.nmf_data)
-	writeData(context, "NMF_", context.nmf_data)
-	context.logs.addItem(f"Output file NMF_{context.OUTPUT_FILENAME} generated")
-	context.setProgressBar(False)
+	context.nmf_data = nmf.getReducedComponents_noOfComponents((int)(context.components.toPlainText()), (int)(context.tolerance.toPlainText()), (int)(context.max_iterations.toPlainText()), method.toPlainText(), solver.toPlainText())
 	
 	''' To plot the points after NMF '''
 	if (int)(selectedComponents) == 1:
@@ -1663,7 +1895,7 @@ def startGBMsemiNMF(context, pca_data, nfindr_data):
 	context.setProgressBar(False)
 
 
-def startPCA(context,selectedComponents):
+def startPCA(context, selectedComponents):
 	'''
 	Main function for PCA
 	'''
@@ -1681,9 +1913,9 @@ def startPCA(context,selectedComponents):
 	context.logs.addItem("Generating Output file")
 	writeData(context, "PCA_", context.pca_data)
 	# t1.join()
-	context.logs.addItem(f"Output file PCA_{context.OUTPUT_FILENAME} generated")
+	context.logs.addItem(f"Output file PCA_{OUTPUT_FILENAME} generated")
 	context.logs.addItem(f'Retained Variance: {retainedVariance}')
-	context.setProgressBar(False)
+	setProgressBar(context,False)
 	
 	''' To plot the points after PCA '''
 	if (int)(selectedComponents) == 1:
@@ -1748,7 +1980,7 @@ def writeData(context, prefix, data):
 	Writes data into a file in CSV (Comma Seperated Value) format
 	'''
 
-	with open(prefix + context.OUTPUT_FILENAME, 'w') as writeFile:
+	with open(prefix + OUTPUT_FILENAME, 'w') as writeFile:
 		writer = csv.writer(writeFile)
 
 		dataList = []
@@ -1847,6 +2079,14 @@ def writeError(context, err_msg):
 ##########################################
 ###### Tabs for different algorithms #####
 ##########################################
+
+def startPCAWindow(context):
+	clearWidgets(context)
+	context.input_label.hide()
+	context.ToolTab = PCAUI()
+	context.setWindowTitle("Principal Component Analysis")
+	context.setCentralWidget(context.ToolTab)
+	context.show()	
 
 def startKerPCAWindow(context):
 	clearWidgets(context)

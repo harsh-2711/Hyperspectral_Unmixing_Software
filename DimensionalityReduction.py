@@ -183,9 +183,10 @@ class LLE():
 		Returns the principal components based on the given nnumber of components
 		to be retained
 		'''
+
 		solver = str(solver)
 		method = str(method)
-		lle = LocallyLinearEmbedding(n_components=noOfComponents, ,n_neighbors=noOfNeighbours, n_jobs=self.n_jobs, eigen_solver=solver, method=method)
+		lle = LocallyLinearEmbedding(n_components=noOfComponents, n_neighbors=noOfNeighbours, n_jobs=self.n_jobs, eigen_solver=solver, method=method)
 		principalComponents = lle.fit_transform(X = self.standardizedData)
 
 		return principalComponents

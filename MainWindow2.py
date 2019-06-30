@@ -47,6 +47,8 @@ Ui_MainWindow, QtBaseClass = uic.loadUiType(path + qtCreatorFile)
 currentAlgo = ""
 OUTPUT_FILENAME = "Data.csv"
 
+end_member_list = [0,0,0]
+
 
 class PCAUI(QMainWindow, Ui_MainWindow):
 
@@ -254,18 +256,18 @@ class NFINDRUI(QMainWindow, Ui_MainWindow):
 		self.input_text = QTextEdit(self)
 		self.input_text.setGeometry(142,35,402,21)
 
-		# Transform Input Label
-		self.output_label = QLabel("Transform I/P", self)
-		self.output_label.move(20, 85)
+		# # Transform Input Label
+		# self.output_label = QLabel("Transform I/P", self)
+		# self.output_label.move(20, 85)
 
-		# Transform Input browse button
-		self.output_browse = QPushButton("Browse", self)
-		self.output_browse.move(550,85)
+		# # Transform Input browse button
+		# self.output_browse = QPushButton("Browse", self)
+		# self.output_browse.move(550,85)
 
-		# Transform Input text field
-		self.output_text = QTextEdit(self)
-		self.output_text.setGeometry(142,90,402,21)
-		self.output_text.setText(os.getcwd())
+		# # Transform Input text field
+		# self.output_text = QTextEdit(self)
+		# self.output_text.setGeometry(142,90,402,21)
+		# self.output_text.setText(os.getcwd())
 
 
 		# Output Label
@@ -283,28 +285,28 @@ class NFINDRUI(QMainWindow, Ui_MainWindow):
 		self.output_text.setText(os.getcwd())
 
 		# No of endmembers Label
-		self.components_label = QLabel("Endmembers", self)
-		self.components_label.move(20, 200)
+		self.endmembers_label = QLabel("Endmembers", self)
+		self.endmembers_label.move(20, 200)
 
 		# Endmembers text field
-		self.components = QTextEdit(self)
-		self.components.setGeometry(140,205,45,21)
+		self.endmembers = QTextEdit(self)
+		self.endmembers.setGeometry(140,205,45,21)
 
 		# Max iterations Label
-		self.jobs_label = QLabel("Max iterations", self)
-		self.jobs_label.move(220, 200)
+		self.maxit_label = QLabel("Max iterations", self)
+		self.maxit_label.move(220, 200)
 
 		# Max iterations text field
-		self.jobs = QTextEdit(self)
-		self.jobs.setGeometry(350,205,40,21)
+		self.maxit = QTextEdit(self)
+		self.maxit.setGeometry(350,205,40,21)
 
 		# ATGP label
-		self.fit_inverse_transform = QLabel("ATGP", self)
-		self.fit_inverse_transform.setGeometry(440,208,280,15)
+		self.ATGP_label = QLabel("ATGP", self)
+		self.ATGP_label.setGeometry(440,208,280,15)
 		
 		# ATGP Checkbox
-		self.checkbox_fit_inverse_transform = QCheckBox(self)
-		self.checkbox_fit_inverse_transform.move(500, 202)
+		self.checkbox_ATGP = QCheckBox(self)
+		self.checkbox_ATGP.move(500, 202)
 
 		# OK button
 		self.OK = QPushButton("OK", self)
@@ -437,7 +439,7 @@ class SUNSALUI(QMainWindow, Ui_MainWindow):
 
 
 		# Endmember sign Label
-		self.input_label = QLabel("EM signature", self)
+		self.input_label = QLabel("Input", self)
 		self.input_label.move(20, 20)
 
 		# Endmember sign browse button
@@ -449,13 +451,13 @@ class SUNSALUI(QMainWindow, Ui_MainWindow):
 		self.input_text = QTextEdit(self)
 		self.input_text.setGeometry(142,25,402,21)
 
-		# Data matrix Label
-		self.output_label = QLabel("Data Matrix", self)
-		self.output_label.move(20, 70)
+		# # Data matrix Label
+		# self.output_label = QLabel("Data Matrix", self)
+		# self.output_label.move(20, 70)
 
-		# Data Matrix browse button
-		self.output_browse = QPushButton("Browse", self)
-		self.output_browse.move(550,70)
+		# # Data Matrix browse button
+		# self.output_browse = QPushButton("Browse", self)
+		# self.output_browse.move(550,70)
 
 		# Data Matrix text field
 		self.output_text = QTextEdit(self)
@@ -477,53 +479,53 @@ class SUNSALUI(QMainWindow, Ui_MainWindow):
 		self.output_text.setText(os.getcwd())
 
 		# No of iterations Label
-		self.components_label = QLabel("Min AL iter", self)
-		self.components_label.move(60, 170)
+		self.iter_label = QLabel("Min AL iter", self)
+		self.iter_label.move(60, 170)
 
 		# iterations text field
-		self.components = QTextEdit(self)
-		self.components.setGeometry(140,175,45,21)
+		self.iter = QTextEdit(self)
+		self.iter.setGeometry(140,175,45,21)
 
 		# Components Label
-		self.jobs_label = QLabel("Lambda", self)
-		self.jobs_label.move(260, 170)
+		self.lambda_label = QLabel("Lambda", self)
+		self.lambda_label.move(260, 170)
 
 		# Components text field
-		self.jobs = QTextEdit(self)
-		self.jobs.setGeometry(320,175,40,21)
+		self.lambda_val = QTextEdit(self)
+		self.lambda_val.setGeometry(320,175,40,21)
 
 		# Tolerance Label
-		self.jobs_label = QLabel("Tolerance", self)
-		self.jobs_label.move(430, 170)
+		self.tol_label = QLabel("Tolerance", self)
+		self.tol_label.move(430, 170)
 
 		# Tolerance text field
-		self.jobs = QTextEdit(self)
-		self.jobs.setGeometry(510,175,40,21)
+		self.tolerance = QTextEdit(self)
+		self.tolerance.setGeometry(510,175,40,21)
 
 
 		# Positivity label
-		self.fit_inverse_transform = QLabel("Positivity", self)
-		self.fit_inverse_transform.setGeometry(130,212,280,15)
+		self.positivity_label = QLabel("Positivity", self)
+		self.positivity_label.setGeometry(130,212,280,15)
 		
 		# Positivity Checkbox
-		self.checkbox_fit_inverse_transform = QCheckBox(self)
-		self.checkbox_fit_inverse_transform.move(200, 206)
+		self.positivity = QCheckBox(self)
+		self.positivity.move(200, 206)
 
 		# Addone label
-		self.fit_inverse_transform = QLabel("Add one", self)
-		self.fit_inverse_transform.setGeometry(250,212,280,15)
+		self.addOne_label = QLabel("Add one", self)
+		self.addOne_label.setGeometry(250,212,280,15)
 		
 		# Addone Checkbox
-		self.checkbox_fit_inverse_transform = QCheckBox(self)
-		self.checkbox_fit_inverse_transform.move(320, 206)
+		self.addOne = QCheckBox(self)
+		self.addOne.move(320, 206)
 
 		# Verbose label
-		self.fit_inverse_transform = QLabel("Verbose", self)
-		self.fit_inverse_transform.setGeometry(370,212,280,15)
+		self.verbose_label = QLabel("Verbose", self)
+		self.verbose_label.setGeometry(370,212,280,15)
 		
 		# Verbose Checkbox
-		self.checkbox_fit_inverse_transform = QCheckBox(self)
-		self.checkbox_fit_inverse_transform.move(440, 206)
+		self.verbose = QCheckBox(self)
+		self.verbose.move(440, 206)
 
 		# OK button
 		self.OK = QPushButton("OK", self)
@@ -1076,7 +1078,6 @@ class GBMsemiNMFUI(QMainWindow, Ui_MainWindow):
 		self.show()
 
 
-
 class Software (QMainWindow, Ui_MainWindow):
 
 	def __init__(self):
@@ -1455,48 +1456,57 @@ def validate(context):
 	# Validating dataset path
 	context.dataExists = validateInputFile(context, context.file)
 	context.logs.addItem(f'Current algo = {currentAlgo}')
-
+	selectedComponents = context.components.toPlainText()
 	# Validating output folder path
 	if context.dataExists:
 		context.outputFolderExists = validateOutputFolder(context, foldername)
 
-	if context.dataExists and context.outputFolderExists:
+	if context.outputFoldeExists and context.dataExists:
+		context.trueComponents = validateComponents(context, selectedComponents)
+
+	if context.dataExists and context.outputFolderExists and context.trueComponents:
 		if currentAlgo == "PCA":
-			selectedComponents = context.components.toPlainText()
-			context.trueComponents = validateComponents(context, selectedComponents)
-			if context.trueComponents:
-				context.logs.addItem(f'Starting Principal Component Analysis for getting top {context.components.toPlainText()} bands')
-				startPCA(context, selectedComponents)
+			context.logs.addItem(f'Starting Principal Component Analysis for getting top {context.components.toPlainText()} bands')
+			startPCA(context, selectedComponents)
 
 		if currentAlgo == "NMF":
-			selectedComponents = context.components.toPlainText()
-			context.trueComponents = validateComponents(context, selectedComponents)
-			
-			if context.trueComponents:
-				context.logs.addItem(f'Starting Non-negative Matrix Factorization for getting top {context.components.toPlainText()} bands')
-				startNMF(context, selectedComponents, context.tolerance, context.maxit, context.method, context.solver)
+			context.logs.addItem(f'Starting Non-negative Matrix Factorization for getting top {context.components.toPlainText()} bands')
+			startNMF(context, selectedComponents, context.tolerance, context.maxit, context.method, context.solver)
 
 		if currentAlgo == "HfcVd":
-			selectedComponents = context.components.toPlainText()
-			context.trueComponents = validateComponents(context, selectedComponents)
-			if context.trueComponents:
-				context.logs.addItem(f'Starting HFCVD for finding number of endmembers')
-				startHfcVd(context, selectedComponents)
+			context.logs.addItem(f'Starting HFCVD for finding number of endmembers')
+			startHfcVd(context, selectedComponents)
 
 		if currentAlgo == "NNLS":
-			selectedComponents = context.components.toPlainText()
-			context.trueComponents = validateComponents(context, selectedComponents)
-			if context.trueComponents:
-				startHfcVd(context, selectedComponents)
-				startNFINDR()
-				startNNLS()
+			startHfcVd(context, selectedComponents)
+			startNFINDR(context, context.pca_data, context.maxit, context.checkbox_ATGP)
+			startNNLS(context, context.pca_data, context.nfindr_data)
+
+		if currentAlgo == "UCLS":
+			startHfcVd(context, selectedComponents)
+			startNFINDR(context, context.pca_data, context.maxit, context.checkbox_ATGP)
+			startUCLS(context, context.pca_data, context.nfindr_data)
+
+		if currentAlgo == "FCLS":
+			startHfcVd(context, selectedComponents)
+			startNFINDR(context, context.pca_data, context.maxit, context.checkbox_ATGP)
+			startFCLS(context, context.pca_data, context.nfindr_data)
 
 		if currentAlgo == "LLE":
-			selectedComponents = context.components.toPlainText()
-			context.trueComponents = validateComponents(context, selectedComponents)
-			if context.trueComponents:
-				startLLE(context, selectedComponents, context.neighbours, context.jobs, context.eigenSolver, context.method)
+			startLLE(context, selectedComponents, context.neighbours, context.jobs, context.eigenSolver, context.method)
 		
+		if currentAlgo == "NFinder":
+			startHfcVd(context, selectedComponents)
+			startNFINDR(context, context.pca_data, context.maxit, context.checkbox_ATGP)
+
+		if currentAlgo == "ATGP":
+			startHfcVd(context, selectedComponents)
+			startATGP(context, context.pca_data)
+
+		if currentAlgo == "SUNSAL":
+			startHfcVd(context, selectedComponents)
+			startNFINDR(context, context.pca_data, None, False)
+			startSUNSAL(context, context.nfindr_data, context.iter, context.lambda_val, context.tolerance, context.positivity, context.addOne, context.verbose)		
 
 
 	# # Validating number of components
@@ -1788,41 +1798,41 @@ def startATGP(context, pca_data):
 	Main function to run ATGP
 	'''
 	context.logs.addItem("Initiating ATGP algorithm")
-	context.ATGP_data, IDX = eea.ATGP(np.transpose(pca_data), context.end_member_list[2])
+	context.ATGP_data, IDX = eea.ATGP(np.transpose(pca_data), end_member_list[2])
 	context.logs.addItem("Analysis completed")
 	context.logs.addItem("Generating output file")
 	writeData(context, "ATGP_", context.ATGP_data)
-	context.logs.addItem(f"Output File ATGP_{context.OUTPUT_FILENAME} generated")
+	context.logs.addItem(f"Output File ATGP_{OUTPUT_FILENAME} generated")
 	context.setProgressBar(False)
 
 
-def startNFINDR(context, pca_data):
+def startNFINDR(context, pca_data, maxit, checkbox_ATGP):
 	'''
 	Main function for N-Finder algorithm
 	'''
 
 	context.datasetAsArray = context.dataset.ReadAsArray()
 	nfindr = NFindrModule()
-	context.nfindr_data, Et, IDX, n_iterations = nfindr.NFINDR(pca_data, context.end_member_list[2])
+	context.nfindr_data, Et, IDX, n_iterations = nfindr.NFINDR(data=pca_data, q=end_member_list[2], maxit=maxit, ATGP_init=checkbox_ATGP)
 	context.logs.addItem("Analysis completed")
 	context.logs.addItem(f'Number of iterations: {n_iterations}')
 	context.logs.addItem("Generating Output file")
 	writeData(context, "NFinder_", context.nfindr_data)
-	context.logs.addItem(f"Output file NFinder_{context.OUTPUT_FILENAME} generated")
+	context.logs.addItem(f"Output file NFinder_{OUTPUT_FILENAME} generated")
 	setProgressBar(context, False)
 
 
-def startSUNSAL(context, nfindr_data):
+def startSUNSAL(context, nfindr_data, iterations, lambda_val, tolerance, positivity, addOne, verbose):
 	'''
 	Main function for SUNSAL algorithm
 	'''
 
 	ss = SUNSALModule()
 	context.logs.addItem("Initiating SUNSAL algorithm")
-	context.sunsal_data, res_p, res_d, sunsal_i = ss.SUNSAL(np.transpose(nfindr_data), np.transpose(context.pca_data))
+	context.sunsal_data, res_p, res_d, sunsal_i = ss.SUNSAL(M=np.transpose(nfindr_data), y=np.transpose(context.pca_data), al_iters=iterations, lambda_p=lambda_val, positivity=positivity, addone=addOne, tol=tolerance, verbose=verbose)
 	context.logs.addItem("Running SUNSAL algorithm")
 	writeData(context, "SUNSAL_", context.sunsal_data)
-	context.logs.addItem(f"Output file SUNSAL_{context.OUTPUT_FILENAME} generated")
+	context.logs.addItem(f"Output file SUNSAL_{OUTPUT_FILENAME} generated")
 	context.logs.addItem(f"Number of iterations are {sunsal_i}")
 	setProgressBar(context, False)
 
@@ -1834,9 +1844,9 @@ def startHfcVd(context, selectedComponents):
 
 	startPCA(context, selectedComponents)
 	context.logs.addItem("Initiating HfcVd algorithm")
-	context.end_member_list = vd.HfcVd(context.pca_data)
+	end_member_list = vd.HfcVd(context.pca_data)
 	context.logs.addItem("Running SUNSAL algorithm")
-	context.logs.addItem(f"Number of end member(s) found is/are {context.end_member_list[2]}")
+	context.logs.addItem(f"Number of end member(s) found is/are {end_member_list[2]}")
 	setProgressBar(context, False)
 
 
@@ -1846,10 +1856,10 @@ def startVCA(context, nfindr_data):
 	'''
 
 	context.logs.addItem("Initiating VCA algorithm")
-	context.vca_data, IDX, proj_data = sparse.vca(nfindr_data, context.end_member_list[2])
+	context.vca_data, IDX, proj_data = sparse.vca(nfindr_data, end_member_list[2])
 	context.logs.addItem("Running VCA algorithm")
 	writeData(context, "VCA_", context.vca_data)
-	context.logs.addItem(f"Output file VCA_{context.OUTPUT_FILENAME} generated")
+	context.logs.addItem(f"Output file VCA_{OUTPUT_FILENAME} generated")
 	setProgressBar(context, False)
 
 
@@ -1859,10 +1869,10 @@ def startPPI(context, pca_data):
 	'''
 
 	context.logs.addItem("Initiating PPI algorithm")
-	context.ppi_data, IDX = eea.PPI(np.transpose(pca_data), context.end_member_list[2])
+	context.ppi_data, IDX = eea.PPI(np.transpose(pca_data), end_member_list[2])
 	context.logs.addItem("Running PPI algorithm")
 	writeData(context, "PPI_", context.ppi_data)
-	context.logs.addItem(f"Output file PPI_{context.OUTPUT_FILENAME} generated")
+	context.logs.addItem(f"Output file PPI_{OUTPUT_FILENAME} generated")
 	setProgressBar(context, False)
 
 
@@ -1876,7 +1886,7 @@ def startNNLS(context, pca_data, nfindr_data):
 	context.logs.addItem("Analysis completed")
 	context.logs.addItem("Generating output file")
 	writeData(context, "NNLS_", context.NNLS_data)
-	context.logs.addItem(f"Output File NNLS_{context.OUTPUT_FILENAME} generated")
+	context.logs.addItem(f"Output File NNLS_{OUTPUT_FILENAME} generated")
 	setProgressBar(context, False)
 
 
@@ -1890,7 +1900,7 @@ def startUCLS(context, pca_data, nfindr_data):
 	context.logs.addItem("Analysis completed")
 	context.logs.addItem("Generating output file")
 	writeData(context, "UCLS_", context.UCLS_data)
-	context.logs.addItem(f"Output File UCLS_{context.OUTPUT_FILENAME} generated")
+	context.logs.addItem(f"Output File UCLS_{OUTPUT_FILENAME} generated")
 	setProgressBar(context, False)
 
 
@@ -1904,7 +1914,7 @@ def startFCLS(context, pca_data, nfindr_data):
 	context.logs.addItem("Analysis completed")
 	context.logs.addItem("Generating output file")
 	writeData(context, "FCLS_", context.UCLS_data)
-	context.logs.addItem(f"Output File FCLS_{context.OUTPUT_FILENAME} generated")
+	context.logs.addItem(f"Output File FCLS_{OUTPUT_FILENAME} generated")
 	setProgressBar(context, False)
 
 
@@ -1919,7 +1929,7 @@ def startGBMsemiNMF(context, pca_data, nfindr_data):
 	context.logs.addItem(f"RMS Error: {rmse}")
 	context.logs.addItem("Generating output file")
 	writeData(context, "GBMsemiNMF_", context.GBMsemiNMF_data)
-	context.logs.addItem(f"Output File GBMsemiNMF_{context.OUTPUT_FILENAME} generated")
+	context.logs.addItem(f"Output File GBMsemiNMF_{OUTPUT_FILENAME} generated")
 	context.setProgressBar(False)
 
 
@@ -1979,7 +1989,7 @@ def startKerPCA(context, selectedComponents):
 	context.logs.addItem("Analysis completed")
 	context.logs.addItem("Generating Output file")
 	writeData(context, "KernelPCA_", context.ker_pca_data)
-	context.logs.addItem(f"Output file KernelPCA_{context.OUTPUT_FILENAME} generated")
+	context.logs.addItem(f"Output file KernelPCA_{OUTPUT_FILENAME} generated")
 	context.setProgressBar(False)
 	
 	''' To plot the points after Kernel PCA '''
@@ -2000,7 +2010,6 @@ def startKerPCA(context, selectedComponents):
 
 	else:
 		context.logs.addItem('Due to high dimentionality, graph could not be plotted')
-
 
 
 def writeData(context, prefix, data):

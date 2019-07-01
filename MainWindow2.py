@@ -1101,17 +1101,20 @@ class Software (QMainWindow, Ui_MainWindow):
 
 		pcaMenu = QAction("PCA", self)
 		dimReduction.addAction(pcaMenu)
+		pcaMenu.triggered.connect(partial(clearWidgets, self))
 		pcaMenu.triggered.connect(partial(startPCAWindow, self))
 		pcaMenu.triggered.connect(partial(self.changeCurrentAlgo, "PCA"))
 
 
 		nmf = QAction("NMF", self)
 		dimReduction.addAction(nmf)
+		nmf.triggered.connect(partial(clearWidgets, self))
 		nmf.triggered.connect(partial(startNMFWindow, self))
 		nmf.triggered.connect(partial(self.changeCurrentAlgo, "NMF"))
 
 		kerPCA = QAction("Kernel PCA", self)
 		dimReduction.addAction(kerPCA)
+		kerPCA.triggered.connect(partial(clearWidgets, self))
 		kerPCA.triggered.connect(partial(startKerPCAWindow, self))
 		kerPCA.triggered.connect(partial(self.changeCurrentAlgo, "KerPCA"))
 
@@ -1120,6 +1123,7 @@ class Software (QMainWindow, Ui_MainWindow):
 
 		lle = QAction("LLE", self)
 		dimReduction.addAction(lle)
+		lle.triggered.connect(partial(clearWidgets, self))
 		lle.triggered.connect(partial(startLLEWindow, self))
 		lle.triggered.connect(partial(self.changeCurrentAlgo, "LLE"))
 
@@ -1134,6 +1138,7 @@ class Software (QMainWindow, Ui_MainWindow):
 
 		hfcvd = QAction("HfcVd", self)
 		mc.addAction(hfcvd)
+		hfcvd.triggered.connect(partial(clearWidgets, self))
 		hfcvd.triggered.connect(partial(startHFCVDWindow, self))
 		hfcvd.triggered.connect(partial(self.changeCurrentAlgo, "HfcVd"))
 
@@ -1142,18 +1147,21 @@ class Software (QMainWindow, Ui_MainWindow):
 
 		nFinder = QAction("N-Finder", self)
 		eme.addAction(nFinder)
+		nFinder.triggered.connect(partial(clearWidgets, self))
 		nFinder.triggered.connect(partial(startNFINDRWindow, self))
-		# nFinder.triggered.connect(partial(changeCurrentAlgo, self, "NFinder"))
+		nFinder.triggered.connect(partial(self.changeCurrentAlgo, "NFinder"))
 
 		atgp = QAction("ATGP", self)
 		eme.addAction(atgp)
+		atgp.triggered.connect(partial(clearWidgets, self))
 		atgp.triggered.connect(partial(startATGPWindow, self))
-		# atgp.triggered.connect(partial(changeCurrentAlgo, self, "ATGP"))
+		atgp.triggered.connect(partial(self.changeCurrentAlgo, "ATGP"))
 
 		ppi = QAction("PPI", self)
 		eme.addAction(ppi)
+		ppi.triggered.connect(partial(clearWidgets, self))
 		ppi.triggered.connect(partial(startPPIWindow, self))
-		# ppi.triggered.connect(partial(changeCurrentAlgo, self, "PPI"))
+		ppi.triggered.connect(partial(self.changeCurrentAlgo, "PPI"))
 
 		sisal = QAction("SISAL", self)
 		eme.addAction(sisal)
@@ -1164,40 +1172,46 @@ class Software (QMainWindow, Ui_MainWindow):
 
 		sunsal = QAction("SUNSAL", self)
 		lu.addAction(sunsal)
+		sunsal.triggered.connect(partial(clearWidgets, self))
 		sunsal.triggered.connect(partial(startSUNSALWindow, self))
-		# sunsal.triggered.connect(partial(changeCurrentAlgo, self, "SUNSAL"))
+		sunsal.triggered.connect(partial(self.changeCurrentAlgo, "SUNSAL"))
 
 		vca = QAction("VCA", self)
 		lu.addAction(vca)
+		vca.triggered.connect(partial(clearWidgets, self))
 		vca.triggered.connect(partial(startVCAWindow, self))
-		# vca.triggered.connect(partial(changeCurrentAlgo, self, "VCA"))
+		vca.triggered.connect(partial(self.changeCurrentAlgo, "VCA"))
 
 		nnls = QAction("NNLS", self)
 		lu.addAction(nnls)
+		nnls.triggered.connect(partial(clearWidgets, self))
 		nnls.triggered.connect(partial(startNNLSWindow, self))
-		# nnls.triggered.connect(partial(changeCurrentAlgo, self, "NNLS"))
+		nnls.triggered.connect(partial(self.changeCurrentAlgo, "NNLS"))
 
 		ucls = QAction("UCLS", self)
 		lu.addAction(ucls)
+		ucls.triggered.connect(partial(clearWidgets, self))
 		ucls.triggered.connect(partial(startUCLSWindow, self))
-		# ucls.triggered.connect(partial(changeCurrentAlgo, self, "UCLS"))
+		ucls.triggered.connect(partial(self.changeCurrentAlgo, "UCLS"))
 
 		fcls = QAction("FCLS", self)
 		lu.addAction(fcls)
+		fcls.triggered.connect(partial(clearWidgets, self))
 		fcls.triggered.connect(partial(startFCLSWindow, self))
-		# fcls.triggered.connect(partial(changeCurrentAlgo, self, "FCLS"))
+		fcls.triggered.connect(partial(self.changeCurrentAlgo, "FCLS"))
 
 		# Non-linear Unmixing
 		nlu = menubar.addMenu("Non Linear Unmixing")
 
 		gbmNMF = QAction("GBM using semi-NMF", self)
 		nlu.addAction(gbmNMF)
+		gbmNMF.triggered.connect(partial(clearWidgets, self))
 		gbmNMF.triggered.connect(partial(startGBMsemiNMFWindow, self))
-		# gbmNMF.triggered.connect(partial(changeCurrentAlgo, self, "GBM using semi-NMF"))
+		gbmNMF.triggered.connect(partial(self.changeCurrentAlgo, "GBM using semi-NMF"))
 
 		gbmGrad = QAction("GBM using gradient", self)
 		nlu.addAction(gbmGrad)
-		# gbmGrad.triggered.connect(partial(changeCurrentAlgo, self, "GBM using gradient"))
+		gbmGrad.triggered.connect(partial(self.changeCurrentAlgo, "GBM using gradient"))
 
 		mulLin = QAction("Multi-Linear", self)
 		nlu.addAction(mulLin)
@@ -2099,20 +2113,20 @@ def startGBMsemiNMFWindow(context):
 
 def clearWidgets(context):
 
-	context.input_label.hide()
-	context.input_browse.hide()
-	context.input_text.hide()
-	context.output_label.hide()
-	context.output_browse.hide()
-	context.output_text.hide()
-	context.components_label.hide()
-	context.components.hide()
-	context.jobs_label.hide()
-	context.jobs.hide()
-	context.OK.hide()
-	context.cancel.hide()
-	context.logs.hide()
-	context.progress.hide()
+    context.input_label.hide()
+    context.input_browse.hide()
+    context.input_text.hide()
+    context.output_label.hide()
+    context.output_browse.hide()
+    context.output_text.hide()
+    context.components_label.hide()
+    context.components.hide()
+    context.jobs_label.hide()
+    context.jobs.hide()
+    context.OK.hide()
+    context.cancel.hide()
+    context.logs.hide()
+    context.progress.hide()
 
 
 if __name__ == "__main__":

@@ -256,20 +256,6 @@ class NFINDRUI(QMainWindow, Ui_MainWindow):
 		self.input_text = QTextEdit(self)
 		self.input_text.setGeometry(142,35,402,21)
 
-		# # Transform Input Label
-		# self.output_label = QLabel("Transform I/P", self)
-		# self.output_label.move(20, 85)
-
-		# # Transform Input browse button
-		# self.output_browse = QPushButton("Browse", self)
-		# self.output_browse.move(550,85)
-
-		# # Transform Input text field
-		# self.output_text = QTextEdit(self)
-		# self.output_text.setGeometry(142,90,402,21)
-		# self.output_text.setText(os.getcwd())
-
-
 		# Output Label
 		self.output_label = QLabel("Output", self)
 		self.output_label.move(20, 140)
@@ -450,14 +436,6 @@ class SUNSALUI(QMainWindow, Ui_MainWindow):
 		# Endmember sign text field
 		self.input_text = QTextEdit(self)
 		self.input_text.setGeometry(142,25,402,21)
-
-		# # Data matrix Label
-		# self.output_label = QLabel("Data Matrix", self)
-		# self.output_label.move(20, 70)
-
-		# # Data Matrix browse button
-		# self.output_browse = QPushButton("Browse", self)
-		# self.output_browse.move(550,70)
 
 		# Data Matrix text field
 		self.output_text = QTextEdit(self)
@@ -1324,116 +1302,6 @@ def setProgressBar(context,switch):
 	else:
 		context.progress.setRange(0,1)
 
-
-	# def validate(self):
-	# 	'''
-	# 	Parent function for validating all the input fields
-	# 	'''
-
-	# 	# Suppressing printing of errors using GDAL lib
-	# 	gdal.UseExceptions()
-	# 	gdal.PushErrorHandler('CPLQuietErrorHandler')
-
-	# 	filename = self.input_text.toPlainText()
-	# 	foldername = self.output_text.toPlainText()
-	# 	selectedComponents = self.components.toPlainText()
-	# 	n_jobs = self.jobs.toPlainText()
-	# 	# tolerance = self.tolerance.toPlainText()
-	# 	# max_iterations = self.maxit.toPlainText()
-
-	# 	# Validating dataset path
-	# 	self.dataExists = validateInputFile(self, self.file)
-
-	# 	# Validating output folder path
-	# 	if self.dataExists:
-	# 		self.outputFolderExists = validateOutputFolder(self, foldername)
-
-	# 	# Validating number of components
-	# 	if self.dataExists and self.outputFolderExists:
-	# 		self.trueComponents = validateComponents(self, selectedComponents)
-
-	# 	# Validating number of jobs
-	# 	if self.dataExists and self.outputFolderExists and self.trueComponents:
-	# 		self.enoughProcs = validateJobs(self,n_jobs)
-
-	# 	# Starting selected algorithm if everything's good
-	# 	if self.dataExists and self.outputFolderExists and self.trueComponents and self.enoughProcs:
-
-	# 		if self.currentAlgo == "PCA":
-	# 			self.logs.addItem(f'Starting Principal Component Analysis for getting top {self.components.toPlainText()} bands')
-	# 			startPCA(self, selectedComponents)
-
-	# 		elif self.currentAlgo == "NMF":
-	# 			self.logs.addItem(f'Starting NMF for getting top {self.components.toPlainText()} bands')
-	# 			newpid1 = os.fork()
-	# 			if newpid1 == 0:
-	# 				nmf_data = startNMF(selectedComponents, tolerance, max_iterations)
-
-	# 		elif self.currentAlgo == "NFinder":
-	# 			self.logs.addItem(f'Starting N-Finder for getting top {self.components.toPlainText()} bands')
-	# 			startNFINDR(self, self.pca_data)
-	# 			startHfcVd(self, selectedComponents)
-	# 			# self.startSUNSAL(self.nfindr_data, self.Et)
-
-	# 		elif self.currentAlgo == "SUNSAL":
-	# 			self.logs.addItem(f'Starting SUNSAL for getting estimated abundance matrix')
-	# 			startHfcVd(self, selectedComponents)
-	# 			startNFINDR(self, self.pca_data)
-	# 			startSUNSAL(self, self.nfindr_data)
-
-	# 		elif self.currentAlgo == "HfcVd":
-	# 			self.logs.addItem(f'Starting HfcVd for getting number of end members')
-	# 			startHfcVd(self, selectedComponents)
-
-	# 		elif self.currentAlgo == "ATGP":
-	# 			self.logs.addItem(f'Starting ATGP for getting Endmember abundances')
-	# 			startHfcVd(self, selectedComponents)
-	# 			startATGP(self, self.pca_data)
-
-	# 		elif self.currentAlgo == "PPI":
-	# 			self.logs.addItem(f'Starting PPI for getting Endmember Extraction')
-	# 			startHfcVd(self, selectedComponents)
-	# 			startPPI(self, self.pca_data)
-
-	# 		elif self.currentAlgo == "VCA":
-	# 			self.logs.addItem(f'Starting VCA for getting estimated endmembers signature matrix')
-	# 			startHfcVd(self, selectedComponents)
-	# 			startNFINDR(self, self.pca_data)
-	# 			startVCA(self, self.nfindr_data)
-
-	# 		elif self.currentAlgo == "NNLS":
-	# 			self.logs.addItem(f'Starting NNLS for getting estimated abundance matrix')
-	# 			startHfcVd(selectedComponents)
-	# 			startNFINDR(self, self.pca_data)
-	# 			startNNLS(self, self.pca_data, self.nfindr_data)
-
-	# 		elif self.currentAlgo == "UCLS":
-	# 			self.logs.addItem(f'Starting UCLS for getting estimated abundance matrix')
-	# 			startHfcVd(self, selectedComponents)
-	# 			startNFINDR(self, self.pca_data)
-	# 			startUCLS(self, self.pca_data, self.nfindr_data)
-
-	# 		elif self.currentAlgo == "FCLS":
-	# 			self.logs.addItem(f'Starting FCLS for getting estimated abundance matrix')
-	# 			startHfcVd(self, selectedComponents)
-	# 			startNFINDR(self, self.pca_data)
-	# 			startFCLS(self, self.pca_data, self.nfindr_data)
-
-	# 		elif self.currentAlgo == "KerPCA":
-	# 			self.logs.addItem(f'Starting Kernel Principal Component Analysis for getting top {self.components.toPlainText()} bands')
-	# 			startKerPCA(self, selectedComponents)
-
-	# 		elif self.currentAlgo == "LLE":
-	# 			self.logs.addItem(f'Starting Locally Linear Embedding algorithm for getting top {self.components.toPlainText()} bands')
-	# 			startLLE(self, selectedComponents)
-
-	# 		elif self.currentAlgo == "GBM using semi-NMF":
-	# 			self.logs.addItem(f'Starting Generalized Bilinear Model for Non-Linear Unmixing')
-	# 			startHfcVd(self, selectedComponents)
-	# 			startNFINDR(self, self.pca_data)
-	# 			startGBMsemiNMF(self, self.pca_data, self.nfindr_data)
-	
-	# 	self.progress.setRange(0,1)
 
 
 def validate(context):

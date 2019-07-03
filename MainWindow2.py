@@ -1355,7 +1355,7 @@ def validate(context):
 
 		elif currentAlgo == "KerPCA":
 			context.logs.addItem(f'Starting Kernel Principal Component Analysis for dimentionality reduction')
-			startKerPCA()
+			startKerPCA(context, selectedComponents, )
 
 		elif currentAlgo == "NMF":
 			context.logs.addItem(f'Starting Non-negative Matrix Factorization for getting top {context.components.toPlainText()} bands')

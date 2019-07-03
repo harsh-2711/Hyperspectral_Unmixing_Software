@@ -6,7 +6,7 @@ Created on Wed Mar  6 11:02:22 2019
 """
 import numpy as np
 import scipy as sp
-import LMM as lmm
+from Modules.Linear_Unmixing import LMM as lmm
 
 
 def golden_section( theta0,df,MPlus,y,lb,ub):

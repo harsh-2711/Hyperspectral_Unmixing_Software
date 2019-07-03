@@ -26,7 +26,7 @@ import vd
 
 from Modules.End_Member_Extraction import eea
 from Modules.Linear_Unmixing import sparse, LMM
-from Modules.Non_Linear_Unmixing import GBM_semiNMF
+from Modules.Non_Linear_Unmixing import GBM_semiNMF, GBM_GDA
 
 from Threads import ValidationThread
 from threading import Thread
@@ -1211,6 +1211,8 @@ class Software (QMainWindow, Ui_MainWindow):
 
 		gbmGrad = QAction("GBM using gradient", self)
 		nlu.addAction(gbmGrad)
+		gbmGrad.triggered.connect(partial(clearWidgets, self))
+		gbmGrad.triggered.connect(partial(startGBMGDAWindow, self))
 		gbmGrad.triggered.connect(partial(self.changeCurrentAlgo, "GBM using gradient"))
 
 		mulLin = QAction("Multi-Linear", self)
@@ -1337,13 +1339,13 @@ def validate(context):
 
 	# Validating dataset path
 	context.dataExists = validateInputFile(context, context.file)
-	context.logs.addItem(f'Current algo = {currentAlgo}')
+	# context.logs.addItem(f'Current algo = {currentAlgo}')
 	selectedComponents = context.components.toPlainText()
 	# Validating output folder path
 	if context.dataExists:
 		context.outputFolderExists = validateOutputFolder(context, foldername)
 
-	if context.outputFoldeExists and context.dataExists:
+	if context.outputFolderExists and context.dataExists:
 		context.trueComponents = validateComponents(context, selectedComponents)
 
 	if context.dataExists and context.outputFolderExists and context.trueComponents:
@@ -1351,45 +1353,54 @@ def validate(context):
 			context.logs.addItem(f'Starting Principal Component Analysis for getting top {context.components.toPlainText()} bands')
 			startPCA(context, selectedComponents)
 
-		if currentAlgo == "NMF":
+		elif currentAlgo == "KerPCA":
+			context.logs.addItem(f'Starting Kernel Principal Component Analysis for dimentionality reduction')
+			startKerPCA()
+
+		elif currentAlgo == "NMF":
 			context.logs.addItem(f'Starting Non-negative Matrix Factorization for getting top {context.components.toPlainText()} bands')
 			startNMF(context, selectedComponents, context.tolerance, context.maxit, context.method, context.solver)
 
-		if currentAlgo == "HfcVd":
+
+		elif currentAlgo == "HfcVd":
 			context.logs.addItem(f'Starting HFCVD for finding number of endmembers')
 			startHfcVd(context, selectedComponents)
 
-		if currentAlgo == "NNLS":
+		elif currentAlgo == "NNLS":
 			startHfcVd(context, selectedComponents)
-			startNFINDR(context, context.pca_data, context.maxit, context.checkbox_ATGP)
+			startNFINDR(context, context.pca_data, None, False)
 			startNNLS(context, context.pca_data, context.nfindr_data)
 
-		if currentAlgo == "UCLS":
+		elif currentAlgo == "UCLS":
 			startHfcVd(context, selectedComponents)
-			startNFINDR(context, context.pca_data, context.maxit, context.checkbox_ATGP)
+			startNFINDR(context, context.pca_data, None, False)
 			startUCLS(context, context.pca_data, context.nfindr_data)
 
-		if currentAlgo == "FCLS":
+		elif currentAlgo == "FCLS":
 			startHfcVd(context, selectedComponents)
-			startNFINDR(context, context.pca_data, context.maxit, context.checkbox_ATGP)
+			startNFINDR(context, context.pca_data, None, False)
 			startFCLS(context, context.pca_data, context.nfindr_data)
 
-		if currentAlgo == "LLE":
+		elif currentAlgo == "LLE":
 			startLLE(context, selectedComponents, context.neighbours, context.jobs, context.eigenSolver, context.method)
 		
-		if currentAlgo == "NFinder":
+		elif currentAlgo == "NFinder":
 			startHfcVd(context, selectedComponents)
 			startNFINDR(context, context.pca_data, context.maxit, context.checkbox_ATGP)
 
-		if currentAlgo == "ATGP":
+		elif currentAlgo == "ATGP":
 			startHfcVd(context, selectedComponents)
 			startATGP(context, context.pca_data)
 
-		if currentAlgo == "SUNSAL":
+		elif currentAlgo == "SUNSAL":
 			startHfcVd(context, selectedComponents)
 			startNFINDR(context, context.pca_data, None, False)
 			startSUNSAL(context, context.nfindr_data, context.iter, context.lambda_val, context.tolerance, context.positivity, context.addOne, context.verbose)		
 
+		elif currentAlgo == "GBM using Gradient":
+			startHfcVd(context, selectedComponents)
+			startNFINDR(context, context.pca_data, None, False)
+			startGBMGDA(context, context.pca_data, context.nfindr_data)
 
 	# # Validating number of components
 	# if self.dataExists and self.outputFolderExists:
@@ -1412,22 +1423,6 @@ def validate(context):
 	# 		if newpid1 == 0:
 	# 			nmf_data = startNMF(selectedComponents, tolerance, max_iterations)
 
-	# 	elif self.currentAlgo == "NFinder":
-	# 		self.logs.addItem(f'Starting N-Finder for getting top {self.components.toPlainText()} bands')
-	# 		startNFINDR(self, self.pca_data)
-	# 		startHfcVd(self, selectedComponents)
-	# 		# self.startSUNSAL(self.nfindr_data, self.Et)
-
-	# 	elif self.currentAlgo == "SUNSAL":
-	# 		self.logs.addItem(f'Starting SUNSAL for getting estimated abundance matrix')
-	# 		startHfcVd(self, selectedComponents)
-	# 		startNFINDR(self, self.pca_data)
-	# 		startSUNSAL(self, self.nfindr_data)
-
-	# 	elif self.currentAlgo == "HfcVd":
-	# 		self.logs.addItem(f'Starting HfcVd for getting number of end members')
-	# 		startHfcVd(self, selectedComponents)
-
 	# 	elif self.currentAlgo == "ATGP":
 	# 		self.logs.addItem(f'Starting ATGP for getting Endmember abundances')
 	# 		startHfcVd(self, selectedComponents)
@@ -1443,24 +1438,6 @@ def validate(context):
 	# 		startHfcVd(self, selectedComponents)
 	# 		startNFINDR(self, self.pca_data)
 	# 		startVCA(self, self.nfindr_data)
-
-	# 	elif self.currentAlgo == "NNLS":
-	# 		self.logs.addItem(f'Starting NNLS for getting estimated abundance matrix')
-	# 		startHfcVd(selectedComponents)
-	# 		startNFINDR(self, self.pca_data)
-	# 		startNNLS(self, self.pca_data, self.nfindr_data)
-
-	# 	elif self.currentAlgo == "UCLS":
-	# 		self.logs.addItem(f'Starting UCLS for getting estimated abundance matrix')
-	# 		startHfcVd(self, selectedComponents)
-	# 		startNFINDR(self, self.pca_data)
-	# 		startUCLS(self, self.pca_data, self.nfindr_data)
-
-	# 	elif self.currentAlgo == "FCLS":
-	# 		self.logs.addItem(f'Starting FCLS for getting estimated abundance matrix')
-	# 		startHfcVd(self, selectedComponents)
-	# 		startNFINDR(self, self.pca_data)
-	# 		startFCLS(self, self.pca_data, self.nfindr_data)
 
 	# 	elif self.currentAlgo == "KerPCA":
 	# 		self.logs.addItem(f'Starting Kernel Principal Component Analysis for getting top {self.components.toPlainText()} bands')
@@ -1805,14 +1782,28 @@ def startGBMsemiNMF(context, pca_data, nfindr_data):
 	Main function to run GBM using semi NMF
 	'''
 
+	context.logs.addItem("Initiating GBM using Gradient analysis algorithm")
+	context.GBMGDA_data = GBM_GDA.GBM_gradient(np.transpose(pca_data), np.transpose(nfindr_data))
+	context.logs.addItem("Analysis completed")
+	context.logs.addItem(f"RMS Error: {rmse}")
+	context.logs.addItem("Generating output file")
+	writeData(context, "GBMGDA_", context.GBMsemiNMF_data)
+	context.logs.addItem(f"Output File GBMGDA_{OUTPUT_FILENAME} generated")
+	context.setProgressBar(False)
+
+def startGBMGDA(context, pca_data, nfindr_data):
+	'''
+	Main function to run GBM using Gradient analysis
+	'''
 	context.logs.addItem("Initiating GBM using semiNMF algorithm")
-	context.GBMsemiNMF_data, rmse = GBM_semiNMF.GBM_semiNMF(np.transpose(pca_data), np.transpose(nfindr_data))
+	context.GBMsemiNMF_data, gamma = GBM_semiNMF.GBM_semiNMF(np.transpose(pca_data), np.transpose(nfindr_data))
 	context.logs.addItem("Analysis completed")
 	context.logs.addItem(f"RMS Error: {rmse}")
 	context.logs.addItem("Generating output file")
 	writeData(context, "GBMsemiNMF_", context.GBMsemiNMF_data)
 	context.logs.addItem(f"Output File GBMsemiNMF_{OUTPUT_FILENAME} generated")
 	context.setProgressBar(False)
+
 
 
 def startPCA(context, selectedComponents):
@@ -2110,6 +2101,14 @@ def startGBMsemiNMFWindow(context):
 	context.setWindowTitle("Generalized Bilinear Model using Semi-NMF")
 	context.setCentralWidget(context.ToolTab)
 	context.show()	
+
+def startGBMGDAWindow(context):
+	clearWidgets(context)
+	context.input_label.hide()
+	context.ToolTab = NNLSUI()
+	context.setWindowTitle("Generalized Bilinear Model using Gradient analysis")
+	context.setCentralWidget(context.ToolTab)
+	context.show()
 
 def clearWidgets(context):
 

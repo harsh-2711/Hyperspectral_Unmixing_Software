@@ -173,6 +173,7 @@ class KerPCAUI(QMainWindow, Ui_MainWindow):
 		self.kernelChoiceList.addItem("cosine")
 		self.kernelChoiceList.addItem("precomputed")
 		self.kernelChoiceList.move(360, 145)
+		self.kernel = self.kernelChoiceList.currentText()
 
 		# Fit inverse transform Label
 		self.eigen_solver = QLabel("Eigen Solv", self)
@@ -184,6 +185,7 @@ class KerPCAUI(QMainWindow, Ui_MainWindow):
 		self.solverChoiceList.addItem("dense")
 		self.solverChoiceList.addItem("arpack")
 		self.solverChoiceList.move(550, 145)
+		self.solver = self.solverChoiceList.currentText()
 
 		# Alpha Label
 		self.alpha_label = QLabel("Alpha", self)
@@ -1353,11 +1355,9 @@ def validate(context):
 			context.logs.addItem(f'Starting Principal Component Analysis for getting top {context.components.toPlainText()} bands')
 			startPCA(context, selectedComponents)
 
-		''' KPCA Stll left to be implemented '''
-
-		# elif currentAlgo == "KerPCA":
-		# 	context.logs.addItem(f'Starting Kernel Principal Component Analysis for dimentionality reduction')
-		# 	startKerPCA(context, selectedComponents,)
+		elif currentAlgo == "KerPCA":
+			context.logs.addItem(f'Starting Kernel Principal Component Analysis for dimentionality reduction')
+			startKerPCA(context, selectedComponents, context.jobs, context.kernel, context.solver, context.alpha, context.gamma, context.checkbox_fit_inverse_transform, context.checkbox_remove_zero_eigen)
 
 		elif currentAlgo == "NMF":
 			context.logs.addItem(f'Starting Non-negative Matrix Factorization for getting top {context.components.toPlainText()} bands')
@@ -1850,7 +1850,7 @@ def startPCA(context, selectedComponents):
 		context.logs.addItem('Due to high dimentionality, graph could not be plotted')
 
 
-def startKerPCA(context, selectedComponents):
+def startKerPCA(context, selectedComponents, jobs, kernel, solver, alpha, gamma, fit_inverse_transform, remove_zero_eigen):
 	'''
 	Main function for Kernel PCA
 	'''
@@ -1859,7 +1859,7 @@ def startKerPCA(context, selectedComponents):
 	kernelpca = KernelPCAAlgorithm(context.datasetAsArray, (int)(context.jobs.toPlainText()))
 	kernelpca.scaleData()
 
-	context.ker_pca_data = kernelpca.getPrincipalComponents_noOfComponents((int)(context.components.toPlainText()))
+	context.ker_pca_data = kernelpca.getPrincipalComponents_noOfComponents((int)(context.components.toPlainText()), (int)(jobs.toPlainText()), kernel, solver, alpha, gamma, fit_inverse_transform, remove_zero_eigen)
 	
 	context.logs.addItem("Analysis completed")
 	context.logs.addItem("Generating Output file")

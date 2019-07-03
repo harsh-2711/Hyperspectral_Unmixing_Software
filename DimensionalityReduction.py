@@ -139,14 +139,14 @@ class KernelPCAAlgorithm():
 
 		return principalComponents
 
-	def getPrincipalComponents_noOfComponents(self, noOfComponents):
+	def getPrincipalComponents_noOfComponents(self, noOfComponents, noOfJobs, kernel, solver, alpha, gamma, fit_inv_trans, rem_zero_eigen):
 		'''
 		Returns the principal components based on the given nnumber of components
 		to be retained
 		'''
 
-		pca = KernelPCA(n_components=noOfComponents, kernel="poly", n_jobs=self.n_jobs)
-		principalComponents = pca.fit_transform(X = self.standardizedData)
+		kpca = KernelPCA(n_components=noOfComponents, kernel=kernel, gamma=gamma, alpha=alpha, fit_inverse_transform=fit_inv_trans, eigen_solver=solver, remove_zero_eig=rem_zero_eigen, n_jobs=noOfJobs)
+		principalComponents = kpca.fit_transform(X = self.standardizedData)
 
 		return principalComponents
 

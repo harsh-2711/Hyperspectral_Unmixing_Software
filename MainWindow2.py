@@ -1353,9 +1353,11 @@ def validate(context):
 			context.logs.addItem(f'Starting Principal Component Analysis for getting top {context.components.toPlainText()} bands')
 			startPCA(context, selectedComponents)
 
-		elif currentAlgo == "KerPCA":
-			context.logs.addItem(f'Starting Kernel Principal Component Analysis for dimentionality reduction')
-			startKerPCA(context, selectedComponents, )
+		''' KPCA Stll left to be implemented '''
+
+		# elif currentAlgo == "KerPCA":
+		# 	context.logs.addItem(f'Starting Kernel Principal Component Analysis for dimentionality reduction')
+		# 	startKerPCA(context, selectedComponents,)
 
 		elif currentAlgo == "NMF":
 			context.logs.addItem(f'Starting Non-negative Matrix Factorization for getting top {context.components.toPlainText()} bands')
@@ -1777,7 +1779,7 @@ def startFCLS(context, pca_data, nfindr_data):
 	setProgressBar(context, False)
 
 
-def startGBMsemiNMF(context, pca_data, nfindr_data):
+def startGBMGDA(context, pca_data, nfindr_data):
 	'''
 	Main function to run GBM using semi NMF
 	'''
@@ -1791,7 +1793,7 @@ def startGBMsemiNMF(context, pca_data, nfindr_data):
 	context.logs.addItem(f"Output File GBMGDA_{OUTPUT_FILENAME} generated")
 	context.setProgressBar(False)
 
-def startGBMGDA(context, pca_data, nfindr_data):
+def startGBMsemiNMF(context, pca_data, nfindr_data):
 	'''
 	Main function to run GBM using Gradient analysis
 	'''

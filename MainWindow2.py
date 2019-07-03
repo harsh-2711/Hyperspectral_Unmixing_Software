@@ -260,25 +260,25 @@ class NFINDRUI(QMainWindow, Ui_MainWindow):
 
 		# Output Label
 		self.output_label = QLabel("Output", self)
-		self.output_label.move(20, 140)
+		self.output_label.move(20, 100)
 
 		# Output browse button
 		self.output_browse = QPushButton("Browse", self)
-		self.output_browse.move(550,140)
+		self.output_browse.move(550,100)
 		self.output_browse.clicked.connect(partial(on_click_output, self))
 
 		# Output text field
 		self.output_text = QTextEdit(self)
-		self.output_text.setGeometry(142,145,402,21)
+		self.output_text.setGeometry(142,105,402,21)
 		self.output_text.setText(os.getcwd())
 
 		# No of endmembers Label
-		self.endmembers_label = QLabel("Endmembers", self)
-		self.endmembers_label.move(20, 200)
+		self.components_label = QLabel("Components", self)
+		self.components_label.move(20, 200)
 
 		# Endmembers text field
-		self.endmembers = QTextEdit(self)
-		self.endmembers.setGeometry(140,205,45,21)
+		self.components = QTextEdit(self)
+		self.components.setGeometry(140,205,45,21)
 
 		# Max iterations Label
 		self.maxit_label = QLabel("Max iterations", self)
@@ -714,17 +714,16 @@ class PPIUI(QMainWindow, Ui_MainWindow):
 		self.input_text.setGeometry(142,25,402,21)
 
 		# Data matrix Label
-		self.output_label = QLabel("Init Skewers", self)
-		self.output_label.move(20, 70)
+		self.initskewers_label = QLabel("Init Skewers", self)
+		self.initskewers_label.move(20, 70)
 
 		# Data Matrix browse button
-		self.output_browse = QPushButton("Browse", self)
-		self.output_browse.move(550,70)
+		self.initskewers_browse = QPushButton("Browse", self)
+		self.initskewers_browse.move(550,70)
 
 		# Data Matrix text field
-		self.output_text = QTextEdit(self)
-		self.output_text.setGeometry(142,75,402,21)
-		self.output_text.setText(os.getcwd())
+		self.initskewers_text = QTextEdit(self)
+		self.initskewers_text.setGeometry(142,75,402,21)
 
 		# Output Label
 		self.output_label = QLabel("Output", self)
@@ -741,12 +740,20 @@ class PPIUI(QMainWindow, Ui_MainWindow):
 		self.output_text.setText(os.getcwd())
 
 		# Tolerance Label		
-		self.jobs_label = QLabel("No of Skewers", self)
-		self.jobs_label.move(150, 180)
+		self.components_label = QLabel("Components", self)
+		self.components_label.move(130, 180)
 
 		# Tolerance text field
-		self.jobs = QTextEdit(self)
-		self.jobs.setGeometry(280,185,40,21)
+		self.components = QTextEdit(self)
+		self.components.setGeometry(220,185,40,21)
+
+		# Tolerance Label		
+		self.skewers_label = QLabel("No of Skewers", self)
+		self.skewers_label.move(300, 180)
+
+		# Tolerance text field
+		self.skewers = QTextEdit(self)
+		self.skewers.setGeometry(400,185,40,21)
 
 		# OK button
 		self.OK = QPushButton("OK", self)
@@ -775,7 +782,7 @@ class VCAUI(QMainWindow, Ui_MainWindow):
 
 
 		# HSI Label
-		self.input_label = QLabel("HSI Input", self)
+		self.input_label = QLabel("Input", self)
 		self.input_label.move(20, 45)
 
 		# HSI browse button
@@ -801,26 +808,26 @@ class VCAUI(QMainWindow, Ui_MainWindow):
 		self.output_text.setGeometry(142,105,402,21)
 		self.output_text.setText(os.getcwd())
 
-		self.jobs_label = QLabel("Endmembers", self)
-		self.jobs_label.move(150, 150)
+		self.components_label = QLabel("Components", self)
+		self.components_label.move(150, 150)
 
 		# Tolerance text field
-		self.jobs = QTextEdit(self)
-		self.jobs.setGeometry(260,155,40,21)
+		self.components = QTextEdit(self)
+		self.components.setGeometry(260,155,40,21)
 
-		self.jobs_label = QLabel("SNR input", self)
-		self.jobs_label.move(340, 150)
+		self.SNR_label = QLabel("SNR input", self)
+		self.SNR_label.move(340, 150)
 
 		# Tolerance text field
-		self.jobs = QTextEdit(self)
-		self.jobs.setGeometry(420,155,40,21)
+		self.SNR = QTextEdit(self)
+		self.SNR.setGeometry(420,155,40,21)
 
-		self.fit_inverse_transform = QLabel("Verbose", self)
-		self.fit_inverse_transform.setGeometry(150,212,280,15)
+		self.verbose_label = QLabel("Verbose", self)
+		self.verbose_label.setGeometry(150,212,280,15)
 		
 		# Verbose Checkbox
-		self.checkbox_fit_inverse_transform = QCheckBox(self)
-		self.checkbox_fit_inverse_transform.move(220, 206)
+		self.verbose = QCheckBox(self)
+		self.verbose.move(220, 206)
 
 		# OK button
 		self.OK = QPushButton("OK", self)
@@ -876,12 +883,12 @@ class ATGPUI(QMainWindow, Ui_MainWindow):
 		self.output_text.setText(os.getcwd())
 
 		# Tolerance Label		
-		self.jobs_label = QLabel("No of Endmembers", self)
-		self.jobs_label.move(150, 180)
+		self.components_label = QLabel("Components", self)
+		self.components_label.move(150, 180)
 
 		# Tolerance text field
-		self.jobs = QTextEdit(self)
-		self.jobs.setGeometry(280,185,40,21)
+		self.components = QTextEdit(self)
+		self.components.setGeometry(280,185,40,21)
 
 
 		# OK button
@@ -1363,7 +1370,6 @@ def validate(context):
 			context.logs.addItem(f'Starting Non-negative Matrix Factorization for getting top {context.components.toPlainText()} bands')
 			startNMF(context, selectedComponents, context.tolerance, context.maxit, context.method, context.solver)
 
-
 		elif currentAlgo == "HfcVd":
 			context.logs.addItem(f'Starting HFCVD for finding number of endmembers')
 			startHfcVd(context, selectedComponents)
@@ -1403,6 +1409,16 @@ def validate(context):
 			startHfcVd(context, selectedComponents)
 			startNFINDR(context, context.pca_data, None, False)
 			startGBMGDA(context, context.pca_data, context.nfindr_data)
+
+		elif currentAlgo == "VCA":
+			startHfcVd(context, selectedComponents)
+			startNFINDR(context, context.pca_data, None, False)
+			startVCA(context, context.nfindr_data, context.SNR, context.verbose)
+
+		elif currentAlgo == "PPI":
+			startHfcVd(context, selectedComponents)
+			startPPI(context, context.pca_data, context.skewers)
+
 
 	# # Validating number of components
 	# if self.dataExists and self.outputFolderExists:
@@ -1711,26 +1727,26 @@ def startHfcVd(context, selectedComponents):
 	setProgressBar(context, False)
 
 
-def startVCA(context, nfindr_data):
+def startVCA(context, nfindr_data, SNR, verbose):
 	'''
 	Main function for VCA algorithm
 	'''
 
 	context.logs.addItem("Initiating VCA algorithm")
-	context.vca_data, IDX, proj_data = sparse.vca(nfindr_data, end_member_list[2])
+	context.vca_data, IDX, proj_data = sparse.vca(Y=nfindr_data, R=end_member_list[2], snr_input=SNR, verbose=verbose)
 	context.logs.addItem("Running VCA algorithm")
 	writeData(context, "VCA_", context.vca_data)
 	context.logs.addItem(f"Output file VCA_{OUTPUT_FILENAME} generated")
 	setProgressBar(context, False)
 
 
-def startPPI(context, pca_data):
+def startPPI(context, pca_data, skewers):
 	'''
 	Main function for PPI algorithm
 	'''
 
 	context.logs.addItem("Initiating PPI algorithm")
-	context.ppi_data, IDX = eea.PPI(np.transpose(pca_data), end_member_list[2])
+	context.ppi_data, IDX = eea.PPI(M=np.transpose(pca_data), q=end_member_list[2], numSkewers=skewers)
 	context.logs.addItem("Running PPI algorithm")
 	writeData(context, "PPI_", context.ppi_data)
 	context.logs.addItem(f"Output file PPI_{OUTPUT_FILENAME} generated")

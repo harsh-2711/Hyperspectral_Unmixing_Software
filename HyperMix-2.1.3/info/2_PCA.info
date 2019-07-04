@@ -1,0 +1,14 @@
+PRINCIPAL COMPONENT ANALYSIS
+
+Version author: Sergio Sanchez Martinez, Hypercomp, Universidad de Extremadura
+
+-Reduction algorithm Principal Component Analysis. 
+
+INPUT ARGUMENTS
+
+-argv[1]: Input image file
+-argv[2]: Number of components
+
+OUTPUT ARGUMENTS
+
+-argv[3]: Output image reduced

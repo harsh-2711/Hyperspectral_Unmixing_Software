@@ -1,0 +1,13 @@
+Hyperspectral Subspace Identification
+
+Version author: Luis Ignacio Jimenez, Hypercomp, Universidad de Extremadura
+
+-Endmember estimation algorithm Hysime.
+
+INPUT ARGUMENTS
+
+-argv[1]: Input image file
+
+OUTPUT ARGUMENTS
+
+-argv[2]: Estimation value filename

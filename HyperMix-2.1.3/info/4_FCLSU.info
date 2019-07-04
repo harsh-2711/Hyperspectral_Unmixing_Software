@@ -1,0 +1,14 @@
+FCLSU
+
+Version author: Sergio Sanchez Martinez, Hypercomp, Universidad de Extremadura
+
+-Unmixing algorithm Full Constraint Linear Spectral Unmixing.
+
+INPUT ARGUMENTS
+
+-argv[1]: Input image file
+-argv[2]: Input endmembers image
+
+OUTPUT ARGUMENTS
+
+-argv[3]: Output abundances image

@@ -1,0 +1,14 @@
+SPATIAL PREPROCESSING
+
+Version author: Jaime Delgado Granados, Universidad de Extremadura
+
+-Preprocessing algorithm Spatial PreProcessing. 
+
+INPUT ARGUMENTS
+
+-argv[1]: Input image file
+-argv[2]: Window size
+
+OUTPUT ARGUMENTS
+
+-argv[3]: Output image preprocessed

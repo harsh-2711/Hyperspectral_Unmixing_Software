@@ -1,0 +1,14 @@
+N-FINDR
+
+Version author: Sergio Sanchez Martinez, Hypercomp Universidad de Extremadura
+
+-Endmember extraction algorithm N-FINDR. 
+
+INPUT ARGUMENTS
+
+-argv[1]: Input image file
+-argv[2]: Input image reduced
+
+OUTPUT ARGUMENTS
+
+-argv[3]: Output endmember image

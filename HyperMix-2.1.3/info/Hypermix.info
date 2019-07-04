@@ -1,0 +1,23 @@
+
+  HYPERMIX TOOL  Version: 2.1
+
+  Group: HyperComp, Universidad de Extremadura 
+
+  Visit: http://www.unex.es/investigacion/grupos/hypercomp
+
+  The research group "Hyperspectral Computing" (HyperComp) has developed a free tool for distribution and validation of hyperspectral analysis algorithms capable of solving the mixing problem in such images. The tool includes the source code of several algorithms that integrate a full spectral unmixing chain as well as a database of synthetic and real images which validate the algorithms available in the tool. 
+
+  Algorithms were developed by several authors whom belong or belonged to the group.
+
+  Copyright (C) 2014  Luis Ignacio Jimenez Gil 
+
+  This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
+  Contact: luijimenez@unex.es
+
+

@@ -1,0 +1,15 @@
+VCA
+
+Version author: Luis IGnacio Jimenez Gil, Hypercomp Universidad de Extremadura
+
+-Endmember extraction algorithm VCA. 
+
+INPUT ARGUMENTS
+
+-argv[1]: Input image file
+-argv[2]: Number of endmembers
+-argv[3]: Signal noise ratio
+
+OUTPUT ARGUMENTS
+
+-argv[4]: Output endmember image

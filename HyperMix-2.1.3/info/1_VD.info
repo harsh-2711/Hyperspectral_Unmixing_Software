@@ -1,0 +1,14 @@
+VIRTUAL DIMENSIONALITY
+
+Version author: Sergio Sanchez Martinez, Hypercomp, Universidad de Extremadura
+
+-Endmember estimation algorithm Virtual Dimensionality.
+
+INPUT ARGUMENTS
+
+-argv[1]: Input image file
+-argv[2]: Approximation [1 - 2 - 3 - 4 - 5]
+
+OUTPUT ARGUMENTS
+
+-argv[3]: Estimation value filename

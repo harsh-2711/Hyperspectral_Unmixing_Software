@@ -1,0 +1,15 @@
+ISRA
+
+Version author: Sergio Sanchez Martinez, Hypercomp, Universidad de Extremadura
+
+-Unmixing algorithm Image Space Reconstruction Algorithm. 
+
+INPUT ARGUMENTS
+
+-argv[1]: Input image file
+-argv[2]: Input endmembers image
+-argv[3]: Number of iterations
+
+OUTPUT ARGUMENTS
+
+-argv[4]: Output abundances image

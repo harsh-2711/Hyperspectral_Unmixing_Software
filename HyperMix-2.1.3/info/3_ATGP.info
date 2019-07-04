@@ -1,0 +1,14 @@
+ATGP
+
+Version author: Sergio Bernabe Garcia, Hypercomp, Universidad de Extremadura
+
+-Endmember extraction algorithm ATGP. 
+
+INPUT ARGUMENTS
+
+-argv[1]: Input image file
+-argv[2]: Number of endmembers
+
+OUTPUT ARGUMENTS
+
+-argv[3]: Output endmember image

@@ -1,0 +1,14 @@
+IEA
+
+Version author: Luis Ignacio Jimenez Gil, Hypercomp, Universidad de Extremadura
+
+-Endmember extraction algorithm IEA. 
+
+INPUT ARGUMENTS
+
+-argv[1]: Input image file
+-argv[2]: Number of endmembers
+
+OUTPUT ARGUMENTS
+
+-argv[3]: Output endmember image

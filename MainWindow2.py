@@ -90,6 +90,10 @@ class PCAUI(QMainWindow, Ui_MainWindow):
 		self.components = QTextEdit(self)
 		self.components.setGeometry(280,185,40,21)
 
+		# OK button
+		self.getVar = QPushButton("Get Variance", self)
+		self.getVar.move(350, 180)
+		self.getVar.clicked.connect(partial(on_click_getVar, self))
 
 		# OK button
 		self.OK = QPushButton("OK", self)
@@ -1505,6 +1509,15 @@ def on_click_OK(context):
 
 
 @pyqtSlot()
+def on_click_getVar(context):
+	'''
+	On click listener for OK button
+	'''
+	context.getVar = ValidationThread()
+	context.getVar.startThread.connect(partial(getRetVariance, context))
+	context.getVar.start()
+
+@pyqtSlot()
 def on_click_cancel(context):
 	'''
 	On click listener for Cancel button
@@ -1532,6 +1545,27 @@ def InputBrowse(context):
 	context.file = fileName
 	if fileName:
 		context.input_text.setText(fileName.split('/')[-1])
+
+
+def getRetVariance(context):
+
+	# Suppressing printing of errors using GDAL lib
+	gdal.UseExceptions()
+	gdal.PushErrorHandler('CPLQuietErrorHandler')
+
+	filename = context.input_text.toPlainText()
+	foldername = context.output_text.toPlainText()
+	context.dataExists = validateInputFile(context, context.file)
+	selectedComponents = context.components.toPlainText()
+
+	context.datasetAsArray = context.dataset.ReadAsArray()
+	pca = PrincipalComponentAnalysis(context.datasetAsArray)
+	pca.scaleData()
+
+	retainedVariance = pca.getRetainedVariance((int)(context.components.toPlainText()))
+	
+	context.logs.addItem(f'Retained Variance: {retainedVariance}')
+
 
 
 def OutputBrowse(context):
@@ -1648,7 +1682,7 @@ def startNMF(context,selectedComponents, tolerance, max_iterations, method, solv
 	context.datasetAsArray = context.dataset.ReadAsArray()
 	nmf = NonNegativeMatrixFactorisation(context.datasetAsArray)
 	nmf.scaleData()
-	context.nmf_data = nmf.getReducedComponents_noOfComponents((int)(context.components.toPlainText()), (int)(tolerance.toPlainText()), (int)(max_iterations.toPlainText()), method, solver)
+	context.nmf_data = nmf.getReducedComponents_noOfComponents((int)(context.components.toPlainText()), (float)(tolerance.toPlainText()), (int)(max_iterations.toPlainText()), method, solver)
 	
 	''' To plot the points after NMF '''
 	if (int)(selectedComponents) == 1:

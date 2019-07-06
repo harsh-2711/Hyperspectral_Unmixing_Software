@@ -1,3 +1,4 @@
+
 import sys
 import os
 
@@ -25,7 +26,7 @@ import vd
 
 from Modules.End_Member_Extraction import eea
 from Modules.Linear_Unmixing import sparse, LMM
-from Modules.Non_Linear_Unmixing import GBM_semiNMF
+from Modules.Non_Linear_Unmixing import GBM_semiNMF, GBM_GDA
 
 from Threads import ValidationThread
 from threading import Thread
@@ -33,7 +34,6 @@ import subprocess
 from ErrorHandler import StdErrHandler
 
 import multiprocessing as mp
-
 import matplotlib.pyplot as plt
 
 
@@ -41,6 +41,81 @@ path = os.path.dirname(__file__)
 qtCreatorFile = "MainWindow.ui" 
 
 Ui_MainWindow, QtBaseClass = uic.loadUiType(path + qtCreatorFile)
+
+
+currentAlgo = ""
+OUTPUT_FILENAME = "Data.csv"
+
+end_member_list = [0,0,0]
+
+
+class PCAUI(QMainWindow, Ui_MainWindow):
+
+	def __init__(self):
+		super(PCAUI, self).__init__()
+
+		# HSI Label
+		self.input_label = QLabel("Input", self)
+		self.input_label.move(20, 60)
+
+		# HSI browse button
+		self.input_browse = QPushButton("Browse", self)
+		self.input_browse.move(550,60)
+		self.input_browse.clicked.connect(partial(on_click_input, self))
+
+		# HSI text field
+		self.input_text = QTextEdit(self)
+		self.input_text.setGeometry(142,65,402,21)
+
+		# Output Label
+		self.output_label = QLabel("Output", self)
+		self.output_label.move(20, 120)
+
+		# Output browse button
+		self.output_browse = QPushButton("Browse", self)
+		self.output_browse.move(550,120)
+		self.output_browse.clicked.connect(partial(on_click_output, self))
+
+		# Output text field
+		self.output_text = QTextEdit(self)
+		self.output_text.setGeometry(142,125,402,21)
+		self.output_text.setText(os.getcwd())
+
+		# Tolerance Label		
+		self.components_label = QLabel("No of Components", self)
+		self.components_label.move(50, 180)
+
+		# Components text field
+		self.components = QTextEdit(self)
+		self.components.setGeometry(180,185,40,21)
+
+		# OK button
+		self.getVar = QPushButton("Get Variance", self)
+		self.getVar.move(280, 180)
+		self.getVar.clicked.connect(partial(on_click_getVar, self))
+
+		# OK button
+		self.OK = QPushButton("OK", self)
+		self.OK.move(230, 250)
+		self.OK.clicked.connect(partial(on_click_OK, self))
+
+		# Cancel button
+		self.cancel = QPushButton("Cancel", self)
+		self.cancel.move(380, 250)
+		self.cancel.clicked.connect(partial(on_click_cancel, self))
+
+		# Logs entry
+		self.logs = QListWidget(self)
+		self.logs.setGeometry(10, 300, 640, 130)
+
+		self.varDisplay = QListWidget(self)
+		self.varDisplay.setGeometry(410, 185, 180, 20)
+
+		# Progress Bar
+		self.progress = QProgressBar(self)
+		self.progress.setGeometry(10, 450, 640, 20)
+		
+		self.show()
 
 
 class KerPCAUI(QMainWindow, Ui_MainWindow):
@@ -55,6 +130,7 @@ class KerPCAUI(QMainWindow, Ui_MainWindow):
 		# Input browse button
 		self.input_browse = QPushButton("Browse", self)
 		self.input_browse.move(550,30)
+		self.input_browse.clicked.connect(partial(on_click_input, self))
 
 		# Input text field
 		self.input_text = QTextEdit(self)
@@ -67,6 +143,7 @@ class KerPCAUI(QMainWindow, Ui_MainWindow):
 		# Output browse button
 		self.output_browse = QPushButton("Browse", self)
 		self.output_browse.move(550,91)
+		self.output_browse.clicked.connect(partial(on_click_output, self))
 
 		# Output text field
 		self.output_text = QTextEdit(self)
@@ -102,6 +179,7 @@ class KerPCAUI(QMainWindow, Ui_MainWindow):
 		self.kernelChoiceList.addItem("cosine")
 		self.kernelChoiceList.addItem("precomputed")
 		self.kernelChoiceList.move(360, 145)
+		self.kernel = self.kernelChoiceList.currentText()
 
 		# Fit inverse transform Label
 		self.eigen_solver = QLabel("Eigen Solv", self)
@@ -113,6 +191,7 @@ class KerPCAUI(QMainWindow, Ui_MainWindow):
 		self.solverChoiceList.addItem("dense")
 		self.solverChoiceList.addItem("arpack")
 		self.solverChoiceList.move(550, 145)
+		self.solver = self.solverChoiceList.currentText()
 
 		# Alpha Label
 		self.alpha_label = QLabel("Alpha", self)
@@ -149,10 +228,12 @@ class KerPCAUI(QMainWindow, Ui_MainWindow):
 		# OK button
 		self.OK = QPushButton("OK", self)
 		self.OK.move(230, 250)
+		self.OK.clicked.connect(partial(on_click_OK, self))
 
 		# Cancel button
 		self.cancel = QPushButton("Cancel", self)
 		self.cancel.move(380, 250)
+		self.cancel.clicked.connect(partial(on_click_cancel, self))
 
 		# Logs entry
 		self.logs = QListWidget(self)
@@ -177,40 +258,28 @@ class NFINDRUI(QMainWindow, Ui_MainWindow):
 		# Input browse button
 		self.input_browse = QPushButton("Browse", self)
 		self.input_browse.move(550,30)
+		self.input_browse.clicked.connect(partial(on_click_input, self))
 
 		# Input text field
 		self.input_text = QTextEdit(self)
 		self.input_text.setGeometry(142,35,402,21)
 
-		# Transform Input Label
-		self.output_label = QLabel("Transform I/P", self)
-		self.output_label.move(20, 85)
-
-		# Transform Input browse button
-		self.output_browse = QPushButton("Browse", self)
-		self.output_browse.move(550,85)
-
-		# Transform Input text field
-		self.output_text = QTextEdit(self)
-		self.output_text.setGeometry(142,90,402,21)
-		self.output_text.setText(os.getcwd())
-
-
 		# Output Label
 		self.output_label = QLabel("Output", self)
-		self.output_label.move(20, 140)
+		self.output_label.move(20, 100)
 
 		# Output browse button
 		self.output_browse = QPushButton("Browse", self)
-		self.output_browse.move(550,140)
+		self.output_browse.move(550,100)
+		self.output_browse.clicked.connect(partial(on_click_output, self))
 
 		# Output text field
 		self.output_text = QTextEdit(self)
-		self.output_text.setGeometry(142,145,402,21)
+		self.output_text.setGeometry(142,105,402,21)
 		self.output_text.setText(os.getcwd())
 
 		# No of endmembers Label
-		self.components_label = QLabel("Endmembers", self)
+		self.components_label = QLabel("Components", self)
 		self.components_label.move(20, 200)
 
 		# Endmembers text field
@@ -218,28 +287,30 @@ class NFINDRUI(QMainWindow, Ui_MainWindow):
 		self.components.setGeometry(140,205,45,21)
 
 		# Max iterations Label
-		self.jobs_label = QLabel("Max iterations", self)
-		self.jobs_label.move(220, 200)
+		self.maxit_label = QLabel("Max iterations", self)
+		self.maxit_label.move(220, 200)
 
 		# Max iterations text field
-		self.jobs = QTextEdit(self)
-		self.jobs.setGeometry(350,205,40,21)
+		self.maxit = QTextEdit(self)
+		self.maxit.setGeometry(350,205,40,21)
 
 		# ATGP label
-		self.fit_inverse_transform = QLabel("ATGP", self)
-		self.fit_inverse_transform.setGeometry(440,208,280,15)
+		self.ATGP_label = QLabel("ATGP", self)
+		self.ATGP_label.setGeometry(440,208,280,15)
 		
 		# ATGP Checkbox
-		self.checkbox_fit_inverse_transform = QCheckBox(self)
-		self.checkbox_fit_inverse_transform.move(500, 202)
+		self.checkbox_ATGP = QCheckBox(self)
+		self.checkbox_ATGP.move(500, 202)
 
 		# OK button
 		self.OK = QPushButton("OK", self)
 		self.OK.move(230, 250)
+		self.OK.clicked.connect(partial(on_click_OK, self))
 
 		# Cancel button
 		self.cancel = QPushButton("Cancel", self)
 		self.cancel.move(380, 250)
+		self.cancel.clicked.connect(partial(on_click_cancel, self))
 
 		# Logs entry
 		self.logs = QListWidget(self)
@@ -265,7 +336,7 @@ class LLEUI(QMainWindow, Ui_MainWindow):
 		# Input browse button
 		self.input_browse = QPushButton("Browse", self)
 		self.input_browse.move(550,20)
-		self.input_browse.clicked.connect(self.on_click_input)
+		self.input_browse.clicked.connect(partial(on_click_input, self))
 
 		# Input text field
 		self.input_text = QTextEdit(self)
@@ -278,6 +349,7 @@ class LLEUI(QMainWindow, Ui_MainWindow):
 		# Output browse button
 		self.output_browse = QPushButton("Browse", self)
 		self.output_browse.move(550,70)
+		self.output_browse.clicked.connect(partial(on_click_output, self))
 
 		# Output text field
 		self.output_text = QTextEdit(self)
@@ -285,7 +357,7 @@ class LLEUI(QMainWindow, Ui_MainWindow):
 		self.output_text.setText(os.getcwd())
 
 		# No of endmembers Label
-		self.components_label = QLabel("Neighbours", self)
+		self.components_label = QLabel("Components", self)
 		self.components_label.move(20, 120)
 
 		# Endmembers text field
@@ -293,12 +365,12 @@ class LLEUI(QMainWindow, Ui_MainWindow):
 		self.components.setGeometry(140,125,45,21)
 
 		# Components Label
-		self.jobs_label = QLabel("Components", self)
-		self.jobs_label.move(240, 120)
+		self.neighbours_label = QLabel("Neighbours", self)
+		self.neighbours_label.move(240, 120)
 
 		# Components text field
-		self.jobs = QTextEdit(self)
-		self.jobs.setGeometry(340,125,40,21)
+		self.neighbours = QTextEdit(self)
+		self.neighbours.setGeometry(340,125,40,21)
 
 		# Jobs Label
 		self.jobs_label = QLabel("Jobs", self)
@@ -309,35 +381,39 @@ class LLEUI(QMainWindow, Ui_MainWindow):
 		self.jobs.setGeometry(510,125,40,21)
 
 		# Eigen solver Label
-		self.kernel_label = QLabel("Eigen solver", self)
-		self.kernel_label.move(140, 180)
+		self.eigenSolver_label = QLabel("Eigen solver", self)
+		self.eigenSolver_label.move(140, 180)
 
 		# Eigen Solver Choice List
-		self.kernelChoiceList = QComboBox(self)
-		self.kernelChoiceList.addItem("auto")
-		self.kernelChoiceList.addItem("arpack")	
-		self.kernelChoiceList.addItem("dense")
-		self.kernelChoiceList.move(230, 180)
-
+		self.eigenSolverChoiceList = QComboBox(self)
+		self.eigenSolverChoiceList.addItem("auto")
+		self.eigenSolverChoiceList.addItem("arpack")	
+		self.eigenSolverChoiceList.addItem("dense")
+		self.eigenSolverChoiceList.move(230, 180)
+		self.eigenSolver = self.eigenSolverChoiceList.currentText()
+		
 		# Method Label
-		self.kernel_label = QLabel("Method", self)
-		self.kernel_label.move(400, 180)
+		self.method_label = QLabel("Method", self)
+		self.method_label.move(400, 180)
 
 		# Method Choice List
-		self.kernelChoiceList = QComboBox(self)
-		self.kernelChoiceList.addItem("standard")
-		self.kernelChoiceList.addItem("hessian")
-		self.kernelChoiceList.addItem("modified")
-		self.kernelChoiceList.addItem("ltsa")
-		self.kernelChoiceList.move(465, 180)
+		self.methodChoiceList = QComboBox(self)
+		self.methodChoiceList.addItem("standard")
+		self.methodChoiceList.addItem("hessian")
+		self.methodChoiceList.addItem("modified")
+		self.methodChoiceList.addItem("ltsa")
+		self.methodChoiceList.move(465, 180)
+		self.method = self.methodChoiceList.currentText()
 
 		# OK button
 		self.OK = QPushButton("OK", self)
 		self.OK.move(230, 250)
+		self.OK.clicked.connect(partial(on_click_OK, self))
 
 		# Cancel button
 		self.cancel = QPushButton("Cancel", self)
 		self.cancel.move(380, 250)
+		self.cancel.clicked.connect(partial(on_click_cancel, self))
 
 		# Logs entry
 		self.logs = QListWidget(self)
@@ -357,24 +433,17 @@ class SUNSALUI(QMainWindow, Ui_MainWindow):
 
 
 		# Endmember sign Label
-		self.input_label = QLabel("EM signature", self)
+		self.input_label = QLabel("Input", self)
 		self.input_label.move(20, 20)
 
 		# Endmember sign browse button
 		self.input_browse = QPushButton("Browse", self)
 		self.input_browse.move(550,20)
+		self.input_browse.clicked.connect(partial(on_click_input, self))
 
 		# Endmember sign text field
 		self.input_text = QTextEdit(self)
 		self.input_text.setGeometry(142,25,402,21)
-
-		# Data matrix Label
-		self.output_label = QLabel("Data Matrix", self)
-		self.output_label.move(20, 70)
-
-		# Data Matrix browse button
-		self.output_browse = QPushButton("Browse", self)
-		self.output_browse.move(550,70)
 
 		# Data Matrix text field
 		self.output_text = QTextEdit(self)
@@ -388,6 +457,7 @@ class SUNSALUI(QMainWindow, Ui_MainWindow):
 		# Output browse button
 		self.output_browse = QPushButton("Browse", self)
 		self.output_browse.move(550,120)
+		self.output_browse.clicked.connect(partial(on_click_output, self))
 
 		# Output text field
 		self.output_text = QTextEdit(self)
@@ -395,61 +465,63 @@ class SUNSALUI(QMainWindow, Ui_MainWindow):
 		self.output_text.setText(os.getcwd())
 
 		# No of iterations Label
-		self.components_label = QLabel("Min AL iter", self)
-		self.components_label.move(60, 170)
+		self.iter_label = QLabel("Min AL iter", self)
+		self.iter_label.move(60, 170)
 
 		# iterations text field
-		self.components = QTextEdit(self)
-		self.components.setGeometry(140,175,45,21)
+		self.iter = QTextEdit(self)
+		self.iter.setGeometry(140,175,45,21)
 
 		# Components Label
-		self.jobs_label = QLabel("Lambda", self)
-		self.jobs_label.move(260, 170)
+		self.lambda_label = QLabel("Lambda", self)
+		self.lambda_label.move(260, 170)
 
 		# Components text field
-		self.jobs = QTextEdit(self)
-		self.jobs.setGeometry(320,175,40,21)
+		self.lambda_val = QTextEdit(self)
+		self.lambda_val.setGeometry(320,175,40,21)
 
 		# Tolerance Label
-		self.jobs_label = QLabel("Tolerance", self)
-		self.jobs_label.move(430, 170)
+		self.tol_label = QLabel("Tolerance", self)
+		self.tol_label.move(430, 170)
 
 		# Tolerance text field
-		self.jobs = QTextEdit(self)
-		self.jobs.setGeometry(510,175,40,21)
+		self.tolerance = QTextEdit(self)
+		self.tolerance.setGeometry(510,175,40,21)
 
 
 		# Positivity label
-		self.fit_inverse_transform = QLabel("Positivity", self)
-		self.fit_inverse_transform.setGeometry(130,212,280,15)
+		self.positivity_label = QLabel("Positivity", self)
+		self.positivity_label.setGeometry(130,212,280,15)
 		
 		# Positivity Checkbox
-		self.checkbox_fit_inverse_transform = QCheckBox(self)
-		self.checkbox_fit_inverse_transform.move(200, 206)
+		self.positivity = QCheckBox(self)
+		self.positivity.move(200, 206)
 
 		# Addone label
-		self.fit_inverse_transform = QLabel("Add one", self)
-		self.fit_inverse_transform.setGeometry(250,212,280,15)
+		self.addOne_label = QLabel("Add one", self)
+		self.addOne_label.setGeometry(250,212,280,15)
 		
 		# Addone Checkbox
-		self.checkbox_fit_inverse_transform = QCheckBox(self)
-		self.checkbox_fit_inverse_transform.move(320, 206)
+		self.addOne = QCheckBox(self)
+		self.addOne.move(320, 206)
 
 		# Verbose label
-		self.fit_inverse_transform = QLabel("Verbose", self)
-		self.fit_inverse_transform.setGeometry(370,212,280,15)
+		self.verbose_label = QLabel("Verbose", self)
+		self.verbose_label.setGeometry(370,212,280,15)
 		
 		# Verbose Checkbox
-		self.checkbox_fit_inverse_transform = QCheckBox(self)
-		self.checkbox_fit_inverse_transform.move(440, 206)
+		self.verbose = QCheckBox(self)
+		self.verbose.move(440, 206)
 
 		# OK button
 		self.OK = QPushButton("OK", self)
 		self.OK.move(230, 250)
+		self.OK.clicked.connect(partial(on_click_OK, self))
 
 		# Cancel button
 		self.cancel = QPushButton("Cancel", self)
 		self.cancel.move(380, 250)
+		self.cancel.clicked.connect(partial(on_click_cancel, self))
 
 		# Logs entry
 		self.logs = QListWidget(self)
@@ -472,34 +544,45 @@ class HFCVDUI(QMainWindow, Ui_MainWindow):
 		self.input_label = QLabel("Input", self)
 		self.input_label.move(20, 60)
 
-		# HSI browse button
-		self.input_browse = QPushButton("Browse", self)
-		self.input_browse.move(550,60)
-
 		# HSI text field
 		self.input_text = QTextEdit(self)
 		self.input_text.setGeometry(142,65,402,21)
+		self.input_text.setPlaceholderText('Input PCA data here')
+		self.input_text.setTabChangesFocus(True)
+
+		# HSI browse button
+		self.input_browse = QPushButton("Browse", self)
+		self.input_browse.move(550,60)
+		self.input_browse.clicked.connect(partial(on_click_input, self))
+		self.input_text.setTabChangesFocus(True)
 
 		# Output Label
 		self.output_label = QLabel("Output", self)
 		self.output_label.move(20, 120)
 
-		# Output browse button
-		self.output_browse = QPushButton("Browse", self)
-		self.output_browse.move(550,120)
-
 		# Output text field
 		self.output_text = QTextEdit(self)
 		self.output_text.setGeometry(142,125,402,21)
 		self.output_text.setText(os.getcwd())
+		self.input_text.setTabChangesFocus(True)
+
+		# Output browse button
+		self.output_browse = QPushButton("Browse", self)
+		self.output_browse.move(550,120)
+		self.output_browse.clicked.connect(partial(on_click_output, self))
+		self.input_text.setTabChangesFocus(True)
 
 		# OK button
 		self.OK = QPushButton("OK", self)
 		self.OK.move(230, 250)
+		self.OK.clicked.connect(partial(on_click_OK, self))
+		self.input_text.setTabChangesFocus(True)
 
 		# Cancel button
 		self.cancel = QPushButton("Cancel", self)
 		self.cancel.move(380, 250)
+		self.cancel.clicked.connect(partial(on_click_cancel, self))
+		self.input_text.setTabChangesFocus(True)
 
 		# Logs entry
 		self.logs = QListWidget(self)
@@ -525,6 +608,7 @@ class NMFUI(QMainWindow, Ui_MainWindow):
 		# HSI browse button
 		self.input_browse = QPushButton("Browse", self)
 		self.input_browse.move(550,20)
+		self.input_browse.clicked.connect(partial(on_click_input, self))
 
 		# HSI text field
 		self.input_text = QTextEdit(self)
@@ -537,6 +621,7 @@ class NMFUI(QMainWindow, Ui_MainWindow):
 		# Output browse button
 		self.output_browse = QPushButton("Browse", self)
 		self.output_browse.move(550, 70)
+		self.output_browse.clicked.connect(partial(on_click_output, self))
 
 		# Output text field
 		self.output_text = QTextEdit(self)
@@ -579,6 +664,7 @@ class NMFUI(QMainWindow, Ui_MainWindow):
 		self.methodChoiceList.addItem("nndsvdar")
 		self.methodChoiceList.addItem("custom")
 		self.methodChoiceList.move(165, 180)
+		self.method = self.methodChoiceList.currentText()
 
 
 		# Method Label
@@ -590,14 +676,17 @@ class NMFUI(QMainWindow, Ui_MainWindow):
 		self.solverChoiceList.addItem("Coordinate Descent")
 		self.solverChoiceList.addItem("Multiplicative Update")
 		self.solverChoiceList.move(365, 180)
+		self.solver = self.solverChoiceList.currentText()
 
 		# OK button
 		self.OK = QPushButton("OK", self)
 		self.OK.move(230, 250)
+		self.OK.clicked.connect(partial(on_click_OK, self))
 
 		# Cancel button
 		self.cancel = QPushButton("Cancel", self)
 		self.cancel.move(380, 250)
+		self.cancel.clicked.connect(partial(on_click_cancel, self))
 
 		# Logs entry
 		self.logs = QListWidget(self)
@@ -623,23 +712,23 @@ class PPIUI(QMainWindow, Ui_MainWindow):
 		# Endmember sign browse button
 		self.input_browse = QPushButton("Browse", self)
 		self.input_browse.move(550,20)
+		self.input_browse.clicked.connect(partial(on_click_input, self))
 
 		# Endmember sign text field
 		self.input_text = QTextEdit(self)
 		self.input_text.setGeometry(142,25,402,21)
 
 		# Data matrix Label
-		self.output_label = QLabel("Init Skewers", self)
-		self.output_label.move(20, 70)
+		self.initskewers_label = QLabel("Init Skewers", self)
+		self.initskewers_label.move(20, 70)
 
 		# Data Matrix browse button
-		self.output_browse = QPushButton("Browse", self)
-		self.output_browse.move(550,70)
+		self.initskewers_browse = QPushButton("Browse", self)
+		self.initskewers_browse.move(550,70)
 
 		# Data Matrix text field
-		self.output_text = QTextEdit(self)
-		self.output_text.setGeometry(142,75,402,21)
-		self.output_text.setText(os.getcwd())
+		self.initskewers_text = QTextEdit(self)
+		self.initskewers_text.setGeometry(142,75,402,21)
 
 		# Output Label
 		self.output_label = QLabel("Output", self)
@@ -648,6 +737,7 @@ class PPIUI(QMainWindow, Ui_MainWindow):
 		# Output browse button
 		self.output_browse = QPushButton("Browse", self)
 		self.output_browse.move(550,120)
+		self.output_browse.clicked.connect(partial(on_click_output, self))
 
 		# Output text field
 		self.output_text = QTextEdit(self)
@@ -655,20 +745,30 @@ class PPIUI(QMainWindow, Ui_MainWindow):
 		self.output_text.setText(os.getcwd())
 
 		# Tolerance Label		
-		self.jobs_label = QLabel("No of Skewers", self)
-		self.jobs_label.move(150, 180)
+		self.components_label = QLabel("Components", self)
+		self.components_label.move(130, 180)
 
 		# Tolerance text field
-		self.jobs = QTextEdit(self)
-		self.jobs.setGeometry(280,185,40,21)
+		self.components = QTextEdit(self)
+		self.components.setGeometry(220,185,40,21)
+
+		# Tolerance Label		
+		self.skewers_label = QLabel("No of Skewers", self)
+		self.skewers_label.move(300, 180)
+
+		# Tolerance text field
+		self.skewers = QTextEdit(self)
+		self.skewers.setGeometry(400,185,40,21)
 
 		# OK button
 		self.OK = QPushButton("OK", self)
 		self.OK.move(230, 250)
+		self.OK.clicked.connect(partial(on_click_OK, self))
 
 		# Cancel button
 		self.cancel = QPushButton("Cancel", self)
 		self.cancel.move(380, 250)
+		self.cancel.clicked.connect(partial(on_click_cancel, self))
 
 		# Logs entry
 		self.logs = QListWidget(self)
@@ -687,12 +787,13 @@ class VCAUI(QMainWindow, Ui_MainWindow):
 
 
 		# HSI Label
-		self.input_label = QLabel("HSI Input", self)
+		self.input_label = QLabel("Input", self)
 		self.input_label.move(20, 45)
 
 		# HSI browse button
 		self.input_browse = QPushButton("Browse", self)
 		self.input_browse.move(550,45)
+		self.input_browse.clicked.connect(partial(on_click_input, self))
 
 		# HSI text field
 		self.input_text = QTextEdit(self)
@@ -705,40 +806,43 @@ class VCAUI(QMainWindow, Ui_MainWindow):
 		# Output browse button
 		self.output_browse = QPushButton("Browse", self)
 		self.output_browse.move(550,100)
+		self.output_browse.clicked.connect(partial(on_click_output, self))
 
 		# Output text field
 		self.output_text = QTextEdit(self)
 		self.output_text.setGeometry(142,105,402,21)
 		self.output_text.setText(os.getcwd())
 
-		self.jobs_label = QLabel("Endmembers", self)
-		self.jobs_label.move(150, 150)
+		self.components_label = QLabel("Components", self)
+		self.components_label.move(150, 150)
 
 		# Tolerance text field
-		self.jobs = QTextEdit(self)
-		self.jobs.setGeometry(260,155,40,21)
+		self.components = QTextEdit(self)
+		self.components.setGeometry(260,155,40,21)
 
-		self.jobs_label = QLabel("SNR input", self)
-		self.jobs_label.move(340, 150)
+		self.SNR_label = QLabel("SNR input", self)
+		self.SNR_label.move(340, 150)
 
 		# Tolerance text field
-		self.jobs = QTextEdit(self)
-		self.jobs.setGeometry(420,155,40,21)
+		self.SNR = QTextEdit(self)
+		self.SNR.setGeometry(420,155,40,21)
 
-		self.fit_inverse_transform = QLabel("Verbose", self)
-		self.fit_inverse_transform.setGeometry(150,212,280,15)
+		self.verbose_label = QLabel("Verbose", self)
+		self.verbose_label.setGeometry(150,212,280,15)
 		
 		# Verbose Checkbox
-		self.checkbox_fit_inverse_transform = QCheckBox(self)
-		self.checkbox_fit_inverse_transform.move(220, 206)
+		self.verbose = QCheckBox(self)
+		self.verbose.move(220, 206)
 
 		# OK button
 		self.OK = QPushButton("OK", self)
 		self.OK.move(230, 250)
+		self.OK.clicked.connect(partial(on_click_OK, self))
 
 		# Cancel button
 		self.cancel = QPushButton("Cancel", self)
 		self.cancel.move(380, 250)
+		self.cancel.clicked.connect(partial(on_click_cancel, self))
 
 		# Logs entry
 		self.logs = QListWidget(self)
@@ -763,6 +867,7 @@ class ATGPUI(QMainWindow, Ui_MainWindow):
 		# HSI browse button
 		self.input_browse = QPushButton("Browse", self)
 		self.input_browse.move(550,60)
+		self.input_browse.clicked.connect(partial(on_click_input, self))
 
 		# HSI text field
 		self.input_text = QTextEdit(self)
@@ -775,6 +880,7 @@ class ATGPUI(QMainWindow, Ui_MainWindow):
 		# Output browse button
 		self.output_browse = QPushButton("Browse", self)
 		self.output_browse.move(550,120)
+		self.output_browse.clicked.connect(partial(on_click_output, self))
 
 		# Output text field
 		self.output_text = QTextEdit(self)
@@ -782,21 +888,23 @@ class ATGPUI(QMainWindow, Ui_MainWindow):
 		self.output_text.setText(os.getcwd())
 
 		# Tolerance Label		
-		self.jobs_label = QLabel("No of Endmembers", self)
-		self.jobs_label.move(150, 180)
+		self.components_label = QLabel("Components", self)
+		self.components_label.move(150, 180)
 
 		# Tolerance text field
-		self.jobs = QTextEdit(self)
-		self.jobs.setGeometry(280,185,40,21)
+		self.components = QTextEdit(self)
+		self.components.setGeometry(280,185,40,21)
 
 
 		# OK button
 		self.OK = QPushButton("OK", self)
 		self.OK.move(230, 250)
+		self.OK.clicked.connect(partial(on_click_OK, self))
 
 		# Cancel button
 		self.cancel = QPushButton("Cancel", self)
 		self.cancel.move(380, 250)
+		self.cancel.clicked.connect(partial(on_click_cancel, self))
 
 		# Logs entry
 		self.logs = QListWidget(self)
@@ -822,45 +930,44 @@ class NNLSUI(QMainWindow, Ui_MainWindow):
 		# Endmember sign browse button
 		self.input_browse = QPushButton("Browse", self)
 		self.input_browse.move(550,40)
+		self.input_browse.clicked.connect(partial(on_click_input, self))
 
 		# Endmember sign text field
 		self.input_text = QTextEdit(self)
 		self.input_text.setGeometry(142,45,402,21)
 
-		# Data matrix Label
-		self.output_label = QLabel("Endmember Mat", self)
-		self.output_label.move(20, 95)
-
-		# Data Matrix browse button
-		self.output_browse = QPushButton("Browse", self)
-		self.output_browse.move(550,95)
-		self.output_browse.clicked.connect(self.on_click_input)
-
-		# Data Matrix text field
-		self.output_text = QTextEdit(self)
-		self.output_text.setGeometry(142,100,402,21)
-		self.output_text.setText(os.getcwd())
 
 		# Output Label
 		self.output_label = QLabel("Output", self)
-		self.output_label.move(20, 150)
+		self.output_label.move(20, 100)
 
 		# Output browse button
 		self.output_browse = QPushButton("Browse", self)
-		self.output_browse.move(550,150)
+		self.output_browse.move(550,100)
+		self.output_browse.clicked.connect(partial(on_click_output, self))
 
 		# Output text field
 		self.output_text = QTextEdit(self)
-		self.output_text.setGeometry(142,155,402,21)
+		self.output_text.setGeometry(142,105,402,21)
 		self.output_text.setText(os.getcwd())
+
+		# Tolerance Label		
+		self.components_label = QLabel("No of Components", self)
+		self.components_label.move(150, 180)
+
+		# Components text field
+		self.components = QTextEdit(self)
+		self.components.setGeometry(280,185,40,21)
 
 		# OK button
 		self.OK = QPushButton("OK", self)
 		self.OK.move(230, 250)
+		self.OK.clicked.connect(partial(on_click_OK, self))
 
 		# Cancel button
 		self.cancel = QPushButton("Cancel", self)
 		self.cancel.move(380, 250)
+		self.cancel.clicked.connect(partial(on_click_cancel, self))
 
 		# Logs entry
 		self.logs = QListWidget(self)
@@ -886,7 +993,7 @@ class GBMsemiNMFUI(QMainWindow, Ui_MainWindow):
 		# Endmember sign browse button
 		self.input_browse = QPushButton("Browse", self)
 		self.input_browse.move(550,20)
-		# self.input_browse.clicked.connect(self.on_click_input)
+		self.input_browse.clicked.connect(partial(on_click_input, self))
 
 		# Endmember sign text field
 		self.input_text = QTextEdit(self)
@@ -912,6 +1019,7 @@ class GBMsemiNMFUI(QMainWindow, Ui_MainWindow):
 		# Output browse button
 		self.output_browse = QPushButton("Browse", self)
 		self.output_browse.move(550,130)
+		self.output_browse.clicked.connect(partial(on_click_output, self))
 
 		# Output text field
 		self.output_text = QTextEdit(self)
@@ -944,10 +1052,12 @@ class GBMsemiNMFUI(QMainWindow, Ui_MainWindow):
 		# OK button
 		self.OK = QPushButton("OK", self)
 		self.OK.move(230, 250)
+		self.OK.clicked.connect(partial(on_click_OK, self))
 
 		# Cancel button
 		self.cancel = QPushButton("Cancel", self)
 		self.cancel.move(380, 250)
+		self.cancel.clicked.connect(partial(on_click_cancel, self))
 
 		# Logs entry
 		self.logs = QListWidget(self)
@@ -959,7 +1069,8 @@ class GBMsemiNMFUI(QMainWindow, Ui_MainWindow):
 		
 		self.show()
 
-class Software(QMainWindow, Ui_MainWindow):
+
+class Software (QMainWindow, Ui_MainWindow):
 
 	def __init__(self):
 		'''
@@ -970,9 +1081,9 @@ class Software(QMainWindow, Ui_MainWindow):
 		self.ui = Ui_MainWindow()
 		self.ui.setupUi(self)
 		self.title = "Hyperspectral Unmixing Toolbox"
-		self.OUTPUT_FILENAME = "Data.csv"
+		# self.OUTPUT_FILENAME = "Data.csv"
 		self.file = ""
-		self.currentAlgo = "PCA"
+		# self.currentAlgo = "PCA"
 
 		# Initialising Menu Bar
 		self.initMenu()
@@ -1003,16 +1114,21 @@ class Software(QMainWindow, Ui_MainWindow):
 		dimReduction = menubar.addMenu("Dimensionality Reduction")
 
 		pcaMenu = QAction("PCA", self)
-		dimReduction.addAction(pcaMenu) 
+		dimReduction.addAction(pcaMenu)
+		pcaMenu.triggered.connect(partial(clearWidgets, self))
+		pcaMenu.triggered.connect(partial(startPCAWindow, self))
 		pcaMenu.triggered.connect(partial(self.changeCurrentAlgo, "PCA"))
+
 
 		nmf = QAction("NMF", self)
 		dimReduction.addAction(nmf)
+		nmf.triggered.connect(partial(clearWidgets, self))
 		nmf.triggered.connect(partial(startNMFWindow, self))
 		nmf.triggered.connect(partial(self.changeCurrentAlgo, "NMF"))
 
 		kerPCA = QAction("Kernel PCA", self)
 		dimReduction.addAction(kerPCA)
+		kerPCA.triggered.connect(partial(clearWidgets, self))
 		kerPCA.triggered.connect(partial(startKerPCAWindow, self))
 		kerPCA.triggered.connect(partial(self.changeCurrentAlgo, "KerPCA"))
 
@@ -1021,6 +1137,7 @@ class Software(QMainWindow, Ui_MainWindow):
 
 		lle = QAction("LLE", self)
 		dimReduction.addAction(lle)
+		lle.triggered.connect(partial(clearWidgets, self))
 		lle.triggered.connect(partial(startLLEWindow, self))
 		lle.triggered.connect(partial(self.changeCurrentAlgo, "LLE"))
 
@@ -1035,6 +1152,7 @@ class Software(QMainWindow, Ui_MainWindow):
 
 		hfcvd = QAction("HfcVd", self)
 		mc.addAction(hfcvd)
+		hfcvd.triggered.connect(partial(clearWidgets, self))
 		hfcvd.triggered.connect(partial(startHFCVDWindow, self))
 		hfcvd.triggered.connect(partial(self.changeCurrentAlgo, "HfcVd"))
 
@@ -1043,49 +1161,56 @@ class Software(QMainWindow, Ui_MainWindow):
 
 		nFinder = QAction("N-Finder", self)
 		eme.addAction(nFinder)
+		nFinder.triggered.connect(partial(clearWidgets, self))
 		nFinder.triggered.connect(partial(startNFINDRWindow, self))
 		nFinder.triggered.connect(partial(self.changeCurrentAlgo, "NFinder"))
 
 		atgp = QAction("ATGP", self)
 		eme.addAction(atgp)
+		atgp.triggered.connect(partial(clearWidgets, self))
 		atgp.triggered.connect(partial(startATGPWindow, self))
-		
 		atgp.triggered.connect(partial(self.changeCurrentAlgo, "ATGP"))
 
 		ppi = QAction("PPI", self)
 		eme.addAction(ppi)
+		ppi.triggered.connect(partial(clearWidgets, self))
 		ppi.triggered.connect(partial(startPPIWindow, self))
 		ppi.triggered.connect(partial(self.changeCurrentAlgo, "PPI"))
 
 		sisal = QAction("SISAL", self)
 		eme.addAction(sisal)
-		sisal.triggered.connect(partial(self.changeCurrentAlgo, "SISAL"))
+		# sisal.triggered.connect(partial(changeCurrentAlgo, self, "SISAL"))
 
 		# Linear Unmixing
 		lu = menubar.addMenu("Linear Unmixing")
 
 		sunsal = QAction("SUNSAL", self)
 		lu.addAction(sunsal)
+		sunsal.triggered.connect(partial(clearWidgets, self))
 		sunsal.triggered.connect(partial(startSUNSALWindow, self))
 		sunsal.triggered.connect(partial(self.changeCurrentAlgo, "SUNSAL"))
 
 		vca = QAction("VCA", self)
 		lu.addAction(vca)
+		vca.triggered.connect(partial(clearWidgets, self))
 		vca.triggered.connect(partial(startVCAWindow, self))
 		vca.triggered.connect(partial(self.changeCurrentAlgo, "VCA"))
 
 		nnls = QAction("NNLS", self)
 		lu.addAction(nnls)
+		nnls.triggered.connect(partial(clearWidgets, self))
 		nnls.triggered.connect(partial(startNNLSWindow, self))
 		nnls.triggered.connect(partial(self.changeCurrentAlgo, "NNLS"))
 
 		ucls = QAction("UCLS", self)
 		lu.addAction(ucls)
+		ucls.triggered.connect(partial(clearWidgets, self))
 		ucls.triggered.connect(partial(startUCLSWindow, self))
 		ucls.triggered.connect(partial(self.changeCurrentAlgo, "UCLS"))
 
 		fcls = QAction("FCLS", self)
 		lu.addAction(fcls)
+		fcls.triggered.connect(partial(clearWidgets, self))
 		fcls.triggered.connect(partial(startFCLSWindow, self))
 		fcls.triggered.connect(partial(self.changeCurrentAlgo, "FCLS"))
 
@@ -1094,11 +1219,14 @@ class Software(QMainWindow, Ui_MainWindow):
 
 		gbmNMF = QAction("GBM using semi-NMF", self)
 		nlu.addAction(gbmNMF)
+		gbmNMF.triggered.connect(partial(clearWidgets, self))
 		gbmNMF.triggered.connect(partial(startGBMsemiNMFWindow, self))
 		gbmNMF.triggered.connect(partial(self.changeCurrentAlgo, "GBM using semi-NMF"))
 
 		gbmGrad = QAction("GBM using gradient", self)
 		nlu.addAction(gbmGrad)
+		gbmGrad.triggered.connect(partial(clearWidgets, self))
+		gbmGrad.triggered.connect(partial(startGBMGDAWindow, self))
 		gbmGrad.triggered.connect(partial(self.changeCurrentAlgo, "GBM using gradient"))
 
 		mulLin = QAction("Multi-Linear", self)
@@ -1109,15 +1237,6 @@ class Software(QMainWindow, Ui_MainWindow):
 
 		graphLapBase = QAction("Graph Laplacian Base", self)
 		nlu.addAction(graphLapBase)
-
-
-	def changeCurrentAlgo(self, algo):
-		'''
-		Changes the value of variable currentAlgo with the algorithm selected
-		from the menu bar
-		'''
-
-		self.currentAlgo = algo
 
 
 	def initUI(self):
@@ -1134,7 +1253,7 @@ class Software(QMainWindow, Ui_MainWindow):
 		# Input browse button
 		self.input_browse = QPushButton("Browse", self)
 		self.input_browse.move(550,30)
-		self.input_browse.clicked.connect(self.on_click_input)
+		self.input_browse.clicked.connect(partial(on_click_input, self))
 
 		# Input text field
 		self.input_text = QTextEdit(self)
@@ -1147,7 +1266,7 @@ class Software(QMainWindow, Ui_MainWindow):
 		# Output browse button
 		self.output_browse = QPushButton("Browse", self)
 		self.output_browse.move(550,91)
-		self.output_browse.clicked.connect(self.on_click_output)
+		self.output_browse.clicked.connect(partial(on_click_output, self))
 
 		# Output text field
 		self.output_text = QTextEdit(self)
@@ -1173,12 +1292,12 @@ class Software(QMainWindow, Ui_MainWindow):
 		# OK button
 		self.OK = QPushButton("OK", self)
 		self.OK.move(230, 250)
-		self.OK.clicked.connect(self.on_click_OK)
+		self.OK.clicked.connect(partial(on_click_OK, self))
 
 		# Cancel button
 		self.cancel = QPushButton("Cancel", self)
 		self.cancel.move(380, 250)
-		self.cancel.clicked.connect(self.on_click_cancel)
+		self.cancel.clicked.connect(partial(on_click_cancel, self))
 
 		# Logs entry
 		self.logs = QListWidget(self)
@@ -1191,666 +1310,777 @@ class Software(QMainWindow, Ui_MainWindow):
 		self.show()
 
 
-	@pyqtSlot()
-	def on_click_input(self):
+	def changeCurrentAlgo(self, algo):
 		'''
-		On click listener for input_browse button
+		Changes the value of variable currentAlgo with the algorithm selected
+		from the menu bar
 		'''
-
-		self.InputBrowse()
-
-
-	def InputBrowse(self):
-		'''
-		Opens Browse Files dialog box for selecting input dataset
-		'''
-
-		options = QFileDialog.Options()
-		options |= QFileDialog.DontUseNativeDialog
-		fileName, _ = QFileDialog.getOpenFileName(self,"Select Dataset", "","All Files (*);;Matlab Files (*.mat)", options=options)
-		self.file = fileName
-		if fileName:
-			self.input_text.setText(fileName.split('/')[-1])
+		global currentAlgo
+		currentAlgo = algo
 
 
-	@pyqtSlot()
-	def on_click_output(self):
-		'''
-		On click listener for output_browse button
-		'''
 
-		self.OutputBrowse()
+def setProgressBar(context,switch):
+	'''
+	switch - Boolean 
+	Switches the progress bar from busy to stop and vice versa based on the
+	value of switch
+	'''
 
-
-	def OutputBrowse(self):
-		'''
-		Opens Browse Files dialog box for selecting target file for writing output
-		'''
-
-		options = QFileDialog.Options()
-		options |= QFileDialog.DontUseNativeDialog
-		folderName = str(QFileDialog.getExistingDirectory(self, "Select Directory", options=options))
-		if folderName:
-			self.output_text.setText(folderName)
+	if switch:
+		context.progress.setRange(0,0)
+	else:
+		context.progress.setRange(0,1)
 
 
-	@pyqtSlot()
-	def on_click_OK(self):
-		'''
-		On click listener for OK button
-		'''
 
-		self.validation = ValidationThread()
-		self.validation.startThread.connect(self.validate)
-		self.validation.startProgress.connect(self.setProgressBar)
-		self.validation.start()
+def validate(context):
+	'''
+	Parent function for validating all the input fields
+	'''
 
+	# Suppressing printing of errors using GDAL lib
+	gdal.UseExceptions()
+	gdal.PushErrorHandler('CPLQuietErrorHandler')
 
-	@pyqtSlot()
-	def on_click_cancel(self):
-		'''
-		On click listener for Cancel button
-		'''
+	foldername = context.output_text.toPlainText()
+	# context.outputFolderExists = validateOutputFolder(context, foldername)
 
-		self.input_text.setText("")
-		self.output_text.setText("")
-		self.components.setText("")
-		self.tolerance.setText("")
-		self.maxit.setText("")
-		self.progress.setValue(0)
-		self.logs.clear()
+	# if currentAlgo == "HfcVd":
+	# 	filename = context.input_text.toPlainText()
+	# 	context.dataExists = validateCSVFile(context, context.file)
 
+	# 	if context.dataExists and context.outputFolderExists:
+	# 		context.logs.addItem(f'Starting HFCVD for finding number of endmembers')
+	# 		startHfcVd(context)
 
-	def setProgressBar(self, switch):
-		'''
-		switch - Boolean 
-		Switches the progress bar from busy to stop and vice versa based on the
-		value of switch
-		'''
+	# else:
+	# # selectedComponents = self.components.toPlainText()
+	# # n_jobs = self.jobs.toPlainText()
+	# # tolerance = self.tolerance.toPlainText()
+	# # max_iterations = self.maxit.toPlainText()
 
-		if switch:
-			self.progress.setRange(0,0)
-		else:
-			self.progress.setRange(0,1)
+	# Validating dataset path
+	context.dataExists = validateInputFile(context, context.file)
+	# context.logs.addItem(f'Current algo = {currentAlgo}')
+	selectedComponents = context.components.toPlainText()
+	# Validating output folder path
+	if context.dataExists:
+		context.outputFolderExists = validateOutputFolder(context, foldername)
 
+	if context.outputFolderExists and context.dataExists:
+		context.trueComponents = validateComponents(context, selectedComponents)
 
-	def validate(self):
-		'''
-		Parent function for validating all the input fields
-		'''
+	if context.dataExists and context.outputFolderExists and context.trueComponents:
+		if currentAlgo == "PCA":
+			context.logs.addItem(f'Starting Principal Component Analysis for getting top {context.components.toPlainText()} bands')
+			startPCA(context, selectedComponents)
 
-		# Suppressing printing of errors using GDAL lib
-		gdal.UseExceptions()
-		gdal.PushErrorHandler('CPLQuietErrorHandler')
+		elif currentAlgo == "KerPCA":
+			context.logs.addItem(f'Starting Kernel Principal Component Analysis for dimentionality reduction')
+			startKerPCA(context, selectedComponents, context.jobs, context.kernel, context.solver, context.alpha, context.gamma, context.checkbox_fit_inverse_transform, context.checkbox_remove_zero_eigen)
 
-		filename = self.input_text.toPlainText()
-		foldername = self.output_text.toPlainText()
-		selectedComponents = self.components.toPlainText()
-		n_jobs = self.jobs.toPlainText()
-		tolerance = self.tolerance.toPlainText()
-		max_iterations = self.maxit.toPlainText()
+		elif currentAlgo == "NMF":
+			context.logs.addItem(f'Starting Non-negative Matrix Factorization for getting top {context.components.toPlainText()} bands')
+			startNMF(context, selectedComponents, context.tolerance, context.maxit, context.method, context.solver)
 
-		# Validating dataset path
-		self.dataExists = self.validateInputFile(self.file)
+		elif currentAlgo == "HfcVd":
+			context.logs.addItem(f'Starting HFCVD for finding number of endmembers')
+			startHfcVd(context, selectedComponents)
 
-		# Validating output folder path
-		if self.dataExists:
-			self.outputFolderExists = self.validateOutputFolder(foldername)
+		elif currentAlgo == "NNLS":
+			startHfcVd(context, selectedComponents)
+			startNFINDR(context, context.pca_data, None, False)
+			startNNLS(context, context.pca_data, context.nfindr_data)
 
-		# Validating number of components
-		if self.dataExists and self.outputFolderExists:
-			self.trueComponents = self.validateComponents(selectedComponents)
+		elif currentAlgo == "UCLS":
+			startHfcVd(context, selectedComponents)
+			startNFINDR(context, context.pca_data, None, False)
+			startUCLS(context, context.pca_data, context.nfindr_data)
 
-		# Validating number of jobs
-		if self.dataExists and self.outputFolderExists and self.trueComponents:
-			self.enoughProcs = self.validateJobs(n_jobs)
+		elif currentAlgo == "FCLS":
+			startHfcVd(context, selectedComponents)
+			startNFINDR(context, context.pca_data, None, False)
+			startFCLS(context, context.pca_data, context.nfindr_data)
 
-		# Starting selected algorithm if everything's good
-		if self.dataExists and self.outputFolderExists and self.trueComponents and self.enoughProcs:
-
-			if self.currentAlgo == "PCA":
-				self.logs.addItem(f'Starting Principal Component Analysis for getting top {self.components.toPlainText()} bands')
-				self.startPCA(selectedComponents)
-
-			elif self.currentAlgo == "NMF":
-				self.startNMFWindow()
-				self.logs.addItem(f'Starting NMF for getting top {self.components.toPlainText()} bands')
-				newpid1 = os.fork()
-				if newpid1 == 0:
-					nmf_data = self.startNMF(selectedComponents, tolerance, max_iterations)
-
-			elif self.currentAlgo == "NFinder":
-				self.logs.addItem(f'Starting N-Finder for getting top {self.components.toPlainText()} bands')
-				self.startHfcVd(selectedComponents)
-				self.startNFINDR(self.pca_data)
-				# self.startSUNSAL(self.nfindr_data, self.Et)
-
-			elif self.currentAlgo == "SUNSAL":
-				self.logs.addItem(f'Starting SUNSAL for getting estimated abundance matrix')
-				self.startHfcVd(selectedComponents)
-				self.startNFINDR(self.pca_data)
-				self.startSUNSAL(self.nfindr_data)
-
-			elif self.currentAlgo == "HfcVd":
-				self.logs.addItem(f'Starting HfcVd for getting number of end members')
-				self.startHfcVd(selectedComponents)
-
-			elif self.currentAlgo == "ATGP":
-				self.logs.addItem(f'Starting ATGP for getting Endmember abundances')
-				self.startHfcVd(selectedComponents)
-				self.startATGP(self.pca_data)
-
-			elif self.currentAlgo == "PPI":
-				self.logs.addItem(f'Starting PPI for getting Endmember Extraction')
-				self.startHfcVd(selectedComponents)
-				self.startPPI(self.pca_data)
-
-			elif self.currentAlgo == "VCA":
-				self.logs.addItem(f'Starting VCA for getting estimated endmembers signature matrix')
-				self.startHfcVd(selectedComponents)
-				self.startNFINDR(self.pca_data)
-				self.startVCA(self.nfindr_data)
-
-			elif self.currentAlgo == "NNLS":
-				self.logs.addItem(f'Starting NNLS for getting estimated abundance matrix')
-				self.startHfcVd(selectedComponents)
-				self.startNFINDR(self.pca_data)
-				self.startNNLS(self.pca_data, self.nfindr_data)
-
-			elif self.currentAlgo == "UCLS":
-				self.logs.addItem(f'Starting UCLS for getting estimated abundance matrix')
-				self.startHfcVd(selectedComponents)
-				self.startNFINDR(self.pca_data)
-				self.startUCLS(self.pca_data, self.nfindr_data)
-
-			elif self.currentAlgo == "FCLS":
-				self.logs.addItem(f'Starting FCLS for getting estimated abundance matrix')
-				self.startHfcVd(selectedComponents)
-				self.startNFINDR(self.pca_data)
-				self.startFCLS(self.pca_data, self.nfindr_data)
-
-			elif self.currentAlgo == "KerPCA":
-				self.logs.addItem(f'Starting Kernel Principal Component Analysis for getting top {self.components.toPlainText()} bands')
-				self.startKerPCA(selectedComponents)
-
-			elif self.currentAlgo == "LLE":
-				self.logs.addItem(f'Starting Locally Linear Embedding algorithm for getting top {self.components.toPlainText()} bands')
-				self.startLLE(selectedComponents)
-
-			elif self.currentAlgo == "GBM using semi-NMF":
-				self.logs.addItem(f'Starting Generalized Bilinear Model for Non-Linear Unmixing')
-				self.startHfcVd(selectedComponents)
-				self.startNFINDR(self.pca_data)
-				self.startGBMsemiNMF(self.pca_data, self.nfindr_data)
-
-	
-		self.progress.setRange(0,1)
+		elif currentAlgo == "LLE":
+			startLLE(context, selectedComponents, context.neighbours, context.jobs, context.eigenSolver, context.method)
 		
+		elif currentAlgo == "NFinder":
+			startHfcVd(context, selectedComponents)
+			startNFINDR(context, context.pca_data, context.maxit, context.checkbox_ATGP)
 
-	def validateInputFile(self, filename):
-		'''
-		Validates the dataset path and loads the dataset if path exists
-		'''
+		elif currentAlgo == "ATGP":
+			startHfcVd(context, selectedComponents)
+			startATGP(context, context.pca_data)
 
-		if filename:
-			try:
-				self.dataset = gdal.Open(filename, gdal.GA_ReadOnly)
-				self.logs.addItem("Dataset imported successfully")
-				return True
-			except:
-				self.logs.addItem(gdal.GetLastErrorMsg())
-				self.logs.addItem('Use command line argument gdalinfo --formats to get more insights')
-				return False
-		else:
-			self.logs.addItem("Please provide path to dataset")
+		elif currentAlgo == "SUNSAL":
+			startHfcVd(context, selectedComponents)
+			startNFINDR(context, context.pca_data, None, False)
+			startSUNSAL(context, context.nfindr_data, context.iter, context.lambda_val, context.tolerance, context.positivity, context.addOne, context.verbose)		
+
+		elif currentAlgo == "GBM using Gradient":
+			startHfcVd(context, selectedComponents)
+			startNFINDR(context, context.pca_data, None, False)
+			startGBMGDA(context, context.pca_data, context.nfindr_data)
+
+		elif currentAlgo == "VCA":
+			startHfcVd(context, selectedComponents)
+			startNFINDR(context, context.pca_data, None, False)
+			startVCA(context, context.nfindr_data, context.SNR, context.verbose)
+
+		elif currentAlgo == "PPI":
+			startHfcVd(context, selectedComponents)
+			startPPI(context, context.pca_data, context.skewers)
+
+
+	# # Validating number of components
+	# if self.dataExists and self.outputFolderExists:
+	# 	self.trueComponents = validateComponents(self, selectedComponents)
+
+	# # Validating number of jobs
+	# if self.dataExists and self.outputFolderExists and self.trueComponents:
+	# 	self.enoughProcs = validateJobs(self,n_jobs)
+
+	# # Starting selected algorithm if everything's good
+	# if self.dataExists and self.outputFolderExists and self.trueComponents and self.enoughProcs:
+
+	# 	if self.currentAlgo == "PCA":
+	# 		self.logs.addItem(f'Starting Principal Component Analysis for getting top {self.components.toPlainText()} bands')
+	# 		startPCA(self, selectedComponents)
+
+	# 	elif self.currentAlgo == "NMF":
+	# 		self.logs.addItem(f'Starting NMF for getting top {self.components.toPlainText()} bands')
+	# 		newpid1 = os.fork()
+	# 		if newpid1 == 0:
+	# 			nmf_data = startNMF(selectedComponents, tolerance, max_iterations)
+
+	# 	elif self.currentAlgo == "ATGP":
+	# 		self.logs.addItem(f'Starting ATGP for getting Endmember abundances')
+	# 		startHfcVd(self, selectedComponents)
+	# 		startATGP(self, self.pca_data)
+
+	# 	elif self.currentAlgo == "PPI":
+	# 		self.logs.addItem(f'Starting PPI for getting Endmember Extraction')
+	# 		startHfcVd(self, selectedComponents)
+	# 		startPPI(self, self.pca_data)
+
+	# 	elif self.currentAlgo == "VCA":
+	# 		self.logs.addItem(f'Starting VCA for getting estimated endmembers signature matrix')
+	# 		startHfcVd(self, selectedComponents)
+	# 		startNFINDR(self, self.pca_data)
+	# 		startVCA(self, self.nfindr_data)
+
+	# 	elif self.currentAlgo == "KerPCA":
+	# 		self.logs.addItem(f'Starting Kernel Principal Component Analysis for getting top {self.components.toPlainText()} bands')
+	# 		startKerPCA(self, selectedComponents)
+
+	# 	elif self.currentAlgo == "LLE":
+	# 		self.logs.addItem(f'Starting Locally Linear Embedding algorithm for getting top {self.components.toPlainText()} bands')
+	# 		startLLE(self, selectedComponents)
+
+	# 	elif self.currentAlgo == "GBM using semi-NMF":
+	# 		self.logs.addItem(f'Starting Generalized Bilinear Model for Non-Linear Unmixing')
+	# 		startHfcVd(self, selectedComponents)
+	# 		startNFINDR(self, self.pca_data)
+	# 		startGBMsemiNMF(self, self.pca_data, self.nfindr_data)
+
+	context.progress.setRange(0,1)
+
+
+@pyqtSlot()
+def on_click_input(context):
+	'''
+	On click listener for input_browse button
+	'''
+
+	InputBrowse(context)
+
+
+@pyqtSlot()
+def on_click_output(context):
+	'''
+	On click listener for output_browse button
+	'''
+
+	OutputBrowse(context)
+
+
+@pyqtSlot()
+def on_click_OK(context):
+	'''
+	On click listener for OK button
+	'''
+
+	context.validation = ValidationThread()
+	context.validation.startThread.connect(partial(validate, context))
+	context.validation.startProgress.connect(partial(setProgressBar, context))
+	context.validation.start()
+
+
+@pyqtSlot()
+def on_click_getVar(context):
+	'''
+	On click listener for OK button
+	'''
+	context.getVar = ValidationThread()
+	context.getVar.startThread.connect(partial(getRetVariance, context))
+	context.getVar.start()
+
+@pyqtSlot()
+def on_click_cancel(context):
+	'''
+	On click listener for Cancel button
+	'''
+
+	context.input_text.setText("")
+	context.output_text.setText("")
+	context.components.setText("")
+	context.progress.setValue(0)
+	context.logs.clear()
+
+	if currentAlgo == "NMF":
+		context.tolerance.setText("")
+		context.maxit.setText("")
+
+		
+def InputBrowse(context):
+	'''
+	Opens Browse Files dialog box for selecting input dataset
+	'''
+
+	options = QFileDialog.Options()
+	options |= QFileDialog.DontUseNativeDialog
+	fileName, _ = QFileDialog.getOpenFileName(context,"Select Dataset", "","All Files (*);;Matlab Files (*.mat)", options=options)
+	context.file = fileName
+	if fileName:
+		context.input_text.setText(fileName.split('/')[-1])
+
+
+def getRetVariance(context):
+
+	# Suppressing printing of errors using GDAL lib
+	gdal.UseExceptions()
+	gdal.PushErrorHandler('CPLQuietErrorHandler')
+
+	filename = context.input_text.toPlainText()
+	foldername = context.output_text.toPlainText()
+	context.dataExists = validateInputFile(context, context.file)
+	selectedComponents = context.components.toPlainText()
+
+	context.datasetAsArray = context.dataset.ReadAsArray()
+	pca = PrincipalComponentAnalysis(context.datasetAsArray)
+	pca.scaleData()
+
+	retainedVariance = pca.getRetainedVariance((int)(context.components.toPlainText()))
+	
+	context.varDisplay.addItem(f'{retainedVariance}')
+
+
+
+def OutputBrowse(context):
+	'''
+	Opens Browse Files dialog box for selecting target file for writing output
+	'''
+
+	options = QFileDialog.Options()
+	options |= QFileDialog.DontUseNativeDialog
+	folderName = str(QFileDialog.getExistingDirectory(context, "Select Directory", options=options))
+	if folderName:
+		context.output_text.setText(folderName)
+
+def validateInputFile(context, filename):
+	'''
+	Validates the dataset path and loads the dataset if path exists
+	'''
+
+	if filename:
+		try:
+			context.dataset = gdal.Open(filename, gdal.GA_ReadOnly)
+			context.logs.addItem("Dataset imported successfully")
+			return True
+		except:
+			context.logs.addItem(gdal.GetLastErrorMsg())
+			context.logs.addItem('Use command line argument gdalinfo --formats to get more insights')
 			return False
+	else:
+		context.logs.addItem("Please provide path to dataset")
+		return False
 
+def validateCSVFile(context, filename):
 
-	def validateOutputFolder(self, foldername):
-		'''
-		Validates the existence of output folder where outfile file will be 
-		created after analysis
-		'''
-
-		if foldername:
-			if os.path.isdir(foldername):
-				return True
-		self.logs.addItem("Please provide a valid directory to save output file")
+	if filename:
+		try:
+			ifile = open(filename, "rU")
+			reader = csv.reader(ifile, delimiter=";")
+			rownum = 0	
+			context.dataset = []
+			for row in reader:
+				context.dataset.append(row)
+				rownum += 1
+			ifile.close()		
+			context.logs.addItem("Dataset imported successfully")
+			return True
+			
+		except:
+			context.logs.addItem(gdal.GetLastErrorMsg())
+			context.logs.addItem('Reading error')
+			return False
+	else:
+		context.logs.addItem("Please provide path to dataset")
 		return False
 
 
-	def validateComponents(self, selectedComponents):
-		'''
-		Validates the number of components w.r.t. the input dataset
-		'''
+def validateOutputFolder(context, foldername):
+	'''
+	Validates the existence of output folder where outfile file will be 
+	created after analysis
+	'''
 
-		totalComponents = self.dataset.RasterCount
-		if selectedComponents.isdigit():
-			if (int)(selectedComponents) > 0 and (int)(selectedComponents) <= totalComponents:
-				return True
-		self.logs.addItem(f'Incorrect number of bands... Max possible number of bands are {totalComponents}')
-		return False
+	if foldername:
+		if os.path.isdir(foldername):
+			return True
+	context.logs.addItem("Please provide a valid directory to save output file")
+	return False
 
 
-	def validateJobs(self, n_jobs):
-		'''
-		Validates the number of jobs desired as per processors available
-		'''
+def validateComponents(context, selectedComponents):
+	'''
+	Validates the number of components w.r.t. the input dataset
+	'''
 
-		n_processors = mp.cpu_count()
-		if n_jobs.isdigit():
-			if (int)(n_jobs) > 0 and (int)(n_jobs) <= n_processors:
-				return True
-		self.logs.addItem(f'Number of jobs must be greater than 0 and less than {n_processors}')
-		return False
+	totalComponents = context.dataset.RasterCount
+	if selectedComponents.isdigit():
+		if (int)(selectedComponents) > 0 and (int)(selectedComponents) <= totalComponents:
+			return True
+	context.logs.addItem(f'Incorrect number of bands... Max possible number of bands are {totalComponents}')
+	return False
+
+
+def validateJobs(context, n_jobs):
+	'''
+	Validates the number of jobs desired as per processors available
+	'''
+
+	n_processors = mp.cpu_count()
+	if n_jobs.isdigit():
+		if (int)(n_jobs) > 0 and (int)(n_jobs) <= n_processors:
+			return True
+	context.logs.addItem(f'Number of jobs must be greater than 0 and less than {n_processors}')
+	return False
+
+
+def startLLE(context, selectedComponents, neighbours, jobs, eigenSolver, method):
+	'''
+	Main function for LLE
+	'''
+
+	context.datasetAsArray = context.dataset.ReadAsArray()
+	lleAlgo = LLE(context.datasetAsArray, (int)(context.jobs.toPlainText()))
+	lleAlgo.scaleData()
+
+	context.lle_data = lleAlgo.getPrincipalComponents_noOfComponents((int)(selectedComponents.toPlainText()), (int)(neighbours.toPlainText()), (int)(jobs.toPlainText()), eigenSolver, method)
 	
+	context.logs.addItem("Analysis completed")
+	context.logs.addItem("Generating Output file")
+	writeData(context, "LLE_", context.lle_data)
+	context.logs.addItem(f"Output file LLE_{OUTPUT_FILENAME} generated")
+	setProgressBar(False)
 	
-	def startPCA(self,selectedComponents):
-		'''
-		Main function for PCA
-		'''
-
-		# t1 = Thread(target=PCAThread2)
-		self.datasetAsArray = self.dataset.ReadAsArray()
-		pca = PrincipalComponentAnalysis(self.datasetAsArray)
-		pca.scaleData()
-
-		# t1.start()
-		self.pca_data = pca.getPrincipalComponents_noOfComponents((int)(self.components.toPlainText()))
-		retainedVariance = pca.getRetainedVariance((int)(self.components.toPlainText()))
-		
-		self.logs.addItem("Analysis completed")
-		self.logs.addItem("Generating Output file")
-		self.writeData("PCA_", self.pca_data)
-		# t1.join()
-		self.logs.addItem(f"Output file PCA_{self.OUTPUT_FILENAME} generated")
-		self.logs.addItem(f'Retained Variance: {retainedVariance}')
-		self.setProgressBar(False)
-		
-		''' To plot the points after PCA '''
-		if (int)(selectedComponents) == 1:
-			newpid = os.fork()
-			if newpid == 0:
-				self.plot1DGraph(self.pca_data)
-
-		elif (int)(selectedComponents) == 2:
-			newpid = os.fork()
-			if newpid == 0:
-				self.plot2DGraph(self.pca_data)
-
-		elif (int)(selectedComponents) == 3:
-			newpid = os.fork()
-			if newpid == 0:
-				self.plot3DGraph(self.pca_data)
-
-		else:
-			self.logs.addItem('Due to high dimentionality, graph could not be plotted')
-
-	# def PCAThread2():
-	# 	subprocess.call()
-	# 	self.pca_data = pca.getPrincipalComponents_noOfComponents((int)(self.components.toPlainText()))
-	# 	self.retainedVariance = pca.getRetainedVariance((int)(self.components.toPlainText()))
-	# 	self.writeData("PCA_", self.pca_data)
-
-
-	def startKerPCA(self, selectedComponents):
-		'''
-		Main function for Kernel PCA
-		'''
-
-		self.datasetAsArray = self.dataset.ReadAsArray()
-		kernelpca = KernelPCAAlgorithm(self.datasetAsArray, (int)(self.jobs.toPlainText()))
-		kernelpca.scaleData()
-
-		self.ker_pca_data = kernelpca.getPrincipalComponents_noOfComponents((int)(self.components.toPlainText()))
-		
-		self.logs.addItem("Analysis completed")
-		self.logs.addItem("Generating Output file")
-		self.writeData("KernelPCA_", self.ker_pca_data)
-		self.logs.addItem(f"Output file KernelPCA_{self.OUTPUT_FILENAME} generated")
-		self.setProgressBar(False)
-		
-		''' To plot the points after Kernel PCA '''
-		if (int)(selectedComponents) == 1:
-			newpid = os.fork()
-			if newpid == 0:
-				self.plot1DGraph(self.ker_pca_data)
-
-		elif (int)(selectedComponents) == 2:
-			newpid = os.fork()
-			if newpid == 0:
-				self.plot2DGraph(self.ker_pca_data)
-
-		elif (int)(selectedComponents) == 3:
-			newpid = os.fork()
-			if newpid == 0:
-				self.plot3DGraph(self.ker_pca_data)
-
-		else:
-			self.logs.addItem('Due to high dimentionality, graph could not be plotted')
-
-
-	def startLLE(self, selectedComponents):
-		'''
-		Main function for LLE
-		'''
-
-		self.datasetAsArray = self.dataset.ReadAsArray()
-		lleAlgo = LLE(self.datasetAsArray, (int)(self.jobs.toPlainText()))
-		lleAlgo.scaleData()
-
-		self.lle_data = lleAlgo.getPrincipalComponents_noOfComponents((int)(self.components.toPlainText()))
-		
-		self.logs.addItem("Analysis completed")
-		self.logs.addItem("Generating Output file")
-		self.writeData("LLE_", self.lle_data)
-		self.logs.addItem(f"Output file LLE_{self.OUTPUT_FILENAME} generated")
-		self.setProgressBar(False)
-		
-		''' To plot the points after LDA '''
-		if (int)(selectedComponents) == 1:
-			newpid = os.fork()
-			if newpid == 0:
-				self.plot1DGraph(self.lle_data)
-
-		elif (int)(selectedComponents) == 2:
-			newpid = os.fork()
-			if newpid == 0:
-				self.plot2DGraph(self.lle_data)
-
-		elif (int)(selectedComponents) == 3:
-			newpid = os.fork()
-			if newpid == 0:
-				self.plot3DGraph(self.lle_data)
-
-		else:
-			self.logs.addItem('Due to high dimentionality, graph could not be plotted')
-
-
-
-	def startNMF(self,selectedComponents, tolerance, max_iterations):
-		'''
-		Main function for NMF
-		'''
-
-		self.datasetAsArray = self.dataset.ReadAsArray()
-		nmf = NonNegativeMatrixFactorisation(self.datasetAsArray)
-		nmf.scaleData()
-		self.nmf_data = nmf.getReducedComponents_noOfComponents((int)(self.components.toPlainText()), (int)(self.tolerance.toPlainText()), (int)(self.max_iterations.toPlainText()))
-		error = nmf.errorFactor((int)(self.components.toPlainText()))
-		self.logs.addItem("Analysis completed")
-		self.logs.addItem(f'RMS Error: {error}')
-		self.logs.addItem("Generating Output file")
-		self.nmf_data = nmf.denormalizeData(self.nmf_data)
-		self.writeData("NMF_", self.nmf_data)
-		self.logs.addItem(f"Output file NMF_{self.OUTPUT_FILENAME} generated")
-		self.setProgressBar(False)
-		
-		''' To plot the points after NMF '''
-		if (int)(selectedComponents) == 1:
-			newpid = os.fork()
-			if newpid == 0:
-				self.plot1DGraph(self.nmf_data)
-
-		elif (int)(selectedComponents) == 2:
-			newpid = os.fork()
-			if newpid == 0:
-				self.plot2DGraph(self.nmf_data)
-
-		elif (int)(selectedComponents) == 3:
-			newpid = os.fork()
-			if newpid == 0:
-				self.plot3DGraph(self.nmf_data)
-
-		else:
-			self.logs.addItem('Due to high dimentionality, graph could not be plotted')
-
-
-	def startATGP(self, pca_data):
-		'''
-		Main function to run ATGP
-		'''
-		self.logs.addItem("Initiating ATGP algorithm")
-		self.ATGP_data, IDX = eea.ATGP(np.transpose(pca_data), self.end_member_list[2])
-		self.logs.addItem("Analysis completed")
-		self.logs.addItem("Generating output file")
-		self.writeData("ATGP_", self.ATGP_data)
-		self.logs.addItem(f"Output File ATGP_{self.OUTPUT_FILENAME} generated")
-		self.setProgressBar(False)
-
-
-	def startNFINDR(self, pca_data):
-		'''
-		Main function for N-Finder algorithm
-		'''
-
-		self.datasetAsArray = self.dataset.ReadAsArray()
-		nfindr = NFindrModule()
-		self.nfindr_data, Et, IDX, n_iterations = nfindr.NFINDR(pca_data, self.end_member_list[2])
-		self.logs.addItem("Analysis completed")
-		self.logs.addItem(f'Number of iterations: {n_iterations}')
-		self.logs.addItem("Generating Output file")
-		self.writeData("NFinder_", self.nfindr_data)
-		self.logs.addItem(f"Output file NFinder_{self.OUTPUT_FILENAME} generated")
-		self.setProgressBar(False)
-
-
-	def startSUNSAL(self, nfindr_data):
-		'''
-		Main function for SUNSAL algorithm
-		'''
-
-		ss = SUNSALModule()
-		self.logs.addItem("Initiating SUNSAL algorithm")
-		self.sunsal_data, res_p, res_d, sunsal_i = ss.SUNSAL(np.transpose(nfindr_data), np.transpose(self.pca_data))
-		self.logs.addItem("Running SUNSAL algorithm")
-		self.writeData("SUNSAL_", self.sunsal_data)
-		self.logs.addItem(f"Output file SUNSAL_{self.OUTPUT_FILENAME} generated")
-		self.logs.addItem(f"Number of iterations are {sunsal_i}")
-		self.setProgressBar(False)
-
-
-	def startHfcVd(self, selectedComponents):
-		'''
-		Main function for HfcVd algorithm
-		'''
-
-		self.startPCA(selectedComponents)
-		self.logs.addItem("Initiating HfcVd algorithm")
-		self.end_member_list = vd.HfcVd(self.pca_data)
-		self.logs.addItem("Running SUNSAL algorithm")
-		self.logs.addItem(f"Number of end member(s) found is/are {self.end_member_list[2]}")
-		self.setProgressBar(False)
-
-
-	def startVCA(self, nfindr_data):
-		'''
-		Main function for VCA algorithm
-		'''
-
-		self.logs.addItem("Initiating VCA algorithm")
-		self.vca_data, IDX, proj_data = sparse.vca(nfindr_data, self.end_member_list[2])
-		self.logs.addItem("Running VCA algorithm")
-		self.writeData("VCA_", self.vca_data)
-		self.logs.addItem(f"Output file VCA_{self.OUTPUT_FILENAME} generated")
-		self.setProgressBar(False)
-
-
-	def startPPI(self, pca_data):
-		'''
-		Main function for PPI algorithm
-		'''
-
-		self.logs.addItem("Initiating PPI algorithm")
-		self.ppi_data, IDX = eea.PPI(np.transpose(pca_data), self.end_member_list[2])
-		self.logs.addItem("Running PPI algorithm")
-		self.writeData("PPI_", self.ppi_data)
-		self.logs.addItem(f"Output file PPI_{self.OUTPUT_FILENAME} generated")
-		self.setProgressBar(False)
-
-
-
-	def startNNLS(self, pca_data, nfindr_data):
-		'''
-		Main function for NNLS algorithm
-		'''
-
-		self.logs.addItem("Initiating NNLS algorithm")
-		self.NNLS_data = LMM.NNLS(pca_data, nfindr_data)
-		self.logs.addItem("Analysis completed")
-		self.logs.addItem("Generating output file")
-		self.writeData("NNLS_", self.NNLS_data)
-		self.logs.addItem(f"Output File NNLS_{self.OUTPUT_FILENAME} generated")
-		self.setProgressBar(False)
-
-
-	def startUCLS(self, pca_data, nfindr_data):
-		'''
-		Main function for UCLS algorithm
-		'''
-
-		self.logs.addItem("Initiating UCLS algorithm")
-		self.UCLS_data = LMM.UCLS(pca_data, nfindr_data)
-		self.logs.addItem("Analysis completed")
-		self.logs.addItem("Generating output file")
-		self.writeData("UCLS_", self.UCLS_data)
-		self.logs.addItem(f"Output File UCLS_{self.OUTPUT_FILENAME} generated")
-		self.setProgressBar(False)
-
-
-	def startFCLS(self, pca_data, nfindr_data):
-		'''
-		Main function for FCLS algorithm
-		'''
-
-		self.logs.addItem("Initiating FCLS algorithm")
-		self.UCLS_data = LMM.FCLS(pca_data, nfindr_data)
-		self.logs.addItem("Analysis completed")
-		self.logs.addItem("Generating output file")
-		self.writeData("FCLS_", self.UCLS_data)
-		self.logs.addItem(f"Output File FCLS_{self.OUTPUT_FILENAME} generated")
-		self.setProgressBar(False)
-
-
-	def startGBMsemiNMF(self, pca_data, nfindr_data):
-		'''
-		Main function to run GBM using semi NMF
-		'''
-
-		self.logs.addItem("Initiating GBM using semiNMF algorithm")
-		self.GBMsemiNMF_data, rmse = GBM_semiNMF.GBM_semiNMF(np.transpose(pca_data), np.transpose(nfindr_data))
-		self.logs.addItem("Analysis completed")
-		self.logs.addItem(f"RMS Error: {rmse}")
-		self.logs.addItem("Generating output file")
-		self.writeData("GBMsemiNMF_", self.GBMsemiNMF_data)
-		self.logs.addItem(f"Output File GBMsemiNMF_{self.OUTPUT_FILENAME} generated")
-		self.setProgressBar(False)
-
-
-	def writeData(self, prefix, data):
-		'''
-		Writes data into a file in CSV (Comma Seperated Value) format
-		'''
-
-		with open(prefix + self.OUTPUT_FILENAME, 'w') as writeFile:
-			writer = csv.writer(writeFile)
-
-			dataList = []
-			for row in data:
-				temp = []
-				for cols in row:
-					temp.append(cols)
-				dataList.append(temp)
-			writer.writerows(dataList)
-
-		writeFile.close()
-
-
-	def plot1DGraph(self, data):
-		'''
-		Plots one dimensional data
-		'''
-
-		x = data[:,0]
-		y = np.zeros((len(x),), dtype=np.int)
-		plt.close('all')
-		fig1 = plt.figure()
-		pltData = [x,y]
-		plt.scatter(pltData[0],pltData[1])
-		
-		xAxisLine = ((min(pltData[0]), max(pltData[0])), (0, 0))
-		plt.plot(xAxisLine[0], xAxisLine[1], 'r')
-		# yAxisLine = ((0, 0), (min(pltData[1]), max(pltData[1])))
-		# plt.plot(yAxisLine[0], yAxisLine[1], 'r')
-
-		plt.xlabel("comp 1") 
-		plt.title("1D plot")
-		plt.show()
-
-
-	def plot2DGraph(self, data):
-		'''
-		Plots two dimensional data
-		'''
-
-		x = data[:,0]
-		y = data[:,1]
-		plt.close('all')
-		fig1 = plt.figure()
-		pltData = [x,y]
-		plt.scatter(pltData[0],pltData[1])
-		
-		xAxisLine = ((min(pltData[0]), max(pltData[0])), (0, 0))
-		plt.plot(xAxisLine[0], xAxisLine[1], 'r')
-		yAxisLine = ((0, 0), (min(pltData[1]), max(pltData[1])))
-		plt.plot(yAxisLine[0], yAxisLine[1], 'r')
-
-		plt.xlabel("comp 1") 
-		plt.ylabel("comp 2")
-		plt.title("2D plot")
-		plt.show()	
-
-
-	def plot3DGraph(self, data):
-		'''
-		Plots three dimensional data
-		'''
-
-		x = data[:,0]
-		y = data[:,1]
-		z = data[:,2]
-		plt.close('all')
-		fig1 = plt.figure()
-		ax = Axes3D(fig1)
-		pltData = [x,y,z]
-		ax.scatter(pltData[0],pltData[1],pltData[2])
-		
-		xAxisLine = ((min(pltData[0]), max(pltData[0])), (0, 0), (0,0))
-		ax.plot(xAxisLine[0], xAxisLine[1], xAxisLine[2], 'r')
-		yAxisLine = ((0, 0), (min(pltData[1]), max(pltData[1])), (0,0))
-		ax.plot(yAxisLine[0], yAxisLine[1], yAxisLine[2], 'r')
-		zAxisLine = ((0, 0), (0,0), (min(pltData[2]), max(pltData[2])))
-		ax.plot(zAxisLine[0], zAxisLine[1], zAxisLine[2], 'r')
-
-		ax.set_xlabel("comp 1") 
-		ax.set_ylabel("comp 2")
-		ax.set_zlabel("comp 3")
-		ax.set_title("3D plot")
-		plt.show()
-
-
-	def writeError(self, err_msg):
-		'''
-		This method receives input from stderr as PyQtSlot and prints it in the 
-		logs section
-		'''
-
-		self.logs.addItem(err_msg)
+	''' To plot the points after LDA '''
+	if (int)(selectedComponents) == 1:
+		newpid = os.fork()
+		if newpid == 0:
+			plot1DGraph(context,context.lle_data)
+
+	elif (int)(selectedComponents) == 2:
+		newpid = os.fork()
+		if newpid == 0:
+			plot2DGraph(context,context.lle_data)
+
+	elif (int)(selectedComponents) == 3:
+		newpid = os.fork()
+		if newpid == 0:
+			plot3DGraph(context,context.lle_data)
+	else:
+		context.logs.addItem('Due to high dimentionality, graph could not be plotted')
+
+
+
+def startNMF(context,selectedComponents, tolerance, max_iterations, method, solver):
+	'''
+	Main function for NMF
+	'''
+
+	context.datasetAsArray = context.dataset.ReadAsArray()
+	nmf = NonNegativeMatrixFactorisation(context.datasetAsArray)
+	nmf.scaleData()
+	context.nmf_data = nmf.getReducedComponents_noOfComponents((int)(context.components.toPlainText()), (float)(tolerance.toPlainText()), (int)(max_iterations.toPlainText()), method, solver)
+	
+	''' To plot the points after NMF '''
+	if (int)(selectedComponents) == 1:
+		newpid = os.fork()
+		if newpid == 0:
+			plot1DGraph(context, context.nmf_data)
+
+	elif (int)(selectedComponents) == 2:
+		newpid = os.fork()
+		if newpid == 0:
+			plot2DGraph(context, context.nmf_data)
+
+	elif (int)(selectedComponents) == 3:
+		newpid = os.fork()
+		if newpid == 0:
+			plot3DGraph(context, context.nmf_data)
+
+	else:
+		context.logs.addItem('Due to high dimentionality, graph could not be plotted')
+
+
+def startATGP(context, pca_data):
+	'''
+	Main function to run ATGP
+	'''
+	context.logs.addItem("Initiating ATGP algorithm")
+	context.ATGP_data, IDX = eea.ATGP(np.transpose(pca_data), end_member_list[2])
+	context.logs.addItem("Analysis completed")
+	context.logs.addItem("Generating output file")
+	writeData(context, "ATGP_", context.ATGP_data)
+	context.logs.addItem(f"Output File ATGP_{OUTPUT_FILENAME} generated")
+	context.setProgressBar(False)
+
+
+def startNFINDR(context, pca_data, maxit, checkbox_ATGP):
+	'''
+	Main function for N-Finder algorithm
+	'''
+
+	context.datasetAsArray = context.dataset.ReadAsArray()
+	nfindr = NFindrModule()
+	context.nfindr_data, Et, IDX, n_iterations = nfindr.NFINDR(data=pca_data, q=end_member_list[2], maxit=maxit, ATGP_init=checkbox_ATGP)
+	context.logs.addItem("Analysis completed")
+	context.logs.addItem(f'Number of iterations: {n_iterations}')
+	context.logs.addItem("Generating Output file")
+	writeData(context, "NFinder_", context.nfindr_data)
+	context.logs.addItem(f"Output file NFinder_{OUTPUT_FILENAME} generated")
+	setProgressBar(context, False)
+
+
+def startSUNSAL(context, nfindr_data, iterations, lambda_val, tolerance, positivity, addOne, verbose):
+	'''
+	Main function for SUNSAL algorithm
+	'''
+
+	ss = SUNSALModule()
+	context.logs.addItem("Initiating SUNSAL algorithm")
+	context.sunsal_data, res_p, res_d, sunsal_i = ss.SUNSAL(M=np.transpose(nfindr_data), y=np.transpose(context.pca_data), al_iters=iterations, lambda_p=lambda_val, positivity=positivity, addone=addOne, tol=tolerance, verbose=verbose)
+	context.logs.addItem("Running SUNSAL algorithm")
+	writeData(context, "SUNSAL_", context.sunsal_data)
+	context.logs.addItem(f"Output file SUNSAL_{OUTPUT_FILENAME} generated")
+	context.logs.addItem(f"Number of iterations are {sunsal_i}")
+	setProgressBar(context, False)
+
+
+def startHfcVd(context):
+	'''
+	Main function for HfcVd algorithm
+	'''
+	context.datasetAsArray = np.array(context.dataset)
+	context.logs.addItem("Initiating HfcVd algorithm")
+	end_member_list = vd.HfcVd(context.datasetAsArray)
+	context.logs.addItem("Running HfcVd algorithm")
+	context.logs.addItem(f"Number of end member(s) found is/are {end_member_list[2]}")
+	setProgressBar(context, False)
+
+
+def startVCA(context, nfindr_data, SNR, verbose):
+	'''
+	Main function for VCA algorithm
+	'''
+
+	context.logs.addItem("Initiating VCA algorithm")
+	context.vca_data, IDX, proj_data = sparse.vca(Y=nfindr_data, R=end_member_list[2], snr_input=SNR, verbose=verbose)
+	context.logs.addItem("Running VCA algorithm")
+	writeData(context, "VCA_", context.vca_data)
+	context.logs.addItem(f"Output file VCA_{OUTPUT_FILENAME} generated")
+	setProgressBar(context, False)
+
+
+def startPPI(context, pca_data, skewers):
+	'''
+	Main function for PPI algorithm
+	'''
+
+	context.logs.addItem("Initiating PPI algorithm")
+	context.ppi_data, IDX = eea.PPI(M=np.transpose(pca_data), q=end_member_list[2], numSkewers=skewers)
+	context.logs.addItem("Running PPI algorithm")
+	writeData(context, "PPI_", context.ppi_data)
+	context.logs.addItem(f"Output file PPI_{OUTPUT_FILENAME} generated")
+	setProgressBar(context, False)
+
+
+def startNNLS(context, pca_data, nfindr_data):
+	'''
+	Main function for NNLS algorithm
+	'''
+
+	context.logs.addItem("Initiating NNLS algorithm")
+	context.NNLS_data = LMM.NNLS(pca_data, nfindr_data)
+	context.logs.addItem("Analysis completed")
+	context.logs.addItem("Generating output file")
+	writeData(context, "NNLS_", context.NNLS_data)
+	context.logs.addItem(f"Output File NNLS_{OUTPUT_FILENAME} generated")
+	setProgressBar(context, False)
+
+
+def startUCLS(context, pca_data, nfindr_data):
+	'''
+	Main function for UCLS algorithm
+	'''
+
+	context.logs.addItem("Initiating UCLS algorithm")
+	context.UCLS_data = LMM.UCLS(pca_data, nfindr_data)
+	context.logs.addItem("Analysis completed")
+	context.logs.addItem("Generating output file")
+	writeData(context, "UCLS_", context.UCLS_data)
+	context.logs.addItem(f"Output File UCLS_{OUTPUT_FILENAME} generated")
+	setProgressBar(context, False)
+
+
+def startFCLS(context, pca_data, nfindr_data):
+	'''
+	Main function for FCLS algorithm
+	'''
+
+	context.logs.addItem("Initiating FCLS algorithm")
+	context.UCLS_data = LMM.FCLS(pca_data, nfindr_data)
+	context.logs.addItem("Analysis completed")
+	context.logs.addItem("Generating output file")
+	writeData(context, "FCLS_", context.UCLS_data)
+	context.logs.addItem(f"Output File FCLS_{OUTPUT_FILENAME} generated")
+	setProgressBar(context, False)
+
+
+def startGBMGDA(context, pca_data, nfindr_data):
+	'''
+	Main function to run GBM using semi NMF
+	'''
+
+	context.logs.addItem("Initiating GBM using Gradient analysis algorithm")
+	context.GBMGDA_data = GBM_GDA.GBM_gradient(np.transpose(pca_data), np.transpose(nfindr_data))
+	context.logs.addItem("Analysis completed")
+	context.logs.addItem(f"RMS Error: {rmse}")
+	context.logs.addItem("Generating output file")
+	writeData(context, "GBMGDA_", context.GBMsemiNMF_data)
+	context.logs.addItem(f"Output File GBMGDA_{OUTPUT_FILENAME} generated")
+	context.setProgressBar(False)
+
+def startGBMsemiNMF(context, pca_data, nfindr_data):
+	'''
+	Main function to run GBM using Gradient analysis
+	'''
+	context.logs.addItem("Initiating GBM using semiNMF algorithm")
+	context.GBMsemiNMF_data, gamma = GBM_semiNMF.GBM_semiNMF(np.transpose(pca_data), np.transpose(nfindr_data))
+	context.logs.addItem("Analysis completed")
+	context.logs.addItem(f"RMS Error: {rmse}")
+	context.logs.addItem("Generating output file")
+	writeData(context, "GBMsemiNMF_", context.GBMsemiNMF_data)
+	context.logs.addItem(f"Output File GBMsemiNMF_{OUTPUT_FILENAME} generated")
+	context.setProgressBar(False)
+
+
+
+def startPCA(context, selectedComponents):
+	'''
+	Main function for PCA
+	'''
+
+	# t1 = Thread(target=PCAThread2)
+	context.datasetAsArray = context.dataset.ReadAsArray()
+	pca = PrincipalComponentAnalysis(context.datasetAsArray)
+	pca.scaleData()
+
+	# t1.start()
+	context.pca_data = pca.getPrincipalComponents_noOfComponents((int)(context.components.toPlainText()))
+	retainedVariance = pca.getRetainedVariance((int)(context.components.toPlainText()))
+	
+	context.logs.addItem("Analysis completed")
+	context.logs.addItem("Generating Output file")
+	writeData(context, "PCA_", context.pca_data)
+	# t1.join()
+	context.logs.addItem(f"Output file PCA_{OUTPUT_FILENAME} generated")
+	context.logs.addItem(f'Retained Variance: {retainedVariance}')
+	setProgressBar(context,False)
+	
+	''' To plot the points after PCA '''
+	if (int)(selectedComponents) == 1:
+		newpid = os.fork()
+		if newpid == 0:
+			plot1DGraph(context, context.pca_data)
+
+	elif (int)(selectedComponents) == 2:
+		newpid = os.fork()
+		if newpid == 0:
+			plot2DGraph(context, context.pca_data)
+
+	elif (int)(selectedComponents) == 3:
+		newpid = os.fork()
+		if newpid == 0:
+			plot3DGraph(context, context.pca_data)
+
+	else:
+		context.logs.addItem('Due to high dimentionality, graph could not be plotted')
+
+
+def startKerPCA(context, selectedComponents, jobs, kernel, solver, alpha, gamma, fit_inverse_transform, remove_zero_eigen):
+	'''
+	Main function for Kernel PCA
+	'''
+
+	context.datasetAsArray = context.dataset.ReadAsArray()
+	kernelpca = KernelPCAAlgorithm(context.datasetAsArray, (int)(context.jobs.toPlainText()))
+	kernelpca.scaleData()
+
+	context.ker_pca_data = kernelpca.getPrincipalComponents_noOfComponents((int)(context.components.toPlainText()), (int)(jobs.toPlainText()), kernel, solver, alpha, gamma, fit_inverse_transform, remove_zero_eigen)
+	
+	context.logs.addItem("Analysis completed")
+	context.logs.addItem("Generating Output file")
+	writeData(context, "KernelPCA_", context.ker_pca_data)
+	context.logs.addItem(f"Output file KernelPCA_{OUTPUT_FILENAME} generated")
+	context.setProgressBar(False)
+	
+	''' To plot the points after Kernel PCA '''
+	if (int)(selectedComponents) == 1:
+		newpid = os.fork()
+		if newpid == 0:
+			plot1DGraph(context, context.ker_pca_data)
+
+	elif (int)(selectedComponents) == 2:
+		newpid = os.fork()
+		if newpid == 0:
+			plot2DGraph(context, context.ker_pca_data)
+
+	elif (int)(selectedComponents) == 3:
+		newpid = os.fork()
+		if newpid == 0:
+			plot3DGraph(context, context.ker_pca_data)
+
+	else:
+		context.logs.addItem('Due to high dimentionality, graph could not be plotted')
+
+
+def writeData(context, prefix, data):
+	'''
+	Writes data into a file in CSV (Comma Seperated Value) format
+	'''
+
+	with open(prefix + OUTPUT_FILENAME, 'w') as writeFile:
+		writer = csv.writer(writeFile)
+
+		dataList = []
+		for row in data:
+			temp = []
+			for cols in row:
+				temp.append(cols)
+			dataList.append(temp)
+		writer.writerows(dataList)
+
+	writeFile.close()
+
+
+def plot1DGraph(context, data):
+	'''
+	Plots one dimensional data
+	'''
+
+	x = data[:,0]
+	y = np.zeros((len(x),), dtype=np.int)
+	plt.close('all')
+	fig1 = plt.figure()
+	pltData = [x,y]
+	plt.scatter(pltData[0],pltData[1])
+	
+	xAxisLine = ((min(pltData[0]), max(pltData[0])), (0, 0))
+	plt.plot(xAxisLine[0], xAxisLine[1], 'r')
+	# yAxisLine = ((0, 0), (min(pltData[1]), max(pltData[1])))
+	# plt.plot(yAxisLine[0], yAxisLine[1], 'r')
+
+	plt.xlabel("comp 1") 
+	plt.title("1D plot")
+	plt.show()
+
+
+def plot2DGraph(context, data):
+	'''
+	Plots two dimensional data
+	'''
+
+	x = data[:,0]
+	y = data[:,1]
+	plt.close('all')
+	fig1 = plt.figure()
+	pltData = [x,y]
+	plt.scatter(pltData[0],pltData[1])
+	
+	xAxisLine = ((min(pltData[0]), max(pltData[0])), (0, 0))
+	plt.plot(xAxisLine[0], xAxisLine[1], 'r')
+	yAxisLine = ((0, 0), (min(pltData[1]), max(pltData[1])))
+	plt.plot(yAxisLine[0], yAxisLine[1], 'r')
+
+	plt.xlabel("comp 1") 
+	plt.ylabel("comp 2")
+	plt.title("2D plot")
+	plt.show()	
+
+
+def plot3DGraph(context, data):
+	'''
+	Plots three dimensional data
+	'''
+
+	x = data[:,0]
+	y = data[:,1]
+	z = data[:,2]
+	plt.close('all')
+	fig1 = plt.figure()
+	ax = Axes3D(fig1)
+	pltData = [x,y,z]
+	ax.scatter(pltData[0],pltData[1],pltData[2])
+	
+	xAxisLine = ((min(pltData[0]), max(pltData[0])), (0, 0), (0,0))
+	ax.plot(xAxisLine[0], xAxisLine[1], xAxisLine[2], 'r')
+	yAxisLine = ((0, 0), (min(pltData[1]), max(pltData[1])), (0,0))
+	ax.plot(yAxisLine[0], yAxisLine[1], yAxisLine[2], 'r')
+	zAxisLine = ((0, 0), (0,0), (min(pltData[2]), max(pltData[2])))
+	ax.plot(zAxisLine[0], zAxisLine[1], zAxisLine[2], 'r')
+
+	ax.set_xlabel("comp 1") 
+	ax.set_ylabel("comp 2")
+	ax.set_zlabel("comp 3")
+	ax.set_title("3D plot")
+	plt.show()
+
+
+def writeError(context, err_msg):
+	'''
+	This method receives input from stderr as PyQtSlot and prints it in the 
+	logs section
+	'''
+
+	context.logs.addItem(err_msg)
 
 
 ##########################################
 ###### Tabs for different algorithms #####
 ##########################################
+
+def startPCAWindow(context):
+	clearWidgets(context)
+	context.input_label.hide()
+	context.ToolTab = PCAUI()
+	context.setWindowTitle("Principal Component Analysis")
+	context.setCentralWidget(context.ToolTab)
+	context.show()	
 
 def startKerPCAWindow(context):
 	clearWidgets(context)
@@ -1956,22 +2186,30 @@ def startGBMsemiNMFWindow(context):
 	context.setCentralWidget(context.ToolTab)
 	context.show()	
 
+def startGBMGDAWindow(context):
+	clearWidgets(context)
+	context.input_label.hide()
+	context.ToolTab = NNLSUI()
+	context.setWindowTitle("Generalized Bilinear Model using Gradient analysis")
+	context.setCentralWidget(context.ToolTab)
+	context.show()
+
 def clearWidgets(context):
 
-	context.input_label.hide()
-	context.input_browse.hide()
-	context.input_text.hide()
-	context.output_label.hide()
-	context.output_browse.hide()
-	context.output_text.hide()
-	context.components_label.hide()
-	context.components.hide()
-	context.jobs_label.hide()
-	context.jobs.hide()
-	context.OK.hide()
-	context.cancel.hide()
-	context.logs.hide()
-	context.progress.hide()
+    context.input_label.hide()
+    context.input_browse.hide()
+    context.input_text.hide()
+    context.output_label.hide()
+    context.output_browse.hide()
+    context.output_text.hide()
+    context.components_label.hide()
+    context.components.hide()
+    context.jobs_label.hide()
+    context.jobs.hide()
+    context.OK.hide()
+    context.cancel.hide()
+    context.logs.hide()
+    context.progress.hide()
 
 
 if __name__ == "__main__":

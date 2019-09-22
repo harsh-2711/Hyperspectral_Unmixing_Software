@@ -1543,6 +1543,9 @@ def on_click_cancel(context):
 		context.tolerance.setText("")
 		context.maxit.setText("")
 
+	if currentAlgo == "PCA":
+		context.varDisplay.clear()
+
 		
 def InputBrowse(context):
 	'''
@@ -1675,6 +1678,12 @@ def startLLE(context, selectedComponents, neighbours, jobs, eigenSolver, method)
 	Main function for LLE
 	'''
 
+	typeCastedJobs = 0
+	if jobs.toPlainText() == "" or not is_number(jobs.toPlainText()):
+		typeCastedJobs = -1
+	else:
+		typeCastedJobs = (int)(jobs.toPlainText())
+
 	context.datasetAsArray = context.dataset.ReadAsArray()
 	lleAlgo = LLE(context.datasetAsArray, (int)(context.jobs.toPlainText()))
 	lleAlgo.scaleData()
@@ -1706,6 +1715,21 @@ def startLLE(context, selectedComponents, neighbours, jobs, eigenSolver, method)
 		context.logs.addItem('Due to high dimentionality, graph could not be plotted')
 
 
+def is_number(s):
+    try:
+        float(s)
+        return True
+    except ValueError:
+        pass
+ 
+    try:
+        import unicodedata
+        unicodedata.numeric(s)
+        return True
+    except (TypeError, ValueError):
+        pass
+
+    return False
 
 def startNMF(context,selectedComponents, tolerance, max_iterations, method, solver):
 	'''
@@ -1715,8 +1739,27 @@ def startNMF(context,selectedComponents, tolerance, max_iterations, method, solv
 	context.datasetAsArray = context.dataset.ReadAsArray()
 	nmf = NonNegativeMatrixFactorisation(context.datasetAsArray)
 	nmf.scaleData()
-	context.nmf_data = nmf.getReducedComponents_noOfComponents((int)(context.components.toPlainText()), (float)(tolerance.toPlainText()), (int)(max_iterations.toPlainText()), method, solver)
+
+	typeCastedTol = 0
+	if tolerance.toPlainText() == "" or not is_number(tolerance.toPlainText()):
+		typeCastedTol = 1e-4
+	else:
+		typeCastedTol = (float)(tolerance.toPlainText())
+
+	typeCastedIter = 0
+	if max_iterations.toPlainText() == "" or not is_number(max_iterations.toPlainText()):
+		typeCastedIter = 200
+	else:
+		typeCastedIter = (int)(max_iterations.toPlainText())
 	
+	context.nmf_data = nmf.getReducedComponents_noOfComponents((int)(context.components.toPlainText()), typeCastedTol, typeCastedIter, method, solver)
+	
+	context.logs.addItem("Analysis completed")
+	context.logs.addItem("Generating Output file")
+	writeData(context, "NMF_", context.nmf_data)
+	context.logs.addItem(f"Output file NMF_{OUTPUT_FILENAME} generated")
+	setProgressBar(context, False)
+
 	''' To plot the points after NMF '''
 	if (int)(selectedComponents) == 1:
 		newpid = os.fork()
@@ -1937,17 +1980,35 @@ def startKerPCA(context, selectedComponents, jobs, kernel, solver, alpha, gamma,
 	Main function for Kernel PCA
 	'''
 
+	typeCastedJobs = 0
+	if jobs.toPlainText() == "" or not is_number(jobs.toPlainText()):
+		typeCastedJobs = -1
+	else:
+		typeCastedJobs = (int)(jobs.toPlainText())
+
+	typeCastedAlpha = 0
+	if alpha.toPlainText() == "" or not is_number(alpha.toPlainText()):
+		typeCastedAlpha = 1
+	else:
+		typeCastedAlpha = (int)(alpha.toPlainText())
+
+	typeCastedGamma = 0
+	if gamma.toPlainText() == "" or not is_number(gamma.toPlainText()):
+		typeCastedGamma = 1/(int)(context.components.toPlainText())
+	else:
+		typeCastedGamma = (float)(gamma.toPlainText())
+
+
 	context.datasetAsArray = context.dataset.ReadAsArray()
-	kernelpca = KernelPCAAlgorithm(context.datasetAsArray, (int)(context.jobs.toPlainText()))
+	kernelpca = KernelPCAAlgorithm(context.datasetAsArray, typeCastedJobs)
 	kernelpca.scaleData()
 
-	context.ker_pca_data = kernelpca.getPrincipalComponents_noOfComponents((int)(context.components.toPlainText()), (int)(jobs.toPlainText()), kernel, solver, alpha, gamma, fit_inverse_transform, remove_zero_eigen)
+	context.ker_pca_data = kernelpca.getPrincipalComponents_noOfComponents((int)(context.components.toPlainText()), typeCastedJobs, kernel, solver, typeCastedAlpha, typeCastedGamma, fit_inverse_transform, remove_zero_eigen)
 	
 	context.logs.addItem("Analysis completed")
 	context.logs.addItem("Generating Output file")
 	writeData(context, "KernelPCA_", context.ker_pca_data)
 	context.logs.addItem(f"Output file KernelPCA_{OUTPUT_FILENAME} generated")
-	context.setProgressBar(False)
 	
 	''' To plot the points after Kernel PCA '''
 	if (int)(selectedComponents) == 1:
